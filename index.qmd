@@ -1,0 +1,14 @@
+---
+title: "Home"
+---
+
+## Welcome
+
+This is a Quarto website.
+
+You can add content here using Markdown and code chunks.
+
+```{python}
+#| echo: true
+print("Hello from Quarto!")
+```

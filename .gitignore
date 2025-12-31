@@ -1,0 +1,34 @@
+# Quarto
+_site/
+.quarto/
+/.luarc.json
+
+# Generated outputs
+output/
+
+# Python
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.ipynb_checkpoints/
+
+# R
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# macOS
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
+
+# Data (uncomment if you don't want to track data files)
+# data/
