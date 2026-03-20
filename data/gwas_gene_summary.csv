@@ -1,0 +1,313 @@
+gene,variant_type,n_snps,func_classes
+OCA2,"coding, regulatory",23,"intergenic_variant, intron_variant, missense_variant, synonymous_variant"
+MC1R,"coding, regulatory",21,"3_prime_UTR_variant, frameshift_variant, intergenic_variant, intron_variant, missense_variant, stop_gained"
+HERC2,regulatory,14,"3_prime_UTR_variant, intergenic_variant, intron_variant"
+IRF4,regulatory,11,"3_prime_UTR_variant, intergenic_variant, intron_variant, regulatory_region_variant"
+SLC45A2,"coding, regulatory",9,"3_prime_UTR_variant, intron_variant, missense_variant, stop_gained"
+TCF25,regulatory,8,"intron_variant, regulatory_region_variant"
+SLC24A4,regulatory,7,"5_prime_UTR_variant, intron_variant"
+TPCN2,"coding, regulatory",6,"3_prime_UTR_variant, intron_variant, missense_variant"
+BNC2,"other, regulatory",6,"TF_binding_site_variant, intron_variant"
+EPHA4,regulatory,5,intergenic_variant
+TYR,"coding, regulatory",5,"intron_variant, missense_variant"
+KITLG,regulatory,5,"intergenic_variant, intron_variant, regulatory_region_variant"
+TMTC3,regulatory,4,"intergenic_variant, intron_variant"
+ASIP,regulatory,4,"intergenic_variant, intron_variant"
+GRM5,regulatory,4,intron_variant
+FANCA,regulatory,4,"intergenic_variant, intron_variant"
+AKAP12,regulatory,3,intron_variant
+DEF8,regulatory,3,"3_prime_UTR_variant, intron_variant, synonymous_variant"
+EZR,"other, regulatory",3,"intergenic_variant, regulatory_region_variant, splice_region_variant"
+EXOC2,regulatory,3,"intergenic_variant, intron_variant"
+MFSD12,"coding, regulatory",3,"intergenic_variant, missense_variant"
+RP11-341G5.1,regulatory,3,"intergenic_variant, intron_variant"
+SLC24A5,"coding, regulatory",3,"3_prime_UTR_variant, intron_variant, missense_variant"
+SOX6,regulatory,3,intron_variant
+LHX2,regulatory,3,intron_variant
+PAX3,regulatory,3,intron_variant
+ENPEP,regulatory,3,"intergenic_variant, intron_variant"
+DSTYK,"coding, regulatory",3,"3_prime_UTR_variant, missense_variant, regulatory_region_variant"
+DMBT1,regulatory,3,intergenic_variant
+RAB11FIP2,regulatory,3,"intergenic_variant, intron_variant"
+C9ORF66,regulatory,2,"intergenic_variant, intron_variant"
+SP6,regulatory,2,intergenic_variant
+PIGU,regulatory,2,intron_variant
+KIAA0930,regulatory,2,"intron_variant, regulatory_region_variant"
+ZNF831,regulatory,2,"intergenic_variant, intron_variant"
+SNX16,regulatory,2,"intron_variant, non_coding_transcript_exon_variant"
+SLC45A1,regulatory,2,intron_variant
+SLC12A9,"coding, regulatory",2,"intron_variant, missense_variant"
+SLAIN1,regulatory,2,intron_variant
+PPARGC1B,regulatory,2,intron_variant
+RSPO2,regulatory,2,"intergenic_variant, intron_variant"
+DLX4,regulatory,2,"intergenic_variant, intron_variant"
+FOSL2,regulatory,2,"intron_variant, non_coding_transcript_exon_variant"
+CR1L,regulatory,2,"intergenic_variant, intron_variant"
+SPIRE2,regulatory,2,"intergenic_variant, intron_variant"
+APBA2,regulatory,2,"intergenic_variant, intron_variant"
+TMEM163,regulatory,2,intron_variant
+TSPAN10,regulatory,2,intron_variant
+ZBTB38,regulatory,2,intron_variant
+MSX2,"coding, regulatory",2,"intergenic_variant, missense_variant"
+TUBB3,regulatory,2,intron_variant
+MARK3,"other, regulatory",2,"intron_variant, splice_region_variant"
+LINC-PINT,regulatory,2,intron_variant
+NEK6,regulatory,2,"intergenic_variant, intron_variant"
+LEF1,regulatory,2,intron_variant
+PADI3,"coding, regulatory",2,"intron_variant, missense_variant"
+MYRF,regulatory,1,3_prime_UTR_variant
+NDUFS4,regulatory,1,intron_variant
+RAB5A,regulatory,1,intron_variant
+RAD51B,regulatory,1,intron_variant
+RALY,regulatory,1,intron_variant
+RAP2B,regulatory,1,intron_variant
+MYO1B,regulatory,1,intron_variant
+RASA3,regulatory,1,non_coding_transcript_exon_variant
+MYCBP2,regulatory,1,intron_variant
+RERG,regulatory,1,intron_variant
+RNU2-47P,regulatory,1,intron_variant
+NIPAL3,regulatory,1,intron_variant
+MTX2,regulatory,1,intron_variant
+RNU6-1010P,regulatory,1,intron_variant
+MTERF1,regulatory,1,intron_variant
+RNU6-921P,regulatory,1,intron_variant
+MSI2,regulatory,1,intron_variant
+ROR2,regulatory,1,intron_variant
+MSH5,regulatory,1,intron_variant
+NFIA,regulatory,1,intron_variant
+PDE6G,regulatory,1,intron_variant
+PTPRM,regulatory,1,intron_variant
+PLK2,regulatory,1,intron_variant
+PEX14,regulatory,1,intron_variant
+OVOL1,regulatory,1,intron_variant
+RP11-105N14.3,regulatory,1,intron_variant
+PIGV,regulatory,1,intron_variant
+PKHD1,regulatory,1,intron_variant
+ORAOV1,regulatory,1,intergenic_variant
+OR9S24P,regulatory,1,intergenic_variant
+OCA,regulatory,1,intron_variant
+NUDCD3,regulatory,1,3_prime_UTR_variant
+NSG2,regulatory,1,intron_variant
+NR3C2,regulatory,1,intron_variant
+PTPN3,regulatory,1,intron_variant
+NPLOC4,regulatory,1,synonymous_variant
+PLXNB2,coding,1,missense_variant
+POLS,regulatory,1,intron_variant
+POMC,regulatory,1,intergenic_variant
+NOTUM,regulatory,1,intron_variant
+NOS1AP,regulatory,1,intron_variant
+PPM1A,regulatory,1,intron_variant
+PSTPIP2,regulatory,1,intron_variant
+PEBP4,regulatory,1,intron_variant
+PTAFR,regulatory,1,intron_variant
+RP1-167G20.1,regulatory,1,intron_variant
+RP4-781K5.4,regulatory,1,intron_variant
+RP11-1166P10.6,regulatory,1,intron_variant
+U91319.1,regulatory,1,intergenic_variant
+TET2,regulatory,1,intron_variant
+TFAP2C,regulatory,1,intron_variant
+THNSL2,regulatory,1,intergenic_variant
+TMC7,regulatory,1,intron_variant
+TMEM38B,regulatory,1,intron_variant
+TMEM91,regulatory,1,synonymous_variant
+TNFRS4,regulatory,1,intergenic_variant
+TNFRSF9,regulatory,1,intergenic_variant
+TNS3,regulatory,1,intron_variant
+TPK1,regulatory,1,intron_variant
+TRANK1,regulatory,1,intron_variant
+TTC3,regulatory,1,intron_variant
+TUBB4BP4,regulatory,1,intergenic_variant
+TWIST2,regulatory,1,intron_variant
+UQCRHL,regulatory,1,intron_variant
+RP11-23I7.1,regulatory,1,intron_variant
+USP8P1,regulatory,1,non_coding_transcript_exon_variant
+UTS2,regulatory,1,intron_variant
+VASH2,regulatory,1,intron_variant
+VGLL4,regulatory,1,intron_variant
+WDR63,regulatory,1,5_prime_UTR_variant
+WFDC5,coding,1,missense_variant
+WIPF2,regulatory,1,intron_variant
+Y_RNA,regulatory,1,intron_variant
+ZBBX,regulatory,1,intergenic_variant
+ZFP36L1,regulatory,1,intron_variant
+ZFYVE16,regulatory,1,regulatory_region_variant
+ZMAT4,regulatory,1,intron_variant
+ZMIZ1,regulatory,1,intron_variant
+ZNF304,coding,1,missense_variant
+TBCD,regulatory,1,intron_variant
+TACC1,regulatory,1,intergenic_variant
+SYNGR1,regulatory,1,intergenic_variant
+SYNE2,regulatory,1,intron_variant
+RP11-308N19.1,regulatory,1,intron_variant
+RP11-365D23.4,regulatory,1,intron_variant
+RP11-379K22.2,regulatory,1,intron_variant
+RP11-398M15.1,regulatory,1,intergenic_variant
+RP11-460N16.1,regulatory,1,intron_variant
+RP11-554A11.7,regulatory,1,intron_variant
+RP11-62F24.2,regulatory,1,intron_variant
+RP11-679B17.2,regulatory,1,intron_variant
+MRAS,regulatory,1,intron_variant
+RPL34,regulatory,1,intergenic_variant
+RPL34-AS1,regulatory,1,non_coding_transcript_exon_variant
+RPL6,regulatory,1,regulatory_region_variant
+SCARB1,regulatory,1,intron_variant
+SCML4,regulatory,1,intron_variant
+SDF4,regulatory,1,intergenic_variant
+SEC5L1,regulatory,1,intron_variant
+SERPINI1,regulatory,1,intron_variant
+SGK1,regulatory,1,intron_variant
+SHC4,regulatory,1,intron_variant
+SIK1,regulatory,1,regulatory_region_variant
+SIM1,regulatory,1,intron_variant
+SKOR2,regulatory,1,intron_variant
+SLC38A2,regulatory,1,intergenic_variant
+SLC7A7,regulatory,1,intron_variant
+SP2,regulatory,1,intron_variant
+SPATA2L,regulatory,1,intron_variant
+SPATA33,regulatory,1,3_prime_UTR_variant
+STOX2,regulatory,1,intron_variant
+SV2B,regulatory,1,intron_variant
+MRPL39,regulatory,1,intron_variant
+AC004938.5,regulatory,1,intergenic_variant
+MPST,regulatory,1,intron_variant
+CCND1,regulatory,1,intergenic_variant
+CDKAL1,regulatory,1,intron_variant
+CDK10,regulatory,1,intron_variant
+CDH3,regulatory,1,intergenic_variant
+CDC42BPA,regulatory,1,intron_variant
+CD82,regulatory,1,intergenic_variant
+CCND2,regulatory,1,intron_variant
+CCDC26,regulatory,1,intergenic_variant
+CDKN2B-AS1,regulatory,1,intron_variant
+CBFA2T3,regulatory,1,intron_variant
+C8ORF31,regulatory,1,intergenic_variant
+C4ORF22,regulatory,1,intron_variant
+C2ORF91,regulatory,1,intron_variant
+C1ORF95,regulatory,1,intergenic_variant
+C1ORF127,regulatory,1,intron_variant
+CDKN2B,regulatory,1,intron_variant
+CELSR1,regulatory,1,intron_variant
+BNC1,regulatory,1,intron_variant
+CNTNAP3,regulatory,1,intron_variant
+CTIF,regulatory,1,intergenic_variant
+CTD-2266L18.1,regulatory,1,intron_variant
+CTD-2199O4.1,regulatory,1,intergenic_variant
+CTC-507E12.1,regulatory,1,non_coding_transcript_exon_variant
+CSMD1,regulatory,1,intron_variant
+CREB5,regulatory,1,intron_variant
+CNTN6,regulatory,1,intron_variant
+CEP112,regulatory,1,intron_variant
+CLSTN2,regulatory,1,intron_variant
+CLPTM1L,regulatory,1,intron_variant
+CLIC5,regulatory,1,intron_variant
+CLEC17A,regulatory,1,intron_variant
+CHMP1A,regulatory,1,synonymous_variant
+CHL1,regulatory,1,intron_variant
+C16ORF55,regulatory,1,3_prime_UTR_variant
+BMP4,regulatory,1,intron_variant
+MITF,regulatory,1,intron_variant
+ADD3,regulatory,1,intron_variant
+AL121904.1,regulatory,1,intron_variant
+AKAP1,regulatory,1,intron_variant
+AHNAK,regulatory,1,intron_variant
+AFM,regulatory,1,intron_variant
+AFG3L1P,regulatory,1,intron_variant
+ADGRV1,regulatory,1,intron_variant
+ADCY8/EFR3A,regulatory,1,intergenic_variant
+AP3M2,regulatory,1,intergenic_variant
+ADAMTSL1,regulatory,1,intron_variant
+AC060226.1,regulatory,1,intron_variant
+AC018696.4,regulatory,1,non_coding_transcript_exon_variant
+AC012074.2,regulatory,1,regulatory_region_variant
+AC008940.1,regulatory,1,intron_variant
+AC007347.1,regulatory,1,intron_variant
+AMPD3,regulatory,1,intron_variant
+APBB2,regulatory,1,intron_variant
+BCN2,regulatory,1,intergenic_variant
+ATP1B3,regulatory,1,intron_variant
+BCAS1,regulatory,1,intron_variant
+BBS5,regulatory,1,intron_variant
+BABAM2,regulatory,1,intergenic_variant
+AXIN2,regulatory,1,intergenic_variant
+ATXN7L1,regulatory,1,intron_variant
+ATXN10,regulatory,1,intergenic_variant
+ATP10A,regulatory,1,intron_variant
+AREG,regulatory,1,intergenic_variant
+AS1,regulatory,1,intron_variant
+ARL15,regulatory,1,intron_variant
+ARID1B,regulatory,1,intron_variant
+ARHGAP32,regulatory,1,intron_variant
+ARHGAP24,regulatory,1,intron_variant
+ARHGAP20,regulatory,1,intron_variant
+DBNDD1,regulatory,1,intron_variant
+DCT,regulatory,1,intron_variant
+DDIT4,regulatory,1,intron_variant
+KRT7,other,1,splice_polypyrimidine_tract_variant
+LINC02105,regulatory,1,intron_variant
+LINC00907,regulatory,1,intron_variant
+LINC00486,regulatory,1,intron_variant
+LINC00322,regulatory,1,intron_variant
+LGR4,regulatory,1,intron_variant
+KRT86,other,1,splice_polypyrimidine_tract_variant
+KRT33A,regulatory,1,non_coding_transcript_exon_variant
+LMO7,regulatory,1,intron_variant
+KRT31,coding,1,splice_donor_variant
+KIAA2026,regulatory,1,intergenic_variant
+KIAA1239,regulatory,1,intron_variant
+KCNH1,regulatory,1,intron_variant
+JAZF1,regulatory,1,intron_variant
+IQCJ-SCHIP1,regulatory,1,intergenic_variant
+LINC02556,regulatory,1,intron_variant
+LNC01877,regulatory,1,intron_variant
+DIRC2,regulatory,1,intron_variant
+MATP,regulatory,1,intron_variant
+MIR3164,coding,1,missense_variant
+MIB2,regulatory,1,intron_variant
+MGMT,regulatory,1,intron_variant
+MED13L,regulatory,1,intron_variant
+MBTPS1,regulatory,1,intron_variant
+MBNL1,regulatory,1,intron_variant
+MAP3K1,regulatory,1,intron_variant
+LOC100507477,regulatory,1,intron_variant
+AC005358.1,regulatory,1,intron_variant
+LRRC4C,regulatory,1,intron_variant
+LRRC16A,regulatory,1,intron_variant
+LOC105378966,regulatory,1,intergenic_variant
+LOC105370627,regulatory,1,intron_variant
+LOC102724084,regulatory,1,intron_variant
+IL6,regulatory,1,intron_variant
+IL16,regulatory,1,intron_variant
+HSPA12A,regulatory,1,intron_variant
+EPHB4,regulatory,1,intron_variant
+FGF5,regulatory,1,intron_variant
+FBXL17,regulatory,1,intron_variant
+FAM189A1,regulatory,1,intron_variant
+EYS,regulatory,1,intron_variant
+ETV1,regulatory,1,intron_variant
+ERMP1,regulatory,1,intron_variant
+EN1,regulatory,1,intron_variant
+HOXC13,other,1,protein_altering_variant
+EMX2,regulatory,1,regulatory_region_variant
+EDNRB,regulatory,1,intron_variant
+DSCR9,regulatory,1,intron_variant
+DPEP1,regulatory,1,regulatory_region_variant
+DOCK8,regulatory,1,intergenic_variant
+DNAJB4,regulatory,1,intron_variant
+FHIT,regulatory,1,intron_variant
+FLJ31356,regulatory,1,intron_variant
+FMN2,regulatory,1,intron_variant
+FOXE1,regulatory,1,intron_variant
+FRAS1,regulatory,1,intron_variant
+FREM2,coding,1,missense_variant
+FTO,regulatory,1,intron_variant
+FZD1,regulatory,1,intergenic_variant
+FZD7,regulatory,1,intron_variant
+GAB2,regulatory,1,intron_variant
+GABRG3,regulatory,1,intron_variant
+GMDS,regulatory,1,intron_variant
+HAVCR2,regulatory,1,intergenic_variant
+HDAC4,regulatory,1,intergenic_variant
+HDAC9,regulatory,1,intron_variant
+HGS,regulatory,1,synonymous_variant
+HLA-C,regulatory,1,non_coding_transcript_exon_variant
+MAP1LC3B2,regulatory,1,regulatory_region_variant
