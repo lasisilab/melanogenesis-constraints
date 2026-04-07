@@ -1,3 +1,7 @@
+(base) ypryor@l-mhwdxg675w ~ % find /Users /Applications /tmp /private/var /Volumes -name "Visual Studio Code.app" 2>/dev/null
+
+
+
 # PEQG Poster Plan: Testing Network-Based Predictions of Genetic Constraint in Melanogenesis
 
 **Conference:** PEQG, June 2026
@@ -60,19 +64,19 @@ These analyses exist in the repo and can go directly onto the poster.
 ## PHASE 1 — Low-hanging fruit (days of work each)
 
 ### 1.1 PhyloP evolutionary conservation scores
-- [ ] **Get data:** Download per-gene PhyloP scores (UCSC PhyloP 100-way or 470-way vertebrate conservation). Can use precomputed gene-level summaries (e.g., mean PhyloP across coding exons) from sources like Ensembl BioMart, or compute from bigWig + BED intervals.
-- [ ] **Merge:** Join PhyloP scores to the existing 130-gene `network_constraint_data.csv` by gene symbol or Ensembl ID.
-- [ ] **Analyze:** Correlate PhyloP with LOEUF (expect strong correlation). Compare PhyloP across functional categories (same Kruskal-Wallis framework). Scatter: PhyloP vs. LOEUF to show convergent evidence.
-- [ ] **Figure:** Add PhyloP panel to poster (boxplot by category, or overlay on existing scatter).
+- [x] **Get data:** Mean PhyloP 100-way per gene fetched from UCSC REST API via `analysis/fetch_phylop_scores.py`. 127/129 genes scored.
+- [x] **Merge:** Joined to LOEUF network data → `data/network_constraint_phylop.csv`
+- [x] **Analyze:** Spearman ρ = −0.166 (p = 0.062); Kruskal-Wallis p = 0.032 across categories. Developmental/NC most conserved, Pigment-specific least.
+- [x] **Figure:** `output/figure_phase1_phylop.png/pdf` — two-panel scatter + boxplot.
 - **Why it matters:** Abstract explicitly lists PhyloP as a constraint metric. Quick win that strengthens the "multiple lines of evidence" story.
 - **Depends on:** Nothing — independent of population data.
 
 ### 1.2 GTEx tissue expression breadth
-- [ ] **Get data:** Download GTEx v8 gene-level median TPM per tissue from GTEx Portal (file: `GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_median_tpm.gct.gz`). This is a single downloadable file.
-- [ ] **Compute tissue breadth:** For each gene, count number of tissues with TPM > 1 (or similar threshold). This is a proxy for pleiotropy.
-- [ ] **Merge:** Join to the 130-gene network data.
-- [ ] **Analyze:** Correlate tissue breadth with LOEUF (expect: broader expression → lower LOEUF). Compare tissue breadth across functional categories.
-- [ ] **Hypothesis 2 test:** Do genes with broader expression show distinct constraint? Regression: LOEUF ~ tissue_breadth + functional_category.
+- [x] **Get data:** GTEx v8 median TPM auto-downloaded → `data/GTEx_v8_gene_median_tpm.gct.gz`
+- [x] **Compute tissue breadth:** Tissue breadth = # tissues with median TPM > 1 (54 tissues). Saved to `data/gtex_tissue_breadth.csv`.
+- [x] **Merge:** Joined to LOEUF network data → `data/network_constraint_gtex.csv`
+- [x] **Analyze:** Spearman ρ = −0.322 (p = 2.26e-04); Kruskal-Wallis p = 6.28e-09 across categories.
+- [x] **Hypothesis 2 test:** OLS regression LOEUF ~ tissue_breadth + functional_category — tissue breadth is a significant predictor after controlling for category.
 - **Why it matters:** Hypothesis 2 is about tissue expression × constraint. Without this, you can't address Hypothesis 2 at all.
 - **Depends on:** Nothing — independent of population data.
 
@@ -82,17 +86,28 @@ These analyses exist in the repo and can go directly onto the poster.
 
 This is the bottleneck. Everything in the second half of the abstract depends on having population-level data for African and Melanesian populations.
 
-### 2.1 Obtain and process 1000 Genomes / HGDP data
-- [ ] **Identify populations:**
-  - African: YRI (Yoruba), LWK (Luhya), ESN (Esan), GWD (Gambian), MSL (Mende) from 1KGP; and/or African populations from HGDP
-  - Melanesian: Bougainville and/or Papuan from HGDP (not in 1KGP)
-  - Outgroup for PBS: e.g., CEU or CHB from 1KGP
-- [ ] **Download VCFs:** 1KGP phase 3 VCFs are available from the IGSR FTP. HGDP data available from gnomAD (HGDP+1KGP callset) or the Bergström et al. 2020 release.
-  - *Decision needed:* Use the gnomAD HGDP+1KGP joint callset? This would simplify getting both African and Melanesian populations in one dataset with consistent variant calling.
-- [ ] **Define gene regions:** For each of the 130 network genes, define genomic intervals (gene body ± some flanking region, e.g., ±10kb). Use Ensembl/UCSC gene coordinates.
-- [ ] **Extract per-gene VCFs:** Subset the full VCFs to just the gene regions of interest. Tools: `bcftools view -R regions.bed`.
-- **Why it matters:** This is the prerequisite for π, PBS, and iHS.
-- **Estimated effort:** 1–3 days depending on data access and pipeline familiarity.
+### 2.1 Obtain and process 1000 Genomes / HGDP / SGDP data
+
+**Population design (resolved 2026-04-07):**
+
+| Role | Source | Populations | ~N |
+|------|--------|-------------|-----|
+| Target: African | 1KGP | YRI, LWK, ESN, GWD, MSL | ~405 |
+| Target: African | HGDP | Yoruba, Mandenka | ~43 |
+| **Exclude** | 1KGP | ASW (African Americans), ACB (African Caribbeans) | — |
+| Target: Melanesian | HGDP | Papuan, Bougainville | ~37 |
+| Target: Melanesian | SGDP | Papuan populations | ~83 |
+| Outgroup: East Asian | 1KGP | CHB, JPT, CHS, CDX, KHV | ~504 |
+| Outgroup: East Asian | HGDP | Han, Japanese | ~68 |
+| Outgroup: South Asian | 1KGP | GIH, PJL, BEB, STU, ITU | ~489 |
+| Outgroup: South Asian | HGDP | Balochi, Brahui, Makrani, Pathan, Sindhi | ~115 |
+
+- [ ] **Download VCFs:** Use gnomAD HGDP+1KGP joint callset for the 1KGP + HGDP populations (consistent variant calling). Download SGDP VCFs from Simons Foundation for Melanesian depth.
+- [ ] **Define gene regions:** Gene body ± 10kb flanking (TBD with Tina). Use Ensembl coordinates from `data/phylop_scores.csv` (already has chrom/start/end).
+- [ ] **Extract per-gene VCFs:** `bcftools view -R regions.bed -S samples.txt` per population group.
+- [ ] **Merge SGDP + HGDP+1KGP:** Normalize, merge with `bcftools merge`; restrict to biallelic SNPs.
+- **Why it matters:** Prerequisite for π, PBS, and iHS.
+- **Estimated effort:** 2–4 days (SGDP integration adds complexity).
 
 ### 2.2 Nucleotide diversity (π) per gene per population
 - [ ] **Compute π:** For each gene region, compute per-site nucleotide diversity for African and Melanesian populations separately. Tools: `pixy`, `scikit-allel`, or `vcftools --site-pi`.
@@ -106,15 +121,19 @@ This is the bottleneck. Everything in the second half of the abstract depends on
 - **Depends on:** 2.1
 
 ### 2.3 PBS (Population Branch Statistic)
-- [ ] **Compute allele frequencies:** Per-SNP allele frequencies for African, Melanesian, and outgroup (e.g., CEU) populations.
-- [ ] **Compute PBS per gene:** PBS requires F_ST between three population pairs. Summarize per gene (e.g., max PBS SNP per gene, or mean PBS).
-  - Tools: Custom script using Hudson's F_ST estimator, or `scikit-allel`.
-- [ ] **Merge:** Add per-gene PBS to the dataset.
+- [ ] **Compute allele frequencies:** Per-SNP allele frequencies for African, Melanesian, and outgroup populations.
+- [ ] **Compute PBS per gene:** PBS requires F_ST between three population pairs. Run three comparisons:
+  - African vs. Melanesian (CEU outgroup)
+  - African vs. East Asian (CEU outgroup)
+  - Melanesian vs. East Asian (CEU outgroup)
+  - Tools: Hudson's F_ST estimator via `scikit-allel`; summarize per gene (max PBS SNP or mean PBS).
+- [ ] **Merge:** Add per-gene PBS values to the dataset.
 - [ ] **Analyze:**
   - Which genes show elevated PBS in African? In Melanesian?
   - Are PBS outliers concentrated at peripheral (pigment-specific) network positions? (Hypothesis 3)
   - Scatter: PBS vs. network centrality, colored by functional category
-- [ ] **Figure:** PBS Manhattan-style or scatter panel for poster.
+  - Compare African vs. Melanesian outlier gene sets — convergent or independent targets?
+- [ ] **Figure:** PBS scatter or comparison panel for poster.
 - **Depends on:** 2.1
 
 ### 2.4 iHS (integrated haplotype score)

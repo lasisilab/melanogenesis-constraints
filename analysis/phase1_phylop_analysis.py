@@ -109,7 +109,7 @@ LABEL_GENES = {'TYR', 'TYRP1', 'DCT', 'OCA2', 'MC1R', 'SOX10', 'MITF',
                'PAX3', 'TFAP2A', 'FOS', 'DUSP1', 'JUN', 'AKT1', 'TP53'}
 
 fig, axes = plt.subplots(1, 2, figsize=(18, 8))
-fig.subplots_adjust(wspace=0.32, left=0.07, right=0.98, top=0.88, bottom=0.15)
+fig.subplots_adjust(wspace=0.32, left=0.07, right=0.98, top=0.88, bottom=0.38)
 
 # ── Panel A: PhyloP vs. LOEUF scatter ─────────────────────────────────────
 ax = axes[0]
@@ -142,8 +142,8 @@ adjust_text(texts, ax=ax,
             expand_points=(3.0, 3.0), expand_text=(2.0, 2.0),
             iter_lim=1000)
 
-ax.text(0.97, 0.97, f'Spearman ρ = {rho:.3f}\np = {pval:.2e}',
-        transform=ax.transAxes, fontsize=14, ha='right', va='top',
+ax.text(0.98, -0.20, f'Spearman ρ = {rho:.3f},  p = {pval:.2e}',
+        transform=ax.transAxes, fontsize=13, ha='right', va='top',
         bbox=dict(boxstyle='round,pad=0.3', facecolor='white',
                   edgecolor='gray', alpha=0.9))
 
@@ -151,8 +151,9 @@ ax.set_xlabel('Mean PhyloP 100-way\n(higher = more conserved)', fontsize=16)
 ax.set_ylabel('LOEUF (lower = more constrained)', fontsize=16)
 ax.set_title('Evolutionary conservation vs.\nLoF intolerance', fontsize=16,
              fontweight='bold', loc='left', pad=10)
-ax.legend(fontsize=12, loc='upper left', framealpha=0.9,
-          edgecolor='gray', handletextpad=0.4, borderpad=0.5, markerscale=1.3)
+ax.legend(fontsize=11, loc='upper center', bbox_to_anchor=(0.5, -0.32),
+          ncol=2, framealpha=0.9, edgecolor='gray',
+          handletextpad=0.4, borderpad=0.5, markerscale=1.2)
 ax.tick_params(labelsize=13)
 ax.text(-0.08, 1.08, 'A', transform=ax.transAxes, fontsize=24, fontweight='bold', va='top')
 
@@ -216,9 +217,9 @@ for k, (i, j, p) in enumerate(sig_pairs):
     draw_bracket(ax, i, j, y_bracket, p_text)
 
 top_y = bracket_y_start + max(len(sig_pairs), 1) * bracket_spacing + 0.05
-ax.text(len(CATEGORY_ORDER) / 2 - 0.5, top_y,
-        f'Kruskal-Wallis p = {kw_p:.2e}',
-        fontsize=13, ha='center', va='bottom',
+ax.set_ylim(ax.get_ylim()[0], top_y + 0.2)
+ax.text(0.98, 0.98, f'Kruskal-Wallis p = {kw_p:.2e}',
+        transform=ax.transAxes, fontsize=13, ha='right', va='top',
         bbox=dict(boxstyle='round,pad=0.3', facecolor='white',
                   edgecolor='gray', alpha=0.9))
 
