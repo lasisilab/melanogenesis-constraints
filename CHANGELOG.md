@@ -15,6 +15,21 @@ All notable changes to the melanogenesis-constraints project are documented here
 - `_quarto.yml` — Phase 2 added to navbar
 - `index.qmd` — updated with analysis phase summary table, key findings section, corrected gene count and scope
 
+### Added (Phase 2 — Cross-population PBS summary)
+- `analysis/phase2_pbs_summary.py` — summarises all 4 PBS scans into two population-averaged signals (mean_afr, mean_mel) and a rank-sum score across all scans:
+  - `figure_phase2_pbs_summary.png/pdf`: Panel A = 2-D scatter (mean_afr × mean_mel) with 75th-percentile threshold lines and quadrant labels (African-specific / Melanesian-specific / Broadly selected / Neither); Panel B = diverging bar chart of top-20 genes by rank-sum (African bars left, Melanesian bars right, gene labels coloured by functional category)
+  - Quadrant counts: 12 broadly selected, 19 African-specific, 19 Melanesian-specific, 78 neither; no pigment-specific genes in top-20 rank-sum
+- `phase2.qmd` — Phase 2.3 section added with figure, inline quadrant summary table, and interpretation
+
+### Added (Phase 2 — Network position × PBS figure)
+- `analysis/phase2_network_selection.py` — directly tests Q3: do population-specific selection signatures concentrate at peripheral network positions?
+  - X = KEGG pathway count (cross-system connectivity), Y = betweenness centrality (within-pathway centrality), node size ∝ PBS value (S_MIN=60, S_MAX=900, power 0.6 scaling), node colour = functional category
+  - Panel A = PBS-1 African; Panel B = PBS-3 Melanesian
+  - Both axes use sqrt transformation to spread skewed distributions; tick labels show original values
+  - Spearman ρ(PBS, network position) ≈ 0 in both scans (p > 0.1) — selection does not concentrate at periphery
+  - `figure_phase2_network_selection.png/pdf`
+- `phase2.qmd` — Phase 2.4 section added with figure, inline Spearman stats table, and interpretation
+
 ### Added (Phase 2 — PBS population branch trees)
 - `analysis/phase2_pbs_trees.py` — draws unrooted 3-leaf PBS star trees for top-3 genes per scan + MC1R; 4×4 grid (rows = scans, cols = top-1/2/3/MC1R); branch lengths = PBS values for all 3 populations derived from pairwise FST; target arm colored by functional category; output: `output/figure_phase2_pbs_trees.png/pdf`
 
