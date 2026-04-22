@@ -64,9 +64,9 @@ POP_LABELS = {
 }
 
 try:
-    pi_df  = pd.read_csv('output/pi_per_gene.csv')
-    pbs_df = pd.read_csv('output/pbs_per_gene.csv')
-    master = pd.read_csv('data/network_constraint_gtex.csv')
+    pi_df  = pd.read_csv('../output/pi_per_gene.csv')
+    pbs_df = pd.read_csv('../output/pbs_per_gene.csv')
+    master = pd.read_csv('../data/network_constraint_gtex.csv')
     master['gene'] = master['gene'].str.upper()
     pi_df['gene']  = pi_df['gene'].str.upper()
     pbs_df['gene'] = pbs_df['gene'].str.upper()
@@ -97,8 +97,8 @@ if not has_data:
 #| echo: false
 #| fig-align: center
 from IPython.display import Image, display
-if os.path.exists('output/figure_phase2_pi.png'):
-    display(Image(filename='output/figure_phase2_pi.png', width=1100))
+if os.path.exists('../output/figure_phase2_pi.png'):
+    display(Image(filename='../output/figure_phase2_pi.png', width=1100))
 else:
     print("Figure not yet generated. Run `analysis/phase2_pi_pbs_analysis.py`.")
 ```
@@ -145,8 +145,8 @@ if has_data:
 
 ```{python}
 #| echo: false
-if has_data and os.path.exists('output/table_pi_pigment_specific.csv'):
-    tbl = pd.read_csv('output/table_pi_pigment_specific.csv')
+if has_data and os.path.exists('../output/table_pi_pigment_specific.csv'):
+    tbl = pd.read_csv('../output/table_pi_pigment_specific.csv')
     for col in tbl.columns[1:]:
         tbl[col] = tbl[col].map(lambda x: f'{x:.6f}' if pd.notna(x) else 'NA')
     from IPython.display import display
@@ -165,8 +165,8 @@ substantially between populations at that locus.
 
 ```{python}
 #| echo: false
-if has_data and os.path.exists('output/table_pi_top_divergence.csv'):
-    tbl2 = pd.read_csv('output/table_pi_top_divergence.csv')
+if has_data and os.path.exists('../output/table_pi_top_divergence.csv'):
+    tbl2 = pd.read_csv('../output/table_pi_top_divergence.csv')
     for col in ['pi_divergence', 'pi_max', 'pi_min']:
         tbl2[col] = tbl2[col].map(lambda x: f'{x:.6f}' if pd.notna(x) else 'NA')
     from IPython.display import display
@@ -215,8 +215,8 @@ if has_data:
 #| echo: false
 #| fig-align: center
 from IPython.display import Image, display
-if os.path.exists('output/figure_phase2_pbs.png'):
-    display(Image(filename='output/figure_phase2_pbs.png', width=1100))
+if os.path.exists('../output/figure_phase2_pbs.png'):
+    display(Image(filename='../output/figure_phase2_pbs.png', width=1100))
 else:
     print("Figure not yet generated. Run `analysis/phase2_pi_pbs_analysis.py`.")
 ```
@@ -291,8 +291,8 @@ if has_data:
 #| echo: false
 #| fig-align: center
 from IPython.display import Image, display
-if os.path.exists('output/figure_phase2_pbs_trees.png'):
-    display(Image(filename='output/figure_phase2_pbs_trees.png', width=1100))
+if os.path.exists('../output/figure_phase2_pbs_trees.png'):
+    display(Image(filename='../output/figure_phase2_pbs_trees.png', width=1100))
 else:
     print("Figure not yet generated. Run `analysis/phase2_pbs_trees.py`.")
 ```
@@ -320,8 +320,8 @@ Threshold lines mark the 75th percentile of each axis, dividing genes into four 
 #| echo: false
 #| fig-align: center
 from IPython.display import Image, display
-if os.path.exists('output/figure_phase2_pbs_summary.png'):
-    display(Image(filename='output/figure_phase2_pbs_summary.png', width=1100))
+if os.path.exists('../output/figure_phase2_pbs_summary.png'):
+    display(Image(filename='../output/figure_phase2_pbs_summary.png', width=1100))
 else:
     print("Figure not yet generated. Run `analysis/phase2_pbs_summary.py`.")
 ```
@@ -386,8 +386,8 @@ category.
 #| echo: false
 #| fig-align: center
 from IPython.display import Image, display
-if os.path.exists('output/figure_phase2_network_selection.png'):
-    display(Image(filename='output/figure_phase2_network_selection.png', width=1100))
+if os.path.exists('../output/figure_phase2_network_selection.png'):
+    display(Image(filename='../output/figure_phase2_network_selection.png', width=1100))
 else:
     print("Figure not yet generated. Run `analysis/phase2_network_selection.py`.")
 ```
@@ -411,11 +411,11 @@ import pandas as _pd
 import numpy as _np
 
 try:
-    _master = _pd.read_csv('data/network_constraint_gtex.csv')
+    _master = _pd.read_csv('../data/network_constraint_gtex.csv')
     _master['gene'] = _master['gene'].str.upper()
-    _kegg = _pd.read_csv('data/kegg_pathway_counts.csv')[['gene', 'kegg_pathway_count']]
+    _kegg = _pd.read_csv('../data/kegg_pathway_counts.csv')[['gene', 'kegg_pathway_count']]
     _kegg['gene'] = _kegg['gene'].str.upper()
-    _pbs = _pd.read_csv('output/pbs_per_gene.csv')[['gene', 'pbs1_african', 'pbs3_melanesian']]
+    _pbs = _pd.read_csv('../output/pbs_per_gene.csv')[['gene', 'pbs1_african', 'pbs3_melanesian']]
     _pbs['gene'] = _pbs['gene'].str.upper()
     _pbs['pbs1_african']    = _pbs['pbs1_african'].clip(lower=0)
     _pbs['pbs3_melanesian'] = _pbs['pbs3_melanesian'].clip(lower=0)

@@ -43,7 +43,7 @@ CATEGORY_ORDER = [
 ]
 
 try:
-    df = pd.read_csv('data/network_constraint_ancestry_loeuf.csv')
+    df = pd.read_csv('../data/network_constraint_ancestry_loeuf.csv')
     has_data = True
     has_nfe = 'LOEUF_nfe' in df.columns
     has_afr = 'LOEUF_afr' in df.columns
@@ -70,7 +70,7 @@ if not has_data:
 #| fig-align: center
 import os
 from IPython.display import Image, display
-fig_path = 'output/figure_phase1_ancestry_loeuf.png'
+fig_path = '../output/figure_phase1_ancestry_loeuf.png'
 if os.path.exists(fig_path):
     display(Image(filename=fig_path, width=900))
 else:

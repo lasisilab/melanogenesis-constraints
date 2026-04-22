@@ -39,7 +39,7 @@ CATEGORY_ORDER = [
 ]
 
 try:
-    df = pd.read_csv('data/network_constraint_gtex.csv')
+    df = pd.read_csv('../data/network_constraint_gtex.csv')
     df['gene'] = df['gene'].str.upper()
     has_bc = 'betweenness_centrality' in df.columns
 except FileNotFoundError:
@@ -48,7 +48,7 @@ except FileNotFoundError:
 has_kegg = False
 if has_bc:
     try:
-        kegg = pd.read_csv('data/kegg_pathway_counts.csv')[['gene', 'kegg_pathway_count']]
+        kegg = pd.read_csv('../data/kegg_pathway_counts.csv')[['gene', 'kegg_pathway_count']]
         kegg['gene'] = kegg['gene'].str.upper()
         df = df.merge(kegg, on='gene', how='left')
         has_kegg = 'kegg_pathway_count' in df.columns
@@ -75,7 +75,7 @@ if not has_bc:
 #| echo: false
 #| fig-align: center
 from IPython.display import Image, display
-fig_path = 'output/figure_phase0_network_constraint.png'
+fig_path = '../output/figure_phase0_network_constraint.png'
 if os.path.exists(fig_path):
     display(Image(filename=fig_path, width=1100))
 else:

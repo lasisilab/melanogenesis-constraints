@@ -1,21 +1,21 @@
 project:
   type: website
   render:
-    - "*.qmd"
+    - "site/*.qmd"
 
 website:
   title: "Melanogenesis Constraints"
   navbar:
     left:
-      - href: index.qmd
+      - href: site/index.qmd
         text: Overview
-      - href: phase0.qmd
+      - href: site/phase0.qmd
         text: Phase 0 — Network & KEGG
-      - href: phase1.qmd
+      - href: site/phase1.qmd
         text: Phase 1 — Conservation & Expression
-      - href: phase1_ancestry.qmd
+      - href: site/phase1_ancestry.qmd
         text: Phase 1.3 — Ancestry LOEUF
-      - href: phase2.qmd
+      - href: site/phase2.qmd
         text: Phase 2 — Population Genomics
 
 format:
