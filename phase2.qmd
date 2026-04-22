@@ -308,7 +308,68 @@ T = −ln(1 − F~ST~), then PBS = (T~target–out~ + T~target–distant~ − T~
 
 ---
 
-## Phase 2.3 — Network position vs. population-specific selection
+## Phase 2.3 — Cross-population PBS summary
+
+### Figure — African vs. Melanesian PBS (population-averaged)
+
+Each of the 4 PBS scans is averaged by target population to reduce outgroup noise:
+*mean_afr* = (PBS-1 + PBS-2) / 2 and *mean_mel* = (PBS-3 + PBS-4) / 2.
+Threshold lines mark the 75th percentile of each axis, dividing genes into four quadrants.
+
+```{python}
+#| echo: false
+#| fig-align: center
+from IPython.display import Image, display
+if os.path.exists('output/figure_phase2_pbs_summary.png'):
+    display(Image(filename='output/figure_phase2_pbs_summary.png', width=1100))
+else:
+    print("Figure not yet generated. Run `analysis/phase2_pbs_summary.py`.")
+```
+
+**Panel A** — 2-D scatter. Node size reflects rank-sum percentile across all 4 scans
+(larger = more consistently elevated across scans). The dotted diagonal marks equal signal
+in both populations; genes above it are Melanesian-dominant, genes below are African-dominant.
+
+**Panel B** — Top 20 genes by cross-population rank-sum. African signal extends left (red),
+Melanesian signal extends right (blue). Gene label color = functional category.
+
+```{python}
+#| echo: false
+#| output: asis
+if has_data:
+    for col in ['pbs1_african','pbs2_african','pbs3_melanesian','pbs4_melanesian']:
+        pbs_df[col] = pbs_df[col].clip(lower=0)
+    pbs_df['mean_afr'] = (pbs_df['pbs1_african']    + pbs_df['pbs2_african'])    / 2
+    pbs_df['mean_mel'] = (pbs_df['pbs3_melanesian'] + pbs_df['pbs4_melanesian']) / 2
+    for col in ['pbs1_african','pbs2_african','pbs3_melanesian','pbs4_melanesian']:
+        pbs_df[f'rank_{col}'] = pbs_df[col].rank(ascending=True, method='average')
+    pbs_df['rank_sum'] = (pbs_df['rank_pbs1_african'] + pbs_df['rank_pbs2_african'] +
+                          pbs_df['rank_pbs3_melanesian'] + pbs_df['rank_pbs4_melanesian'])
+
+    thr_afr = pbs_df['mean_afr'].quantile(0.75)
+    thr_mel = pbs_df['mean_mel'].quantile(0.75)
+
+    def _quad(row):
+        hi_a = row['mean_afr'] >= thr_afr
+        hi_m = row['mean_mel'] >= thr_mel
+        if hi_a and hi_m: return 'Broadly selected (both)'
+        if hi_a:           return 'African-specific'
+        if hi_m:           return 'Melanesian-specific'
+        return 'Neither'
+    pbs_df['quadrant'] = pbs_df.apply(_quad, axis=1)
+
+    print("**Quadrant summary (75th-percentile threshold):**\n")
+    print("| Quadrant | N genes | Example genes |")
+    print("|---|---|---|")
+    for q in ['Broadly selected (both)', 'African-specific', 'Melanesian-specific', 'Neither']:
+        sub = pbs_df[pbs_df['quadrant'] == q]
+        top = ', '.join(sub.nlargest(3, 'rank_sum')['gene'].tolist())
+        print(f"| {q} | {len(sub)} | {top} |")
+```
+
+---
+
+## Phase 2.4 — Network position vs. population-specific selection
 
 ### Figure — Betweenness centrality × KEGG connectivity, node size = PBS
 
