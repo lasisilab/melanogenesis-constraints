@@ -79,6 +79,11 @@ df = (master[['gene', 'functional_category', 'LOEUF', 'betweenness_centrality']]
 df = df.dropna(subset=['betweenness_centrality', 'kegg_pathway_count'])
 print(f"  {len(df)} genes with betweenness + KEGG data")
 
+# ── Square-root transform for plotting (spread skewed distributions) ──────
+# Most genes cluster near 0 on both axes; sqrt spreads the mass more evenly.
+df['x_plot'] = np.sqrt(df['kegg_pathway_count'].clip(lower=0))
+df['y_plot'] = np.sqrt(df['betweenness_centrality'].clip(lower=0))
+
 # ── Node size scaling ──────────────────────────────────────────────────────
 # Map PBS → marker area (s parameter in scatter).
 # Min size = 60 (PBS = 0, still visible), max size = 900 (top PBS).
@@ -144,8 +149,8 @@ for ax, (pbs_col, size_col, letter, subtitle) in zip(axes, PANEL_SPECS):
         sub = df[df['functional_category'] == cat]
         if len(sub) == 0:
             continue
-        ax.scatter(sub['kegg_pathway_count'],
-                   sub['betweenness_centrality'],
+        ax.scatter(sub['x_plot'],
+                   sub['y_plot'],
                    s=sub[size_col],
                    c=CATEGORY_COLORS[cat],
                    alpha=0.82,
@@ -161,8 +166,8 @@ for ax, (pbs_col, size_col, letter, subtitle) in zip(axes, PANEL_SPECS):
         # Bold + larger for top PBS genes; normal for always-label genes
         is_top = row['gene'] in top_pbs_genes(pbs_col, n=8)
         texts.append(
-            ax.text(row['kegg_pathway_count'],
-                    row['betweenness_centrality'],
+            ax.text(row['x_plot'],
+                    row['y_plot'],
                     row['gene'],
                     fontsize=8.5 if is_top else 7.5,
                     fontweight='bold' if is_top else 'normal',
@@ -176,32 +181,39 @@ for ax, (pbs_col, size_col, letter, subtitle) in zip(axes, PANEL_SPECS):
                 expand_points=(2.5, 2.5), expand_text=(2.0, 2.0),
                 iter_lim=1000)
 
-    # ── Quadrant annotations (matching original figure style) ─────────────
-    x_max = df['kegg_pathway_count'].max()
-    y_max = df['betweenness_centrality'].max()
-    x_mid = x_max * 0.45
-    y_mid = y_max * 0.45
+    # ── Quadrant annotations — positions in sqrt-transformed coordinates ───
+    xp_max = df['x_plot'].max()   # sqrt(120) ≈ 10.95
+    yp_max = df['y_plot'].max()   # sqrt(0.21) ≈ 0.458
+    xp_mid = xp_max * 0.45
 
     quad_style = dict(fontsize=9.5, color='#444444', ha='center',
                       style='italic',
                       bbox=dict(boxstyle='round,pad=0.35', facecolor='#F8F8F8',
                                 edgecolor='#CCCCCC', alpha=0.85))
 
-    ax.text(x_mid * 0.28, y_max * 0.88,
+    ax.text(xp_mid * 0.28, yp_max * 0.88,
             'Within-pathway hubs\nPathway-essential; constrained',
             **quad_style)
-    ax.text(x_mid * 2.55, y_max * 0.88,
+    ax.text(xp_mid * 2.55, yp_max * 0.88,
             'Pleiotropic hubs\nCross-system essential;\nmost constrained',
             **quad_style)
-    ax.text(x_mid * 0.28, y_max * 0.10,
+    ax.text(xp_mid * 0.28, yp_max * 0.10,
             'Peripheral specialists\nPathway-effectors;\nmost variable',
             **quad_style)
 
     # ── Diagonal arrow (low connectivity → high connectivity) ──────────────
-    ax.annotate('', xy=(x_max * 0.80, y_max * 0.78),
-                xytext=(x_max * 0.18, y_max * 0.18),
+    ax.annotate('', xy=(xp_max * 0.80, yp_max * 0.78),
+                xytext=(xp_max * 0.18, yp_max * 0.18),
                 arrowprops=dict(arrowstyle='->', color='#AAAAAA',
                                 lw=1.5, linestyle='dashed'))
+
+    # ── Axis ticks — show original (untransformed) values ─────────────────
+    x_ticks_orig = [0, 10, 20, 40, 60, 80, 100, 120]
+    y_ticks_orig = [0.00, 0.02, 0.05, 0.10, 0.15, 0.20]
+    ax.set_xticks([np.sqrt(v) for v in x_ticks_orig])
+    ax.set_xticklabels(x_ticks_orig)
+    ax.set_yticks([np.sqrt(v) for v in y_ticks_orig])
+    ax.set_yticklabels(y_ticks_orig)
 
     # ── Axis labels and titles ─────────────────────────────────────────────
     ax.set_xlabel('Cross-system connectivity\n(number of KEGG pathways)',
