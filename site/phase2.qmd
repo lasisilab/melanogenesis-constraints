@@ -1,0 +1,461 @@
+---
+title: "Phase 2 — Population Genomics"
+subtitle: "Nucleotide diversity (π) and PBS across 5 populations in the melanogenesis network"
+---
+
+## Overview
+
+Phase 2 applies population genomic analyses to the 129-gene melanogenesis network
+using whole-genome variant data extracted for 5 populations:
+
+| Population | N samples | Source |
+|---|---|---|
+| African | 747 | gnomAD HGDP+1KGP (YRI, LWK, ESN, GWD, MSL, Yoruba, Mandenka) |
+| Melanesian | 47 | gnomAD HGDP (PapuanHighlands, PapuanSepik, Bougainville) + SGDP (Papuan) |
+| South Asian | 790 | gnomAD HGDP+1KGP |
+| East Asian | 718 | gnomAD HGDP+1KGP |
+| European | 788 | gnomAD HGDP+1KGP (CEU, TSI, FIN, GBR, IBS + HGDP European) |
+
+**Two metrics are computed:**
+
+- **π (nucleotide diversity)** — mean pairwise differences per base pair within each
+  population, computed over each gene region (body ± 10 kb).
+  Tests whether pigment-specific genes differ in within-population diversity.
+
+- **PBS (Population Branch Statistic)** — measures population-specific allele frequency
+  change relative to two outgroups, using the Hudson FST estimator
+  (Bhatia et al. 2013). Four approved scans:
+
+| Scan | Target | Outgroup | Distant outgroup |
+|---|---|---|---|
+| PBS-1 | African | South Asian | Melanesian |
+| PBS-2 | African | European | Melanesian |
+| PBS-3 | Melanesian | South Asian | African |
+| PBS-4 | Melanesian | European | African |
+
+> **Note:** PBS was computed within the 129-gene melanogenesis network only.
+> Values represent relative differentiation within this candidate gene set and
+> are **not** calibrated against a genome-wide null distribution.
+
+---
+
+```{python}
+#| echo: false
+#| warning: false
+import pandas as pd
+import numpy as np
+from scipy import stats
+import os
+import warnings
+warnings.filterwarnings('ignore')
+
+CATEGORY_ORDER = [
+    'Pigment-specific', 'Developmental/NC', 'Generic signaling',
+    'Cytokines/growth factors', 'Apoptosis/cell death', 'Other',
+]
+
+POPS = ['african', 'melanesian', 'southasian', 'european', 'eastasian']
+POP_LABELS = {
+    'african':    'African',
+    'melanesian': 'Melanesian',
+    'southasian': 'South Asian',
+    'european':   'European',
+    'eastasian':  'East Asian',
+}
+
+try:
+    pi_df  = pd.read_csv('../output/pi_per_gene.csv')
+    pbs_df = pd.read_csv('../output/pbs_per_gene.csv')
+    master = pd.read_csv('../data/network_constraint_gtex.csv')
+    master['gene'] = master['gene'].str.upper()
+    pi_df['gene']  = pi_df['gene'].str.upper()
+    pbs_df['gene'] = pbs_df['gene'].str.upper()
+    pi_df  = pi_df.merge(master[['gene','functional_category','LOEUF']], on='gene', how='left')
+    pbs_df = pbs_df.merge(master[['gene','functional_category','LOEUF']], on='gene', how='left')
+    for col in ['pbs1_african','pbs2_african','pbs3_melanesian','pbs4_melanesian']:
+        pbs_df[col] = pbs_df[col].clip(lower=0)
+    has_data = True
+except FileNotFoundError:
+    has_data = False
+```
+
+```{python}
+#| echo: false
+#| output: asis
+if not has_data:
+    print("> **Note:** Output CSVs not yet generated.")
+    print("> Run `analysis/phase2_pi_pbs_analysis.py` to produce figures and tables.")
+```
+
+---
+
+## Phase 2.1 — Nucleotide diversity (π)
+
+### Figure — π by functional category, all 5 populations
+
+```{python}
+#| echo: false
+#| fig-align: center
+from IPython.display import Image, display
+if os.path.exists('../output/figure_phase2_pi.png'):
+    display(Image(filename='../output/figure_phase2_pi.png', width=1100))
+else:
+    print("Figure not yet generated. Run `analysis/phase2_pi_pbs_analysis.py`.")
+```
+
+Panels A–E show π distributions by functional category for each population.
+Median shown as a white open circle. MC1R is marked with a star (★) in each panel.
+Panel F shows MC1R π vs. the dataset median across all 5 populations.
+
+---
+
+### π statistics
+
+```{python}
+#| echo: false
+if has_data:
+    print("Spearman ρ(π, LOEUF) by population:\n")
+    for pop in POPS:
+        col = f'pi_{pop}'
+        sub = pi_df.dropna(subset=[col, 'LOEUF'])
+        rho, pval = stats.spearmanr(sub[col], sub['LOEUF'])
+        sig = '✓' if pval < 0.05 else ''
+        print(f"  {POP_LABELS[pop]:12s}: ρ = {rho:.3f},  p = {pval:.3e}  {sig}")
+```
+
+```{python}
+#| echo: false
+if has_data:
+    print("Kruskal-Wallis π by functional category:\n")
+    for pop in POPS:
+        col = f'pi_{pop}'
+        sub = pi_df.dropna(subset=[col, 'functional_category'])
+        groups = [sub.loc[sub['functional_category']==c, col].values
+                  for c in CATEGORY_ORDER if c in sub['functional_category'].values]
+        non_empty = [g for g in groups if len(g) > 0]
+        if len(non_empty) >= 2:
+            kw, p = stats.kruskal(*non_empty)
+            sig = '✓' if p < 0.05 else ''
+            print(f"  {POP_LABELS[pop]:12s}: H = {kw:.2f},  p = {p:.3e}  {sig}")
+```
+
+---
+
+### Table 1 — Pigment-specific gene π values (all populations)
+
+```{python}
+#| echo: false
+if has_data and os.path.exists('../output/table_pi_pigment_specific.csv'):
+    tbl = pd.read_csv('../output/table_pi_pigment_specific.csv')
+    for col in tbl.columns[1:]:
+        tbl[col] = tbl[col].map(lambda x: f'{x:.6f}' if pd.notna(x) else 'NA')
+    from IPython.display import display
+    display(tbl.to_html(index=False))
+elif not has_data:
+    print("Run `analysis/phase2_pi_pbs_analysis.py` to generate this table.")
+```
+
+---
+
+### Table 2 — Top 10 genes by π divergence across populations
+
+Divergence = max(π) − min(π) across the 5 populations. High divergence
+indicates that selective pressures on within-population diversity differ
+substantially between populations at that locus.
+
+```{python}
+#| echo: false
+if has_data and os.path.exists('../output/table_pi_top_divergence.csv'):
+    tbl2 = pd.read_csv('../output/table_pi_top_divergence.csv')
+    for col in ['pi_divergence', 'pi_max', 'pi_min']:
+        tbl2[col] = tbl2[col].map(lambda x: f'{x:.6f}' if pd.notna(x) else 'NA')
+    from IPython.display import display
+    display(tbl2.to_html(index=False))
+elif not has_data:
+    print("Run `analysis/phase2_pi_pbs_analysis.py` to generate this table.")
+```
+
+---
+
+### MC1R π case study
+
+```{python}
+#| echo: false
+#| output: asis
+if has_data:
+    mc1r = pi_df[pi_df['gene'] == 'MC1R']
+    if len(mc1r) > 0:
+        row = mc1r.iloc[0]
+        print("MC1R nucleotide diversity compared to the dataset median:\n")
+        print("| Population | MC1R π | Dataset median π | Percentile |")
+        print("|---|---|---|---|")
+        for pop in POPS:
+            col = f'pi_{pop}'
+            val = row.get(col, np.nan)
+            med = pi_df[col].median()
+            pct = int((pi_df[col] < val).mean() * 100)
+            print(f"| {POP_LABELS[pop]} | {val:.6f} | {med:.6f} | {pct}th |")
+        print()
+        print("MC1R π is elevated relative to the network median in all populations, "
+              "consistent with relaxed purifying selection on LoF variants. "
+              "The African value is particularly high, which is *paradoxical* given "
+              "the documented purifying selection on MC1R missense variants in African "
+              "populations (Harding et al. 2000; Norton et al. 2007). "
+              "This is explored further in the PBS analysis below and in the "
+              "[Ancestry-Stratified LOEUF](phase1_ancestry.qmd#mc1r-case-study) section.")
+```
+
+---
+
+## Phase 2.2 — PBS (Population Branch Statistic)
+
+### Figure — PBS by functional category, all 4 scans
+
+```{python}
+#| echo: false
+#| fig-align: center
+from IPython.display import Image, display
+if os.path.exists('../output/figure_phase2_pbs.png'):
+    display(Image(filename='../output/figure_phase2_pbs.png', width=1100))
+else:
+    print("Figure not yet generated. Run `analysis/phase2_pi_pbs_analysis.py`.")
+```
+
+Panels A–D: PBS distributions by functional category for each scan.
+Panel E: top genes across all 4 scans (horizontal bars — dark red/salmon = African scans,
+dark blue/light blue = Melanesian scans; dot color = functional category).
+
+---
+
+### Top 10 genes per PBS scan
+
+```{python}
+#| echo: false
+if has_data:
+    from IPython.display import display
+    scans = [
+        ('pbs1_african',    'PBS-1: African (S. Asian outgroup, Melanesian distant)'),
+        ('pbs2_african',    'PBS-2: African (European outgroup, Melanesian distant)'),
+        ('pbs3_melanesian', 'PBS-3: Melanesian (S. Asian outgroup, African distant)'),
+        ('pbs4_melanesian', 'PBS-4: Melanesian (European outgroup, African distant)'),
+    ]
+    for col, label in scans:
+        print(f"\n**{label}**\n")
+        top = (pbs_df.dropna(subset=[col])
+               .nlargest(10, col)[['gene','functional_category', col]]
+               .reset_index(drop=True))
+        top[col] = top[col].map(lambda x: f'{x:.4f}')
+        display(top.to_html(index=False))
+```
+
+---
+
+### MC1R PBS case study
+
+```{python}
+#| echo: false
+#| output: asis
+if has_data:
+    mc1r_pbs = pbs_df[pbs_df['gene'] == 'MC1R']
+    if len(mc1r_pbs) > 0:
+        row = mc1r_pbs.iloc[0]
+        scans = [
+            ('pbs1_african',    'PBS-1: African / S. Asian outgroup'),
+            ('pbs2_african',    'PBS-2: African / European outgroup'),
+            ('pbs3_melanesian', 'PBS-3: Melanesian / S. Asian outgroup'),
+            ('pbs4_melanesian', 'PBS-4: Melanesian / European outgroup'),
+        ]
+        print("| Scan | MC1R PBS | Dataset median | Percentile |")
+        print("|---|---|---|---|")
+        for col, label in scans:
+            val = row.get(col, np.nan)
+            med = pbs_df[col].median()
+            pct = int((pbs_df[col] < val).mean() * 100)
+            print(f"| {label} | {val:.4f} | {med:.4f} | {pct}th |")
+        print()
+        print("MC1R shows **elevated PBS in African scans** (PBS-1/2, ~84–87th percentile "
+              "within the network) but **no Melanesian-specific signal** (PBS-3/4, ~9th "
+              "percentile). This is consistent with African-specific selective pressure on "
+              "MC1R — but note that high π in Africans argues against strong purifying "
+              "selection on LoF variants. The most likely explanation: selection in Africa "
+              "acts on *missense* variants (preserving ancestral dark-skin function), which "
+              "is invisible to both LOEUF and π but is captured by PBS via overall allele "
+              "frequency differentiation.")
+```
+
+---
+
+### Figure — PBS population branch trees
+
+```{python}
+#| echo: false
+#| fig-align: center
+from IPython.display import Image, display
+if os.path.exists('../output/figure_phase2_pbs_trees.png'):
+    display(Image(filename='../output/figure_phase2_pbs_trees.png', width=1100))
+else:
+    print("Figure not yet generated. Run `analysis/phase2_pbs_trees.py`.")
+```
+
+Each tree is an unrooted 3-leaf star where branch lengths are proportional to
+PBS values for the target, outgroup, and distant outgroup populations respectively.
+A long target arm with short outgroup arms indicates population-specific selection
+in the target population. The **bold colored arm** is the target; arm color
+reflects the gene's functional category. The MC1R column is shaded yellow.
+
+All branch lengths are derived from pairwise Hudson FST estimates:
+T = −ln(1 − F~ST~), then PBS = (T~target–out~ + T~target–distant~ − T~out–distant~) / 2.
+
+---
+
+## Phase 2.3 — Cross-population PBS summary
+
+### Figure — African vs. Melanesian PBS (population-averaged)
+
+Each of the 4 PBS scans is averaged by target population to reduce outgroup noise:
+*mean_afr* = (PBS-1 + PBS-2) / 2 and *mean_mel* = (PBS-3 + PBS-4) / 2.
+Threshold lines mark the 75th percentile of each axis, dividing genes into four quadrants.
+
+```{python}
+#| echo: false
+#| fig-align: center
+from IPython.display import Image, display
+if os.path.exists('../output/figure_phase2_pbs_summary.png'):
+    display(Image(filename='../output/figure_phase2_pbs_summary.png', width=1100))
+else:
+    print("Figure not yet generated. Run `analysis/phase2_pbs_summary.py`.")
+```
+
+**Panel A** — 2-D scatter. Node size reflects rank-sum percentile across all 4 scans
+(larger = more consistently elevated across scans). The dotted diagonal marks equal signal
+in both populations; genes above it are Melanesian-dominant, genes below are African-dominant.
+
+**Panel B** — Top 20 genes by cross-population rank-sum. African signal extends left (red),
+Melanesian signal extends right (blue). Gene label color = functional category.
+
+```{python}
+#| echo: false
+#| output: asis
+if has_data:
+    for col in ['pbs1_african','pbs2_african','pbs3_melanesian','pbs4_melanesian']:
+        pbs_df[col] = pbs_df[col].clip(lower=0)
+    pbs_df['mean_afr'] = (pbs_df['pbs1_african']    + pbs_df['pbs2_african'])    / 2
+    pbs_df['mean_mel'] = (pbs_df['pbs3_melanesian'] + pbs_df['pbs4_melanesian']) / 2
+    for col in ['pbs1_african','pbs2_african','pbs3_melanesian','pbs4_melanesian']:
+        pbs_df[f'rank_{col}'] = pbs_df[col].rank(ascending=True, method='average')
+    pbs_df['rank_sum'] = (pbs_df['rank_pbs1_african'] + pbs_df['rank_pbs2_african'] +
+                          pbs_df['rank_pbs3_melanesian'] + pbs_df['rank_pbs4_melanesian'])
+
+    thr_afr = pbs_df['mean_afr'].quantile(0.75)
+    thr_mel = pbs_df['mean_mel'].quantile(0.75)
+
+    def _quad(row):
+        hi_a = row['mean_afr'] >= thr_afr
+        hi_m = row['mean_mel'] >= thr_mel
+        if hi_a and hi_m: return 'Broadly selected (both)'
+        if hi_a:           return 'African-specific'
+        if hi_m:           return 'Melanesian-specific'
+        return 'Neither'
+    pbs_df['quadrant'] = pbs_df.apply(_quad, axis=1)
+
+    print("**Quadrant summary (75th-percentile threshold):**\n")
+    print("| Quadrant | N genes | Example genes |")
+    print("|---|---|---|")
+    for q in ['Broadly selected (both)', 'African-specific', 'Melanesian-specific', 'Neither']:
+        sub = pbs_df[pbs_df['quadrant'] == q]
+        top = ', '.join(sub.nlargest(3, 'rank_sum')['gene'].tolist())
+        print(f"| {q} | {len(sub)} | {top} |")
+```
+
+---
+
+## Phase 2.4 — Network position vs. population-specific selection
+
+### Figure — Betweenness centrality × KEGG connectivity, node size = PBS
+
+This figure directly tests the central question: **Do population-specific selection
+signatures concentrate at peripheral network positions, while core pathway genes
+remain universally constrained?**
+
+X-axis = cross-system connectivity (KEGG pathway count); Y-axis = within-pathway
+centrality (betweenness centrality). Node size is proportional to PBS value — larger
+nodes carry stronger population-specific selection signals. Node color = functional
+category.
+
+```{python}
+#| echo: false
+#| fig-align: center
+from IPython.display import Image, display
+if os.path.exists('../output/figure_phase2_network_selection.png'):
+    display(Image(filename='../output/figure_phase2_network_selection.png', width=1100))
+else:
+    print("Figure not yet generated. Run `analysis/phase2_network_selection.py`.")
+```
+
+**Panel A** — PBS-1: African population-specific selection (S. Asian outgroup, Melanesian distant).
+BCL2L1 carries the largest signal (PBS = 0.85) at a peripheral position (low betweenness, moderate KEGG count).
+KITLG and TFAP2A are the next-highest African signals among Developmental/NC genes.
+
+**Panel B** — PBS-3: Melanesian population-specific selection (S. Asian outgroup, African distant).
+Signals spread more evenly across network positions: MAPK3 sits in the pleiotropic hub
+corner (KEGG = 120), while ADCY4 and HIF1A carry moderate-to-high signals at intermediate
+positions. MITF (KEGG = 7, moderate betweenness) stands out as the highest-PBS pigment-
+specific gene in the Melanesian scan.
+
+**Spearman ρ (PBS × network position):**
+
+```{python}
+#| echo: false
+from scipy import stats as _stats
+import pandas as _pd
+import numpy as _np
+
+try:
+    _master = _pd.read_csv('../data/network_constraint_gtex.csv')
+    _master['gene'] = _master['gene'].str.upper()
+    _kegg = _pd.read_csv('../data/kegg_pathway_counts.csv')[['gene', 'kegg_pathway_count']]
+    _kegg['gene'] = _kegg['gene'].str.upper()
+    _pbs = _pd.read_csv('../output/pbs_per_gene.csv')[['gene', 'pbs1_african', 'pbs3_melanesian']]
+    _pbs['gene'] = _pbs['gene'].str.upper()
+    _pbs['pbs1_african']    = _pbs['pbs1_african'].clip(lower=0)
+    _pbs['pbs3_melanesian'] = _pbs['pbs3_melanesian'].clip(lower=0)
+    _df = (_master[['gene', 'betweenness_centrality']]
+           .merge(_kegg, on='gene', how='left')
+           .merge(_pbs,  on='gene', how='left'))
+    _df = _df.dropna(subset=['betweenness_centrality', 'kegg_pathway_count'])
+
+    print("| PBS scan | vs. betweenness centrality | vs. KEGG pathway count |")
+    print("|---|---|---|")
+    for pbs_col, label in [('pbs1_african', 'PBS-1 African'), ('pbs3_melanesian', 'PBS-3 Melanesian')]:
+        sub = _df.dropna(subset=[pbs_col])
+        r1, p1 = _stats.spearmanr(sub['betweenness_centrality'], sub[pbs_col])
+        r2, p2 = _stats.spearmanr(sub['kegg_pathway_count'],      sub[pbs_col])
+        print(f"| {label} | ρ = {r1:.3f}, p = {p1:.3e} | ρ = {r2:.3f}, p = {p2:.3e} |")
+except FileNotFoundError:
+    print("Run analysis scripts to generate network position × PBS statistics.")
+```
+
+Neither PBS scan shows a significant positive concentration at peripheral positions
+(ρ ≈ 0, p > 0.1). The African signal (BCL2L1) is peripheral but is an apoptosis gene
+rather than a pigment-specific gene. The result suggests that population-specific
+selection in the melanogenesis network does not systematically target peripheral
+specialists over pleiotropic hubs — selection signals reflect function-specific
+evolutionary pressures rather than network topology.
+
+---
+
+## Data provenance
+
+| File | Description | Generated by |
+|---|---|---|
+| `vcf/final/african.vcf.gz` | 747 African samples, 184,859 variants | Cluster pipeline 01–06 |
+| `vcf/final/melanesian.vcf.gz` | 47 Melanesian samples (30 HGDP + 17 SGDP) | Cluster pipeline 01–06 |
+| `vcf/final/southasian.vcf.gz` | 790 South Asian samples, 167,302 variants | Cluster pipeline 01–06 |
+| `vcf/final/eastasian.vcf.gz` | 718 East Asian samples, 137,663 variants | Cluster pipeline 01–06 |
+| `vcf/final/european.vcf.gz` | 788 European samples, 135,432 variants | Cluster pipeline 01–06 |
+| `output/pi_per_gene.csv` | Per-gene π for all 5 populations | `analysis/cluster/07_compute_pi.py` |
+| `output/pbs_per_gene.csv` | Per-gene PBS (4 scans) + pairwise FST | `analysis/cluster/08_compute_pbs.py` |
+| `output/figure_phase2_network_selection.png` | Network position × PBS figure | `analysis/phase2_network_selection.py` |
+
+*gnomAD HGDP+1KGP v3.1.2 joint callset; SGDP Simons.vcf.gz (hg19→hg38 via bcftools +liftover).
+PBS reference: Bhatia G et al. (2013) Genome Research 23(9):1514–1521.*

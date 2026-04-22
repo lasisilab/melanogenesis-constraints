@@ -1,0 +1,130 @@
+gene,functional_category,disease_class,LOEUF,pLI,betweenness_centrality,mean_phylop_100way
+OCA2,Pigment-specific,Isolated pigment,0.856,0.0,0.001296,-0.0095250453602593
+DCT,Pigment-specific,Isolated pigment,1.174,0.0,0.001615,0.1510168783081803
+PMEL,Pigment-specific,Isolated pigment,1.287,0.0,0.0,0.6249052149810025
+TYRP1,Pigment-specific,Isolated pigment,1.889,0.0,0.000396,0.2652185322848748
+MLANA,Pigment-specific,Isolated pigment,1.952,0.0,0.001296,0.0872462806775878
+TYR,Pigment-specific,Isolated pigment,1.964,0.0,0.026506,0.0719845416537104
+MC1R,Pigment-specific,Isolated pigment,1.967,0.0,0.016532,-0.1148769683156468
+SOX10,Developmental/NC,Syndromic/developmental,0.209,0.99166,0.0,0.4851072774502868
+TFAP2A,Developmental/NC,Syndromic/developmental,0.261,0.98964,0.039932,1.3607229984988478
+KIT,Developmental/NC,Syndromic/developmental,0.305,0.98087,0.067583,0.1939645767268308
+MITF,Developmental/NC,Syndromic/developmental,0.308,0.98119,0.082398,0.1714319856775089
+KITLG,Developmental/NC,Syndromic/developmental,0.419,0.85024,0.061606,0.1428120720727657
+PAX3,Developmental/NC,Syndromic/developmental,0.475,0.24063,0.0,0.465088925989204
+EDNRB,Developmental/NC,Syndromic/developmental,0.593,0.009242,0.061938,0.1527182068643057
+EDN1,Developmental/NC,Syndromic/developmental,0.635,0.45504,0.047435,0.3819551988310221
+PRKCB,Generic signaling,Not classified,0.081,1.0,0.051497,-0.0086440977354746
+STAT3,Generic signaling,Syndromic/developmental,0.095,1.0,0.01151,0.1851762693850324
+PIK3CA,Generic signaling,Syndromic/developmental,0.117,1.0,0.05303,0.3977976932370433
+CTNNB1,Generic signaling,Syndromic/developmental,0.129,0.99999,0.003889,0.3546048371801698
+NFKB1,Generic signaling,Other Mendelian,0.138,1.0,0.214664,0.1185315651095948
+PRKCD,Generic signaling,Not classified,0.171,0.99995,0.061557,0.197162549773646
+MAPK1,Generic signaling,Not classified,0.175,0.99698,0.029841,0.0660999912447821
+STAT1,Generic signaling,Not classified,0.187,0.99999,0.00175,0.1995744468970488
+MAPK8,Generic signaling,Not classified,0.207,0.99823,0.026018,0.2133905596751382
+JAK1,Generic signaling,Syndromic/developmental,0.214,0.99998,0.009681,0.0850032534292967
+MAP3K1,Generic signaling,Not classified,0.214,0.99998,0.015885,0.3506494683579527
+MAP2K4,Generic signaling,Not classified,0.22,0.99709,0.002671,0.1466295477404426
+CREB1,Generic signaling,Not classified,0.223,0.99673,0.076145,0.3238287140505174
+MAP2K7,Generic signaling,Not classified,0.232,0.99552,0.004845,0.1462906907210679
+PRKG1,Generic signaling,Not classified,0.235,0.99938,0.010222,
+SRC,Generic signaling,Not classified,0.244,0.99691,0.00722,0.063500865318989
+WNT5A,Generic signaling,Syndromic/developmental,0.269,0.98732,0.0,0.6042174603232355
+ATF2,Generic signaling,Not classified,0.283,0.99131,0.0,0.376515416158824
+PDPK1,Generic signaling,Not classified,0.29,0.98013,0.026079,0.0022671588909249
+HIF1A,Generic signaling,Not classified,0.309,0.9777,0.007057,0.4148808901194917
+AKT1,Generic signaling,Other Mendelian,0.315,0.9759,0.063527,-0.5148952122487739
+PRKACA,Generic signaling,Other Mendelian,0.318,0.97142,0.035949,0.2432542889015685
+MAP2K2,Generic signaling,Other Mendelian,0.325,0.96673,0.012941,-0.2302327547193132
+GSK3B,Generic signaling,Other Mendelian,0.334,0.95571,0.002297,0.2114802315892739
+MAP3K5,Generic signaling,Not classified,0.34,0.51964,0.010876,0.1253326421154128
+ELK1,Generic signaling,Not classified,0.341,0.93711,0.005185,0.3701401681030395
+EGFR,Generic signaling,Syndromic/developmental,0.349,0.36837,0.031066,-0.1866381322617357
+RAF1,Generic signaling,Other Mendelian,0.354,0.85295,0.029684,0.1854813449308331
+MAP2K6,Generic signaling,Not classified,0.359,0.91334,0.011405,0.0672001286442734
+MAP2K1,Generic signaling,Other Mendelian,0.377,0.89669,0.012941,0.0834803878881259
+PRKCH,Generic signaling,Not classified,0.388,0.42878,0.017467,0.0965454910388742
+PRKCZ,Generic signaling,Not classified,0.4,0.541,0.04694,-0.2809755531194882
+RAC1,Generic signaling,Not classified,0.467,0.76228,0.048575,0.0849394591952173
+MAPK14,Generic signaling,Not classified,0.473,0.37466,0.023347,0.1816461359704768
+CDC42,Generic signaling,Not classified,0.501,0.78728,0.025653,0.2959128566024664
+RPS6KA1,Generic signaling,Not classified,0.515,0.001906,0.009025,0.3148053812258691
+RAP1A,Generic signaling,Not classified,0.537,0.62227,0.024072,0.176976530263844
+PAK1,Generic signaling,Not classified,0.563,0.001331,0.004659,0.2407625825485189
+USF1,Generic signaling,Not classified,0.585,0.023545,0.006395,0.72793444664239
+MAPK3,Generic signaling,Not classified,0.614,0.036884,0.029841,0.715246804309116
+FZD3,Generic signaling,Not classified,0.62,0.000436,0.001368,0.3138729318425844
+FOS,Generic signaling,Not classified,0.645,0.26176,0.036119,1.6372739243950505
+MAP2K3,Generic signaling,Not classified,0.663,0.022009,0.011405,-0.0821441575813596
+RHOA,Generic signaling,Not classified,0.664,0.60405,0.001642,0.1114266515395455
+MAP4K2,Generic signaling,Not classified,0.689,0.0,0.000284,0.2338761161845767
+HRAS,Generic signaling,Other Mendelian,0.926,0.079774,0.030908,0.0530099810703783
+JUN,Generic signaling,Not classified,1.02,0.05962,0.04388,1.2313066987977233
+TNFRSF1A,Cytokines/growth factors,Not classified,0.236,0.9949,0.079,0.0162802822497566
+HGF,Cytokines/growth factors,Syndromic/developmental,0.25,0.99947,0.0,0.255763014812472
+MET,Cytokines/growth factors,Syndromic/developmental,0.305,0.96998,0.018428,0.3588885194280024
+TNF,Cytokines/growth factors,Not classified,0.487,0.8033,0.077171,0.6708427251245038
+CSF2,Cytokines/growth factors,Not classified,0.505,0.83468,0.012213,0.2481095775724485
+IL1R1,Cytokines/growth factors,Not classified,0.506,0.15126,0.011306,-0.1070314007829326
+NGF,Cytokines/growth factors,Syndromic/developmental,0.528,0.82026,0.006879,0.1708122588968335
+NTRK1,Cytokines/growth factors,Syndromic/developmental,0.658,2e-06,0.006605,0.2333657984960884
+IL6,Cytokines/growth factors,Not classified,0.753,0.31536,0.006022,0.2873490772147761
+IL6R,Cytokines/growth factors,Not classified,0.813,3.2e-05,0.007851,-0.0875576736303749
+IL12A,Cytokines/growth factors,Not classified,0.815,0.04746,0.001582,0.1473289837834075
+IL10,Cytokines/growth factors,Not classified,1.039,0.005887,0.000821,0.2370025384130278
+IL1A,Cytokines/growth factors,Not classified,1.309,0.00016,0.009477,0.153459515497729
+IL8,Cytokines/growth factors,Not classified,1.861,0.000274,0.000821,
+CFLAR,Apoptosis/cell death,Other Mendelian,0.173,0.99967,0.000446,0.1001880220229461
+MCL1,Apoptosis/cell death,Not classified,0.29,0.96349,0.0,0.170216002333121
+BCL2L1,Apoptosis/cell death,Not classified,0.341,0.93667,0.001714,0.3023019209463023
+FAS,Apoptosis/cell death,Other Mendelian,0.441,0.8117,0.005041,-0.0277016862981053
+TP53,Apoptosis/cell death,Other Mendelian,0.469,0.53235,0.025518,0.0911534939222649
+CASP3,Apoptosis/cell death,Other Mendelian,0.686,0.10017,0.058861,0.0743548345750121
+BCL2,Apoptosis/cell death,Other Mendelian,0.712,0.55903,0.002648,0.06154434623431
+FASLG,Apoptosis/cell death,Not classified,0.716,0.18345,0.003212,0.2315679582801646
+BAX,Apoptosis/cell death,Not classified,0.751,0.31746,0.006247,0.1520618295763998
+CASP8,Apoptosis/cell death,Other Mendelian,0.811,4e-06,0.019349,0.0196882562260006
+CASP9,Apoptosis/cell death,Not classified,0.974,7e-06,0.014932,-0.0116423469117416
+DFFB,Apoptosis/cell death,Not classified,1.08,1.1e-05,0.004969,-0.0956082911920318
+DFFA,Apoptosis/cell death,Not classified,1.161,8.7e-05,0.0,0.0400526741136831
+BAK1,Apoptosis/cell death,Not classified,1.369,7e-06,0.013534,0.0585604718790925
+BAD,Apoptosis/cell death,Not classified,1.533,0.004624,0.007595,0.1296721600809808
+BBC3,Apoptosis/cell death,Not classified,1.589,0.003976,0.000238,0.1734769155554644
+PMAIP1,Apoptosis/cell death,Not classified,1.848,0.11182,0.003967,-0.1063956390770221
+BID,Apoptosis/cell death,Not classified,1.917,0.0,0.003171,-0.1603760179776268
+MSN,Other,Not classified,0.13,0.99967,0.003457,0.2444283992843793
+PPP3CA,Other,Other Mendelian,0.158,0.99988,0.001635,0.0900906974369929
+PTGS2,Other,Not classified,0.263,0.99597,0.036779,0.8810467010513635
+CDH2,Other,Not classified,0.29,0.99171,0.0,0.1497212255396769
+PTGER4,Other,Not classified,0.3,0.9755,0.013502,0.5427346016488509
+PIAS3,Other,Not classified,0.301,0.98499,0.0,0.7481349801361025
+RDX,Other,Not classified,0.348,0.85245,0.000864,0.1134704330328751
+SPTLC2,Other,Other Mendelian,0.39,0.78035,0.009789,0.139002999680906
+CCND1,Other,Not classified,0.41,0.89057,0.00252,0.5152046986220088
+GUCY1A2,Other,Not classified,0.434,0.31409,0.012109,0.0740367337304586
+GAB1,Other,Not classified,0.439,0.18433,0.035806,0.2358904828232956
+EZR,Other,Not classified,0.44,0.17989,0.000864,-0.0854262333082612
+RYR1,Other,Syndromic/developmental,0.456,0.0,0.016821,0.3063383242145782
+CDK2,Other,Not classified,0.485,0.61054,0.0,1.1489578187583225
+PTGER3,Other,Not classified,0.579,0.37217,0.015133,0.0191666904136844
+ICAM1,Other,Not classified,0.618,0.035295,0.0,-0.1538335305957016
+CDK4,Other,Not classified,0.642,0.062909,0.002808,0.6636156042576288
+NOS2,Other,Not classified,0.755,0.0,0.012598,0.148829607786052
+ADCY4,Other,Not classified,0.892,0.0,0.049397,0.5769734064058767
+F7,Other,Not classified,0.902,1.3e-05,0.0,-0.4156879050723044
+CYCS,Other,Not classified,0.914,0.63647,0.042746,0.2229839431694402
+DUSP1,Other,Not classified,0.917,0.010151,0.054703,1.3757811218021871
+F10,Other,Not classified,0.97,2e-06,0.0,0.0610227684575528
+SPTLC1,Other,Other Mendelian,0.978,0.0,0.009789,0.0592010034976418
+PTGER2,Other,Not classified,0.982,0.00749,0.013502,0.2226886336862795
+NOX1,Other,Not classified,1.064,0.0,0.023568,0.391463554864804
+SMPD1,Other,Not classified,1.085,0.0,0.016409,1.2170666629581153
+CSF2RA,Other,Not classified,1.119,0.0,0.010672,-0.1681653004979804
+GADD45A,Other,Not classified,1.131,0.044075,6e-05,0.978689753099266
+F2RL1,Other,Not classified,1.327,0.000148,0.024043,0.1778713046441436
+CDKN1A,Other,Not classified,1.375,0.001857,0.002607,0.0833861002090178
+MMP1,Other,Not classified,1.525,0.0,0.000122,0.0944890894211668
+SMPD2,Other,Not classified,1.583,0.0,0.011324,0.6955403676064158
+PTGER1,Other,Not classified,1.584,0.000973,0.015133,-0.0495820446317103
+TPSAB1,Other,Not classified,1.95,0.0,0.0,-0.7759954302219519
