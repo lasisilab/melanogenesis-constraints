@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 #SBATCH --job-name=melano_vcf_extract
-#SBATCH --account=tlasisi1
+#SBATCH --account=tlasisi0
 #SBATCH --partition=standard
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=4
-#SBATCH --mem=16G
-#SBATCH --time=12:00:00
-#SBATCH --output=/nfs/turbo/lsa-tlasisi1/tlasisi/melanosome-constraints/logs/extract_%A_%a.out
-#SBATCH --error=/nfs/turbo/lsa-tlasisi1/tlasisi/melanosome-constraints/logs/extract_%A_%a.err
-#SBATCH --array=1-22
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=8G
+#SBATCH --time=4:00:00
+#SBATCH --output=/nfs/turbo/lsa-tlasisi1/tlasisi/melanogenesis-constraints/logs/extract_%A_%a.out
+#SBATCH --error=/nfs/turbo/lsa-tlasisi1/tlasisi/melanogenesis-constraints/logs/extract_%A_%a.err
+#SBATCH --array=1-22%6
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=ypryor@umich.edu
 
 # 02_extract_vcfs.sh
 #
@@ -28,7 +30,7 @@ set -euo pipefail
 
 module load bcftools htslib
 
-BASE=/nfs/turbo/lsa-tlasisi1/tlasisi/melanosome-constraints
+BASE=/nfs/turbo/lsa-tlasisi1/tlasisi/melanogenesis-constraints
 REGIONS="${BASE}/data/gene_regions.bed"
 RAW="${BASE}/vcf/raw"
 CHR=${SLURM_ARRAY_TASK_ID}
@@ -43,7 +45,7 @@ bcftools view \
     --min-ac 1 \
     --types snps \
     --output-type z \
-    --threads 4 \
+    --threads 1 \
     --output "${RAW}/hgdp_1kgp.chr${CHR}.vcf.gz" \
     "${GNOMAD_URL}"
 
@@ -51,31 +53,31 @@ tabix -p vcf "${RAW}/hgdp_1kgp.chr${CHR}.vcf.gz"
 echo "[$(date)] gnomAD chr${CHR} done."
 
 # ─── SGDP (Melanesian populations only) ───────────────────────────────────────
-# Simons Genome Diversity Project — per-chromosome VCFs from Reich Lab
-# NOTE: SGDP is hg19 (GRCh37). You will need to liftover to hg38 before merging
-#       with gnomAD, OR liftover the gene_regions.bed to hg19 for this step.
-#       Liftover step is handled in 04_liftover_merge.sh (to be written).
-#
-# SGDP VCFs: https://sharehost.hms.harvard.edu/genetics/reich_lab/sgdp/vcf_variants/
-SGDP_URL="https://sharehost.hms.harvard.edu/genetics/reich_lab/sgdp/vcf_variants/cteam_extended.v4.PS2_phase.public.chr${CHR}.vcf.gz"
-SGDP_SAMPLES="${BASE}/data/samples_sgdp_melanesian.txt"
+# Local copy of Simons.vcf.gz (all chromosomes, hg19, chr naming: "1" not "chr1").
+# Indexed with tabix before this job runs.
+# Regions extracted using gene_regions_hg19.bed (chr prefix stripped).
+SGDP_VCF="${BASE}/data/sgdp/Simons.vcf.gz"
+SGDP_SAMPLES="${BASE}/data/samples_melanesian_sgdp.txt"
+REGIONS_HG19="${BASE}/data/gene_regions_hg19.bed"
 
-if [[ -f "${SGDP_SAMPLES}" ]]; then
-    echo "[$(date)] Extracting chr${CHR} from SGDP (Melanesian)..."
+if [[ -f "${SGDP_SAMPLES}" && -f "${SGDP_VCF}" && -f "${REGIONS_HG19}" ]]; then
+    echo "[$(date)] Extracting chr${CHR} from local SGDP (Melanesian)..."
     bcftools view \
-        --regions-file "${REGIONS}" \
+        --regions-file "${REGIONS_HG19}" \
         --samples-file "${SGDP_SAMPLES}" \
         --min-ac 1 \
         --types snps \
         --output-type z \
-        --threads 4 \
+        --threads 1 \
         --output "${RAW}/sgdp_melanesian.chr${CHR}.vcf.gz" \
-        "${SGDP_URL}"
+        "${SGDP_VCF}"
 
     tabix -p vcf "${RAW}/sgdp_melanesian.chr${CHR}.vcf.gz"
     echo "[$(date)] SGDP chr${CHR} done."
 else
-    echo "WARNING: ${SGDP_SAMPLES} not found — skipping SGDP. Run 03_make_sample_lists.py first."
+    [[ ! -f "${SGDP_VCF}" ]]      && echo "WARNING: ${SGDP_VCF} not found — skipping SGDP."
+    [[ ! -f "${SGDP_SAMPLES}" ]]  && echo "WARNING: ${SGDP_SAMPLES} not found — run 03_make_sample_lists.py."
+    [[ ! -f "${REGIONS_HG19}" ]]  && echo "WARNING: ${REGIONS_HG19} not found — run: sed 's/^chr//' gene_regions.bed > gene_regions_hg19.bed"
 fi
 
 echo "[$(date)] chr${CHR} extraction complete."

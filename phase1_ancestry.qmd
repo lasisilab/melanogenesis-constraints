@@ -287,5 +287,33 @@ else:
 
 ---
 
+## MC1R Case Study — Population-Specific Constraint Beyond LoF
+
+> **In progress** — results pending. Planned for follow-up analysis after PEQG 2026.
+
+MC1R presents an apparent paradox in this dataset: it has the **highest LOEUF (1.967)** of any gene in the network yet is expressed across **53/54 tissues** — far broader than expected for a pigment-specific gene. Ancestry-stratified LOEUF reveals that this tolerance signal is substantially stronger in Non-Finnish European populations than in African populations, consistent with the accumulation of high-frequency European functional variants (Val60Leu, Arg151Cys, Arg160Trp, Asp294His) associated with red/fair hair.
+
+However, this picture is incomplete. A substantial body of prior work documents **strong purifying selection on MC1R in African populations**, preserving ancestral "dark skin" receptor function in high-UV environments (Harding et al. 2000; Norton et al. 2007). This purifying selection is **invisible to LOEUF**, which measures only loss-of-function tolerance. Purifying selection against missense variants — which alter receptor function without abolishing it — would not be captured by LoF o/e ratios.
+
+### Why LOEUF misses this signal
+
+| Metric | What it measures | MC1R in Africans | MC1R in Europeans |
+|--------|-----------------|-----------------|------------------|
+| LOEUF | LoF tolerance | Moderate (purifying selection depletes LoF *and* missense) | High (red-hair missense variants inflate o/e) |
+| Missense Z | Missense intolerance | Expected high (purifying selection) | Expected low (functional variants tolerated) |
+| PBS | Population-specific selection | Expected elevated | Low |
+
+### Planned analysis
+
+Two complementary metrics will be used to test whether African purifying selection on MC1R is detectable:
+
+1. **Missense Z-score** (gnomAD) — depletion of missense variants genome-wide. A high missense Z in African-ancestry data would confirm that amino acid changes to MC1R are selectively removed even when LoF is tolerated in Europeans.
+
+2. **PBS (Population Branch Statistic)** — from the Phase 2 population genomics pipeline currently running on the UMich Great Lakes cluster. If MC1R shows elevated PBS in the African branch relative to the Papuan and South Asian outgroups, that is direct evidence of African-specific selection at this locus.
+
+This case study illustrates a broader limitation of whole-gene LoF constraint metrics: they collapse diverse selective pressures into a single number and may miss population-specific signatures, particularly for genes where selection acts primarily on functional missense variation rather than complete gene loss.
+
+---
+
 *Analysis script:* `analysis/phase1_gnomad_v4_ancestry.py`
 *Data source:* gnomAD v4.1 ([Karczewski et al. 2025](https://gnomad.broadinstitute.org))

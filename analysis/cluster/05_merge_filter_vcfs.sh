@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 #SBATCH --job-name=melano_merge
-#SBATCH --account=tlasisi1
+#SBATCH --account=tlasisi0
 #SBATCH --partition=standard
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=4
-#SBATCH --mem=32G
-#SBATCH --time=6:00:00
-#SBATCH --output=/nfs/turbo/lsa-tlasisi1/tlasisi/melanosome-constraints/logs/merge_%A_%a.out
-#SBATCH --error=/nfs/turbo/lsa-tlasisi1/tlasisi/melanosome-constraints/logs/merge_%A_%a.err
-#SBATCH --array=1-22
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=16G
+#SBATCH --time=2:00:00
+#SBATCH --output=/nfs/turbo/lsa-tlasisi1/tlasisi/melanogenesis-constraints/logs/merge_%A_%a.out
+#SBATCH --error=/nfs/turbo/lsa-tlasisi1/tlasisi/melanogenesis-constraints/logs/merge_%A_%a.err
+#SBATCH --array=1-22%6
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=ypryor@umich.edu
 
 # 05_merge_filter_vcfs.sh
 #
@@ -30,9 +32,9 @@
 
 set -euo pipefail
 
-module load bcftools htslib
+module load Bioinformatics bcftools/1.21 htslib
 
-BASE=/nfs/turbo/lsa-tlasisi1/tlasisi/melanosome-constraints
+BASE=/nfs/turbo/lsa-tlasisi1/tlasisi/melanogenesis-constraints
 RAW="${BASE}/vcf/raw"
 LIFTED="${BASE}/vcf/lifted"
 FILTERED="${BASE}/vcf/filtered"
@@ -48,6 +50,7 @@ MELANESIAN_HGDP="${DATA}/samples_melanesian_hgdp.txt"
 MELANESIAN_SGDP="${DATA}/samples_melanesian_sgdp.txt"
 EAST_ASIAN="${DATA}/samples_eastasian.txt"
 SOUTH_ASIAN="${DATA}/samples_southasian.txt"
+EUROPEAN="${DATA}/samples_european.txt"
 
 GNOMAD_VCF="${RAW}/hgdp_1kgp.chr${CHR}.vcf.gz"
 SGDP_VCF="${LIFTED}/sgdp_melanesian.chr${CHR}.hg38.vcf.gz"
@@ -61,7 +64,7 @@ if [[ -f "${SGDP_VCF}" ]]; then
     bcftools merge \
         --merge snps \
         --output-type z \
-        --threads 4 \
+        --threads 2 \
         --output "${MERGED}" \
         "${GNOMAD_VCF}" \
         "${SGDP_VCF}"
@@ -107,6 +110,7 @@ declare -A POP_FILES=(
     ["melanesian"]="${MELANESIAN_HGDP}"   # HGDP; SGDP added below
     ["eastasian"]="${EAST_ASIAN}"
     ["southasian"]="${SOUTH_ASIAN}"
+    ["european"]="${EUROPEAN}"
 )
 
 for POP in "${!POP_FILES[@]}"; do

@@ -1,15 +1,17 @@
 # Cluster Resource Request: Melanogenesis Constraint Population Analysis
 **Prepared by:** Yemko Pryor  
 **Date:** 2026-04-07  
-**Location:** `/nfs/turbo/lsa-tlasisi1/tlasisi/melanosome-constraints/`
+**Location:** `/nfs/turbo/lsa-tlasisi1/tlasisi/melanogenesis-constraints/`
 
 ---
 
 ## What this analysis does
 
-We are running selection scans and nucleotide diversity analyses across **128 melanogenesis network genes** in African and Melanesian populations, using East and South Asian populations as outgroups for FST/PBS comparisons. This is the population genomics component of the PEQG 2026 poster.
+We are computing nucleotide diversity (π) and the Population Branch Statistic (PBS) across **128 melanogenesis network genes** in African and Melanesian populations, using East and South Asian populations as outgroups. This is the population genomics component of the PEQG 2026 poster.
 
 The key design choice is **targeted extraction**: instead of downloading full genome VCFs, we use remote tabix-indexed access to stream only our 128 gene regions (gene body ± 10 kb flanking = **13.4 Mb of sequence**) directly from cloud storage. This keeps storage requirements very low.
+
+> **Scope note:** iHS (integrated haplotype score) requires phased whole-chromosome data and a genome-wide normalization baseline, making it incompatible with targeted extraction. iHS is **out of scope for PEQG 2026** and deferred to future work. The PEQG poster deliverables are π and PBS only.
 
 ---
 
@@ -27,13 +29,24 @@ The key design choice is **targeted extraction**: instead of downloading full ge
 | **Target: African** | 1KGP | YRI, LWK, ESN, GWD, MSL | ~405 |
 | **Target: African** | HGDP | Yoruba, Mandenka | ~43 |
 | *Excluded* | 1KGP | ASW, ACB (admixed) | — |
-| **Target: Melanesian** | HGDP | Papuan, Bougainville | ~37 |
-| **Target: Melanesian** | SGDP | Papuan populations | ~83 |
-| **Outgroup: East Asian** | 1KGP + HGDP | CHB, JPT, CHS, CDX, KHV, Han, Japanese | ~572 |
-| **Outgroup: South Asian** | 1KGP + HGDP | GIH, PJL, BEB, STU, ITU, Balochi, etc. | ~604 |
-| **Total study samples** | | | **~1,744** |
+| **Target: Melanesian** | HGDP | PapuanHighlands, PapuanSepik, Bougainville | ~30 |
+| **Target: Melanesian** | SGDP | Papuan populations | ~15 |
+| **Outgroup: South Asian** | 1KGP + HGDP | GIH, PJL, BEB, STU, ITU, Balochi, etc. | ~790 |
+| **Outgroup: European** | 1KGP | CEU, TSI, FIN, GBR, IBS | ~? |
+| **Outgroup: European** | HGDP | French, Sardinian, Basque, Orcadian, etc. | ~? |
+| **Outgroup: East Asian** | 1KGP + HGDP | CHB, JPT, CHS, CDX, KHV, Han, Japanese | ~718 |
+| **Total study samples** | | | **~2,285+** |
 
-*Note: Europeans excluded from PBS comparisons. East and South Asian outgroups allow more informative three-population FST calculations.*
+*Note: East Asian samples are retained in the dataset but are not used in the four primary PBS comparisons.*
+
+### PBS scan design (approved by T. Lasisi)
+
+| Scan | Target | Outgroup | Distant outgroup |
+|------|--------|----------|-----------------|
+| PBS-1 | African | South Asian | Papuan |
+| PBS-2 | African | European | Papuan |
+| PBS-3 | Papuan | South Asian | African |
+| PBS-4 | Papuan | European | African |
 
 ---
 
@@ -53,7 +66,7 @@ The key design choice is **targeted extraction**: instead of downloading full ge
 | Chain file (hg19→hg38) | UCSC download, needed once | ~100 MB |
 | **Merged + filtered study VCFs** | ~1,744 samples, biallelic SNPs only | **~300–500 MB** |
 | Per-population subset VCFs | African, Melanesian, E.Asian, S.Asian | ~200–400 MB |
-| Analysis outputs (π, PBS, iHS) | Per-gene summary tables and figures | ~50–100 MB |
+| Analysis outputs (π, PBS) | Per-gene summary tables and figures | ~50–100 MB |
 | SLURM logs | stdout/stderr for all jobs | ~10 MB |
 | **Total** | | **~1.0–1.7 GB** |
 
@@ -90,21 +103,23 @@ The pipeline runs as SLURM array jobs (chr1–22 in parallel). All jobs run on a
 
 ### Per-job resource requirements
 
-| Script | CPUs | Memory | Wall time / job |
-|--------|------|--------|----------------|
-| `02_extract_vcfs.sh` (stream + extract) | 4 | 16 GB | 1–2 hr |
-| `04_liftover_sgdp.sh` (CrossMap) | 4 | 16 GB | 30–60 min |
-| `05_merge_filter_vcfs.sh` (merge + filter) | 4 | 32 GB | 30–60 min |
+| Script | CPUs | Memory | Wall time / job | Concurrency |
+|--------|------|--------|----------------|-------------|
+| `02_extract_vcfs.sh` (stream + extract) | 1 | 8 GB | ~1–4 hr | 4 at a time |
+| `04_liftover_sgdp.sh` (CrossMap) | 1 | 8 GB | ~15–30 min | 4 at a time |
+| `05_merge_filter_vcfs.sh` (merge + filter) | 1 | 16 GB | ~15–30 min | 4 at a time |
+| `06_concat_vcfs.sh` (concatenate per population) | 1 | 8 GB | ~15 min | single job |
 
 ### Total compute
 
-| Stage | Jobs | CPU-hours | Wall time (parallel) |
-|-------|------|-----------|---------------------|
-| Extract gnomAD + SGDP | 22 array jobs | ~44–88 | ~2 hr |
-| Liftover SGDP | 22 array jobs | ~22–44 | ~1 hr |
-| Merge + filter | 22 array jobs | ~22–44 | ~1 hr |
-| π / PBS / iHS analysis | 1–3 jobs | ~10–20 | ~4–8 hr |
-| **Total** | | **~100–200 CPU-hours** | **~8–12 hr wall time** |
+| Stage | Jobs | CPU-hours | Wall time (sequential batches) |
+|-------|------|-----------|-------------------------------|
+| Extract gnomAD + SGDP | 22 array jobs (%4) | ~22–88 | ~3–9 hr |
+| Liftover SGDP | 22 array jobs (%4) | ~6–11 | ~30–60 min |
+| Merge + filter | 22 array jobs (%4) | ~6–11 | ~1–2 hr |
+| Concatenate per population | 1 job | ~1 | ~15 min |
+| π / PBS analysis | 1–2 jobs | ~5–10 | ~2–4 hr |
+| **Total** | | **~40–125 CPU-hours** | **~7–16 hr wall time** |
 
 > **Note:** The extraction step (`02_extract_vcfs.sh`) dominates wall time because it streams from remote HTTP. Actual CPU utilization is low during network I/O — the jobs are mostly waiting on data transfer, not computing. A faster network partition (if available) would reduce this substantially.
 
@@ -118,10 +133,19 @@ Step 2  python 03_make_sample_lists.py  # download metadata, write sample files 
 Step 3  sbatch 02_extract_vcfs.sh       # array: extract gene regions from gnomAD + SGDP
 Step 4  sbatch 04_liftover_sgdp.sh      # array: liftover SGDP hg19 → hg38
 Step 5  sbatch 05_merge_filter_vcfs.sh  # array: merge datasets, filter to study samples
-Step 6  [downstream] compute π, PBS, iHS per gene per population
+Step 6  sbatch 06_concat_vcfs.sh        # concatenate per-chromosome VCFs into per-population files
+Step 7  [downstream] compute π and PBS per gene per population
 ```
 
-Steps 3–5 depend on each other and must run in order. Steps 3 and 4 can be submitted together using SLURM job dependencies (`--dependency=afterok`).
+Steps 3–6 depend on each other and must run in order. Submit as a dependency chain:
+
+```bash
+JOB1=$(sbatch --parsable analysis/cluster/02_extract_vcfs.sh)
+JOB2=$(sbatch --parsable --dependency=afterok:$JOB1 analysis/cluster/04_liftover_sgdp.sh)
+JOB3=$(sbatch --parsable --dependency=afterok:$JOB2 analysis/cluster/05_merge_filter_vcfs.sh)
+JOB4=$(sbatch --parsable --dependency=afterok:$JOB3 analysis/cluster/06_concat_vcfs.sh)
+echo "Chain: $JOB1 → $JOB2 → $JOB3 → $JOB4"
+```
 
 ---
 
@@ -130,8 +154,8 @@ Steps 3–5 depend on each other and must run in order. Steps 3 and 4 can be sub
 | Decision | Recommendation | Status |
 |----------|---------------|--------|
 | Gene region flanking | ±10 kb (currently set) | Confirm with Tina |
-| iHS on poster vs. "in progress" | Mark as in progress if time is short | Open |
-| hg38 reference FASTA location | Check cluster first | Open |
+| iHS | Out of scope for PEQG 2026 — deferred to future work | **Decided** |
+| hg38 reference FASTA | Downloaded and indexed at `data/reference/hg38.fa` | **Done** |
 
 ---
 

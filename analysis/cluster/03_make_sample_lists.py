@@ -18,7 +18,7 @@ Outputs (all in BASE/data/):
 
 Usage:
     python analysis/cluster/03_make_sample_lists.py \
-        --base /nfs/turbo/lsa-tlasisi1/tlasisi/melanosome-constraints
+        --base /nfs/turbo/lsa-tlasisi1/tlasisi/melanogenesis-constraints
 """
 
 import argparse
@@ -28,7 +28,7 @@ import requests
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--base",
-                    default="/nfs/turbo/lsa-tlasisi1/tlasisi/melanosome-constraints",
+                    default="/nfs/turbo/lsa-tlasisi1/tlasisi/melanogenesis-constraints",
                     help="Cluster working directory")
 args = parser.parse_args()
 
@@ -37,8 +37,8 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 # ─── gnomAD HGDP+1KGP sample metadata ────────────────────────────────────────
 META_URL = ("https://storage.googleapis.com/gcp-public-data--gnomad/"
-            "release/3.1/secondary_analyses/hgdp_1kg/"
-            "gnomad.hgdp_1kg.sample_qc_metadata.tsv")
+            "release/3.1/secondary_analyses/hgdp_1kg_v2/metadata_and_qc/"
+            "gnomad_meta_updated.tsv")
 
 print("Downloading gnomAD HGDP+1KGP sample metadata...")
 meta_path = os.path.join(OUT_DIR, "gnomad_hgdp_1kg_metadata.tsv")
@@ -86,14 +86,17 @@ AFRICAN_1KGP     = {"YRI", "LWK", "ESN", "GWD", "MSL"}          # keep
 ADMIXED_EXCLUDE  = {"ASW", "ACB"}                                  # exclude (admixed)
 EAST_ASIAN_1KGP  = {"CHB", "JPT", "CHS", "CDX", "KHV"}
 SOUTH_ASIAN_1KGP = {"GIH", "PJL", "BEB", "STU", "ITU"}
+EUROPEAN_1KGP    = {"CEU", "TSI", "FIN", "GBR", "IBS"}
 
 # HGDP population labels (check against your metadata)
 AFRICAN_HGDP     = {"Yoruba", "Mandenka"}
-MELANESIAN_HGDP  = {"Papuan", "Bougainville"}
+MELANESIAN_HGDP  = {"Papuan", "PapuanHighlands", "PapuanSepik", "Bougainville"}
 EAST_ASIAN_HGDP  = {"Han", "Japanese", "She", "Tujia", "Naxi", "Lahu", "Dai",
                      "Cambodians", "Yakut"}
 SOUTH_ASIAN_HGDP = {"Balochi", "Brahui", "Makrani", "Pathan", "Sindhi",
                      "Burusho", "Hazara", "Kalash"}
+EUROPEAN_HGDP    = {"French", "Sardinian", "Basque", "Orcadian", "BergamoItalian",
+                     "Tuscan", "Russian", "Adygei"}
 
 pops = meta[pop_col].fillna("")
 
@@ -101,6 +104,7 @@ african     = meta[pops.isin(AFRICAN_1KGP | AFRICAN_HGDP)][sample_col]
 melanesian  = meta[pops.isin(MELANESIAN_HGDP)][sample_col]
 east_asian  = meta[pops.isin(EAST_ASIAN_1KGP | EAST_ASIAN_HGDP)][sample_col]
 south_asian = meta[pops.isin(SOUTH_ASIAN_1KGP | SOUTH_ASIAN_HGDP)][sample_col]
+european    = meta[pops.isin(EUROPEAN_1KGP | EUROPEAN_HGDP)][sample_col]
 excluded    = meta[pops.isin(ADMIXED_EXCLUDE)][sample_col]
 
 print(f"\nSample counts:")
@@ -108,6 +112,7 @@ print(f"  African (1KGP + HGDP, excl. admixed): {len(african)}")
 print(f"  Melanesian (HGDP only):               {len(melanesian)}")
 print(f"  East Asian (1KGP + HGDP):             {len(east_asian)}")
 print(f"  South Asian (1KGP + HGDP):            {len(south_asian)}")
+print(f"  European (1KGP + HGDP):               {len(european)}")
 print(f"  Excluded (ASW + ACB):                  {len(excluded)}")
 
 def write_list(samples, path):
@@ -119,54 +124,30 @@ write_list(african,     os.path.join(OUT_DIR, "samples_african.txt"))
 write_list(melanesian,  os.path.join(OUT_DIR, "samples_melanesian_hgdp.txt"))
 write_list(east_asian,  os.path.join(OUT_DIR, "samples_eastasian.txt"))
 write_list(south_asian, os.path.join(OUT_DIR, "samples_southasian.txt"))
+write_list(european,    os.path.join(OUT_DIR, "samples_european.txt"))
 write_list(excluded,    os.path.join(OUT_DIR, "samples_exclude.txt"))
 
-all_keep = pd.concat([african, melanesian, east_asian, south_asian]).drop_duplicates()
-write_list(all_keep,    os.path.join(OUT_DIR, "samples_all_keep.txt"))
-
 # ─── SGDP Melanesian samples ──────────────────────────────────────────────────
-# SGDP metadata from: https://reichdata.hms.harvard.edu/pub/datasets/sgdp/
-# Papuan populations in SGDP: "Papuan" entries (various subgroups)
-# The SGDP VCF uses sample IDs of the form: S_<population>-<N>
-# Manually curated list of Papuan-group populations in SGDP:
+# Sample IDs confirmed directly from Simons.vcf.gz (data/sgdp/Simons.vcf.gz).
+# 14 × S_Papuan, 1 × B_Papuan-15, 2 × S_Bougainville = 17 total.
+# NOTE: must be defined BEFORE all_keep so SGDP samples are included.
 
-SGDP_PAPUAN_POPS = [
-    "Papuan",
-    "New_Guinea",
+SGDP_MELANESIAN_SAMPLES = [
+    "S_Papuan-1",  "S_Papuan-2",  "S_Papuan-3",  "S_Papuan-4",
+    "S_Papuan-5",  "S_Papuan-6",  "S_Papuan-7",  "S_Papuan-8",
+    "S_Papuan-9",  "S_Papuan-10", "S_Papuan-11", "S_Papuan-12",
+    "S_Papuan-13", "S_Papuan-14",
+    "B_Papuan-15",
+    "S_Bougainville-1", "S_Bougainville-2",
 ]
 
-SGDP_META_URL = ("https://sharehost.hms.harvard.edu/genetics/reich_lab/sgdp/"
-                 "SGDP_metadata.279public.21signedLetter.samples.txt")
+sgdp_melanesian = pd.Series(SGDP_MELANESIAN_SAMPLES)
+print(f"\n  SGDP Melanesian (Papuan + Bougainville): {len(sgdp_melanesian)} samples")
+write_list(sgdp_melanesian, os.path.join(OUT_DIR, "samples_melanesian_sgdp.txt"))
 
-sgdp_meta_path = os.path.join(OUT_DIR, "sgdp_metadata.txt")
-if not os.path.exists(sgdp_meta_path):
-    try:
-        print("\nDownloading SGDP metadata...")
-        r = requests.get(SGDP_META_URL, timeout=30)
-        r.raise_for_status()
-        with open(sgdp_meta_path, "wb") as f:
-            f.write(r.content)
-        print(f"  Saved → {sgdp_meta_path}")
-    except Exception as e:
-        print(f"  WARNING: Could not download SGDP metadata: {e}")
-        print("  Download manually from: https://sharehost.hms.harvard.edu/genetics/reich_lab/sgdp/")
-        sgdp_meta_path = None
-
-if sgdp_meta_path and os.path.exists(sgdp_meta_path):
-    sgdp = pd.read_csv(sgdp_meta_path, sep="\t", low_memory=False)
-    print("SGDP columns:", list(sgdp.columns[:10]))
-    # Column may be 'SGDP-Population ID', 'Population', etc.
-    # Filter for Papuan-group populations
-    for col in ["Population ID", "SGDP-Population ID", "Population", "population"]:
-        if col in sgdp.columns:
-            papuan_mask = sgdp[col].str.contains(
-                "|".join(SGDP_PAPUAN_POPS), case=False, na=False)
-            sgdp_sample_col = [c for c in ["Sample ID", "SGDP-ID", "sample_id"]
-                                if c in sgdp.columns][0]
-            sgdp_melanesian = sgdp.loc[papuan_mask, sgdp_sample_col]
-            print(f"  SGDP Melanesian (Papuan): {len(sgdp_melanesian)} samples")
-            write_list(sgdp_melanesian,
-                       os.path.join(OUT_DIR, "samples_melanesian_sgdp.txt"))
-            break
+# all_keep includes SGDP so 05_merge_filter_vcfs.sh doesn't silently drop them
+all_keep = pd.concat([african, melanesian, sgdp_melanesian,
+                      east_asian, south_asian, european]).drop_duplicates()
+write_list(all_keep,    os.path.join(OUT_DIR, "samples_all_keep.txt"))
 
 print("\nDone. Copy data/ directory to the cluster before running 02_extract_vcfs.sh.")

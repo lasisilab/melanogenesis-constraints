@@ -11,10 +11,36 @@ This site documents the analysis pipeline for the PEQG 2026 poster:
 We test whether a gene's position in the melanogenesis signaling network predicts
 its evolutionary constraint — combining LoF intolerance (LOEUF), phylogenetic
 conservation (PhyloP), tissue expression breadth (GTEx), and population genomics
-(nucleotide diversity π, PBS, iHS) across African and Melanesian populations.
+(nucleotide diversity π, PBS) across 5 populations.
 
-**Gene sets:** Raghunath et al. 2015 (134 network genes), Baxter et al. 2018
-(635 pigmentation genes), Bajpai et al. 2023 CRISPR screen (169 hits).
+**Gene set:** Raghunath et al. 2015 — 129-gene melanocyte signaling network,
+classified into 6 functional categories.
+
+---
+
+## Analysis phases
+
+| Phase | Analysis | Status |
+|---|---|---|
+| [Phase 0](phase0.qmd) | Network position (betweenness centrality) + KEGG pathway connectivity vs. LOEUF | ✓ Complete |
+| [Phase 1](phase1.qmd) | PhyloP conservation + GTEx tissue expression breadth vs. LOEUF | ✓ Complete |
+| [Phase 1.3](phase1_ancestry.qmd) | gnomAD v4 ancestry-stratified LOEUF (NFE, AFR, EAS, SAS, ASJ) | ✓ Complete |
+| [Phase 2](phase2.qmd) | Population genomics: π and PBS across African, Melanesian, South Asian, East Asian, European | ✓ Complete |
+
+---
+
+## Key findings
+
+- **Pigment-specific genes are significantly more LoF-tolerant** than generic signaling genes
+  (Kruskal-Wallis p = 1.70×10⁻⁸), consistent with the recessive biology hypothesis —
+  heterozygous LoF carries no fitness penalty.
+- The tolerance ordering is **preserved across ancestry groups** (NFE/AFR LOEUF concordant),
+  ruling out European ascertainment bias as the sole driver.
+- **Tissue expression breadth strongly predicts constraint** (Spearman ρ > 0, p < 0.001):
+  broadly expressed genes are more LoF-intolerant regardless of pigmentation function.
+- **MC1R paradox:** highest LOEUF (1.967) in the network yet expressed in 53/54 tissues;
+  African PBS elevated (84–87th percentile within network) despite high π — consistent
+  with African purifying selection acting on *missense* variants, invisible to LoF metrics.
 
 ---
 
