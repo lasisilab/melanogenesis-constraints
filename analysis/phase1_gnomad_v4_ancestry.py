@@ -467,7 +467,7 @@ ax.legend(handles=[eur_patch, noneur_patch], fontsize=12,
 ax.set_xticks(cat_centers)
 ax.set_xticklabels([CATEGORY_SHORT[c] for c in CATEGORY_ORDER],
                    fontsize=12, rotation=30, ha='right')
-ax.set_ylabel('LOEUF (lower = more constrained)', fontsize=16)
+ax.set_ylabel('LOEUF (higher = less constrained)', fontsize=16)
 ax.set_title('LOEUF by functional category:\nEuropean vs non-European', fontsize=16,
              fontweight='bold', loc='left', pad=10)
 ax.tick_params(labelsize=13)

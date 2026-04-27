@@ -148,7 +148,7 @@ ax.text(0.98, -0.20, f'Spearman ρ = {rho:.3f},  p = {pval:.2e}',
                   edgecolor='gray', alpha=0.9))
 
 ax.set_xlabel('Mean PhyloP 100-way\n(higher = more conserved)', fontsize=16)
-ax.set_ylabel('LOEUF (lower = more constrained)', fontsize=16)
+ax.set_ylabel('LOEUF (higher = less constrained)', fontsize=16)
 ax.set_title('Evolutionary conservation vs.\nLoF intolerance', fontsize=16,
              fontweight='bold', loc='left', pad=10)
 ax.legend(fontsize=11, loc='upper center', bbox_to_anchor=(0.5, -0.32),

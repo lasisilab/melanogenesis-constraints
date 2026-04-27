@@ -93,7 +93,7 @@ are labelled.
 functional niche and are expected to be under stronger constraint.
 
 **Panel C** — LOEUF distributions by functional category (boxplot). Median
-shown as a white open circle. Brackets mark Bonferroni-corrected significant
+shown as a black line. Brackets mark Bonferroni-corrected significant
 pairs from Dunn's posthoc test. This is the primary finding panel: pigment-
 specific genes are significantly more LoF-tolerant than generic signaling genes.
 

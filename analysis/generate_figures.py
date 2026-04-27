@@ -305,7 +305,7 @@ def plot_boxplot_with_pairwise(ax, plot_df, title):
     ax.set_xticklabels(
         [CATEGORY_SHORT_LABELS[c] for c in CATEGORY_ORDER],
         fontsize=16, rotation=35, ha='right')
-    ax.set_ylabel('LOEUF (lower = more constrained)', fontsize=20)
+    ax.set_ylabel('LOEUF (higher = less constrained)', fontsize=20)
     ax.set_title(title, fontsize=19, fontweight='bold', loc='left', pad=14)
     ax.tick_params(labelsize=18)
     ax.set_ylim(YLIM)
@@ -323,7 +323,7 @@ aim1_labels = (PIGMENTATION_ENZYMES | MELANOCYTE_REGULATORY
                | {'NFKB1', 'AKT1', 'KIT'})
 plot_scatter(axes[0], 'BetweennessCentrality', 'LOEUF', df,
              'Betweenness centrality\n(within-pathway integration)',
-             'LOEUF (lower = more constrained)',
+             'LOEUF (higher = less constrained)',
              'Network position vs. evolutionary constraint',
              aim1_labels, legend_loc='upper right')
 axes[0].text(-0.08, 1.10, 'A', transform=axes[0].transAxes,
@@ -338,7 +338,7 @@ aim2_labels = (pigment_in_kegg | regulatory_in_kegg
                | {'NFKB1', 'AKT1', 'MAPK1'})
 plot_scatter(axes[1], 'n_kegg_pathways', 'LOEUF', df_kegg,
              'Number of KEGG pathways\n(cross-system connectivity)',
-             'LOEUF (lower = more constrained)',
+             'LOEUF (higher = less constrained)',
              'Pathway involvement vs. evolutionary constraint',
              aim2_labels, legend_loc='upper right')
 axes[1].text(-0.08, 1.10, 'B', transform=axes[1].transAxes,

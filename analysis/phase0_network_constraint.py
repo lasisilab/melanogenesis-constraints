@@ -205,7 +205,7 @@ def scatter_panel(ax, data, x_col, rho, pval, xlabel, title, panel_letter,
     if x_label_note:
         x_full += f'\n{x_label_note}'
     ax.set_xlabel(x_full, fontsize=12)
-    ax.set_ylabel('LOEUF (lower = more constrained)', fontsize=12)
+    ax.set_ylabel('LOEUF (higher = less constrained)', fontsize=12)
     ax.set_title(title, fontsize=13, fontweight='bold', loc='left', pad=8)
     ax.tick_params(labelsize=11)
     ax.text(-0.10, 1.06, panel_letter, transform=ax.transAxes, fontsize=20,
@@ -223,13 +223,14 @@ def loeuf_boxplot_panel(ax, data, dunn, kw_p, title, panel_letter):
 
     positions = list(range(len(CATEGORY_ORDER)))
 
-    # Draw boxplot (no default median line — we replace it with a white circle)
+    # Draw boxplot with black median line
     bp = ax.boxplot(bp_data, positions=positions, widths=0.58,
                     patch_artist=True, showfliers=False,
                     zorder=2,
                     whiskerprops=dict(color='#666666', linewidth=1.2),
                     capprops=dict(color='#666666', linewidth=1.2),
-                    boxprops=dict(linewidth=1.0))
+                    boxprops=dict(linewidth=1.0),
+                    medianprops=dict(color='black', linewidth=1.5))
     for patch, color in zip(bp['boxes'], colors):
         patch.set_facecolor(color)
         patch.set_alpha(0.80)
@@ -245,13 +246,6 @@ def loeuf_boxplot_panel(ax, data, dunn, kw_p, title, panel_letter):
                    c='white', s=22, alpha=0.75,
                    edgecolors=CATEGORY_COLORS[cat], linewidths=0.7, zorder=3)
 
-    # Median as white open circle
-    for i, vals in enumerate(bp_data):
-        if len(vals) == 0:
-            continue
-        ax.scatter([i], [np.median(vals)],
-                   marker='o', c='white', s=55, zorder=5,
-                   edgecolors='black', linewidths=1.2)
 
     # n= labels below boxes
     all_vals = [v for vals in bp_data for v in vals]
@@ -296,7 +290,7 @@ def loeuf_boxplot_panel(ax, data, dunn, kw_p, title, panel_letter):
     ax.set_xticks(positions)
     ax.set_xticklabels([CATEGORY_SHORT[c] for c in CATEGORY_ORDER],
                        fontsize=10.5, rotation=30, ha='right')
-    ax.set_ylabel('LOEUF (lower = more constrained)', fontsize=12)
+    ax.set_ylabel('LOEUF (higher = less constrained)', fontsize=12)
     ax.set_title(title, fontsize=13, fontweight='bold', loc='left', pad=8)
     ax.tick_params(labelsize=11)
     ax.text(-0.10, 1.06, panel_letter, transform=ax.transAxes, fontsize=20,
