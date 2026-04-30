@@ -106,20 +106,27 @@ print(f"  Median breadth (all {len(breadth_df)} genes): "
 
 # ── Step 3: Merge with LOEUF network data ─────────────────────────────────
 print("\nMerging with LOEUF network data...")
-loeuf = pd.read_excel(LOEUF_FILE, sheet_name='All Genes by Category')
-loeuf.columns = ['gene', 'functional_category', 'disease_class',
-                  'LOEUF', 'pLI', 'betweenness_centrality']
-loeuf['gene'] = loeuf['gene'].str.upper()
+if os.path.exists(OUT_CSV):
+    print(f"Loading existing merged data from {OUT_CSV}...")
+    df = pd.read_csv(OUT_CSV)
+elif os.path.exists(LOEUF_FILE):
+    loeuf = pd.read_excel(LOEUF_FILE, sheet_name='All Genes by Category')
+    loeuf.columns = ['gene', 'functional_category', 'disease_class',
+                      'LOEUF', 'pLI', 'betweenness_centrality']
+    loeuf['gene'] = loeuf['gene'].str.upper()
 
-df = loeuf.merge(breadth_df[['gene', 'tissue_breadth', 'max_tpm', 'median_tpm_all']],
-                 on='gene', how='left')
-n_missing = df['tissue_breadth'].isna().sum()
-print(f"  {len(df)} network genes, {n_missing} without GTEx data")
-if n_missing > 0:
-    print("  Missing:", df.loc[df['tissue_breadth'].isna(), 'gene'].tolist())
+    df = loeuf.merge(breadth_df[['gene', 'tissue_breadth', 'max_tpm', 'median_tpm_all']],
+                     on='gene', how='left')
+    n_missing = df['tissue_breadth'].isna().sum()
+    print(f"  {len(df)} network genes, {n_missing} without GTEx data")
+    if n_missing > 0:
+        print("  Missing:", df.loc[df['tissue_breadth'].isna(), 'gene'].tolist())
 
-df.to_csv(OUT_CSV, index=False)
-print(f"Merged data saved → {OUT_CSV}")
+    df.to_csv(OUT_CSV, index=False)
+    print(f"Merged data saved → {OUT_CSV}")
+else:
+    print(f"ERROR: Cannot find {LOEUF_FILE} or {OUT_CSV}")
+    sys.exit(1)
 
 # ── Step 4: Statistics ─────────────────────────────────────────────────────
 df_clean = df.dropna(subset=['tissue_breadth', 'LOEUF'])
@@ -219,7 +226,7 @@ ax.text(0.98, -0.20, f'Spearman ρ = {rho:.3f},  p = {pval:.2e}',
                   edgecolor='gray', alpha=0.9))
 
 ax.set_xlabel(f'Tissue breadth (# tissues with TPM > {TPM_THRESHOLD:.0f})', fontsize=16)
-ax.set_ylabel('LOEUF (lower = more constrained)', fontsize=16)
+ax.set_ylabel('LOEUF (higher = less constrained)', fontsize=16)
 ax.set_title('Tissue expression breadth vs.\nLoF intolerance', fontsize=16,
              fontweight='bold', loc='left', pad=10)
 ax.legend(fontsize=11, loc='upper center', bbox_to_anchor=(0.5, -0.32),

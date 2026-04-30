@@ -7,15 +7,15 @@ website:
   title: "Melanogenesis Constraints"
   navbar:
     left:
-      - href: site/index.qmd
+      - href: index.html
         text: Overview
-      - href: site/phase0.qmd
+      - href: phase0.html
         text: Phase 0 — Network & KEGG
-      - href: site/phase1.qmd
+      - href: phase1.html
         text: Phase 1 — Conservation & Expression
-      - href: site/phase1_ancestry.qmd
+      - href: phase1_ancestry.html
         text: Phase 1.3 — Ancestry LOEUF
-      - href: site/phase2.qmd
+      - href: phase2.html
         text: Phase 2 — Population Genomics
 
 format:
