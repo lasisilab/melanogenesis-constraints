@@ -60,7 +60,7 @@ import scikit_posthocs as sp
 import warnings
 warnings.filterwarnings('ignore')
 
-loeuf = pd.read_excel('../data/LOEUF_by_functional_category.xlsx',
+loeuf = pd.read_excel('data/LOEUF_by_functional_category.xlsx',
                       sheet_name='All Genes by Category')
 loeuf.columns = ['gene', 'functional_category', 'disease_class',
                   'LOEUF', 'pLI', 'betweenness_centrality']

@@ -37,10 +37,15 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 # ── Load and merge ─────────────────────────────────────────────────────────
 print("Loading LOEUF network data...")
-loeuf = pd.read_excel(LOEUF_FILE, sheet_name='All Genes by Category')
-loeuf.columns = ['gene', 'functional_category', 'disease_class',
-                  'LOEUF', 'pLI', 'betweenness_centrality']
-loeuf['gene'] = loeuf['gene'].str.upper()
+if os.path.exists(LOEUF_FILE):
+    loeuf = pd.read_excel(LOEUF_FILE, sheet_name='All Genes by Category')
+    loeuf.columns = ['gene', 'functional_category', 'disease_class',
+                      'LOEUF', 'pLI', 'betweenness_centrality']
+    loeuf['gene'] = loeuf['gene'].str.upper()
+else:
+    # Load from phase0 output if Excel file missing
+    phase0_csv = os.path.join(PROJECT_DIR, 'data', 'network_constraint_gtex.csv')
+    loeuf = pd.read_csv(phase0_csv)[['gene', 'functional_category', 'LOEUF', 'betweenness_centrality']]
 
 print("Loading PhyloP scores...")
 phylop = pd.read_csv(PHYLOP_FILE)[['gene', 'mean_phylop_100way']]

@@ -1,7 +1,7 @@
 project:
   type: website
   render:
-    - "site/*.qmd"
+    - "*.qmd"
 
 website:
   title: "Melanogenesis Constraints"

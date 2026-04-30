@@ -30,7 +30,7 @@ from scipy import stats
 import warnings
 warnings.filterwarnings('ignore')
 
-phylop = pd.read_csv('../data/network_constraint_phylop.csv')
+phylop = pd.read_csv('data/network_constraint_phylop.csv')
 df = phylop.dropna(subset=['mean_phylop_100way', 'LOEUF'])
 
 rho, pval = stats.spearmanr(df['mean_phylop_100way'], df['LOEUF'])
@@ -50,7 +50,7 @@ consistent with both metrics capturing evolutionary constraint. The Kruskal-Wall
 across functional categories is significant (p = `{python} f"{kw_p:.3e}"`), with
 Developmental/NC genes most conserved and Pigment-specific genes least conserved.
 
-![PhyloP conservation vs. LOEUF and by functional category](../output/figure_phase1_phylop.png){width=100%}
+![PhyloP conservation vs. LOEUF and by functional category](output/figure_phase1_phylop.png){width=100%}
 
 ### Key genes
 
@@ -81,7 +81,7 @@ summary.loc[[c for c in CATEGORY_ORDER if c in summary.index]]
 
 ```{python}
 #| echo: false
-gtex = pd.read_csv('../data/network_constraint_gtex.csv')
+gtex = pd.read_csv('data/network_constraint_gtex.csv')
 df_g = gtex.dropna(subset=['tissue_breadth', 'LOEUF'])
 
 rho_g, pval_g = stats.spearmanr(df_g['tissue_breadth'], df_g['LOEUF'])
@@ -96,7 +96,7 @@ Genes expressed broadly across tissues are far more LoF-intolerant than
 tissue-specific genes. The Kruskal-Wallis test is highly significant
 (p = `{python} f"{kw_p_g:.3e}"`).
 
-![Tissue expression breadth vs. LOEUF and by functional category](../output/figure_phase1_gtex.png){width=100%}
+![Tissue expression breadth vs. LOEUF and by functional category](output/figure_phase1_gtex.png){width=100%}
 
 ### Hypothesis 2 test — Regression: LOEUF ~ tissue breadth + functional category
 
