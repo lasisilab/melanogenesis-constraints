@@ -1,0 +1,231 @@
+---
+title: "Phase 1 — Conservation & Expression Breadth"
+subtitle: "PhyloP evolutionary conservation and GTEx tissue expression"
+---
+
+## Overview
+
+Phase 1 adds two independent constraint axes to the network analysis:
+
+- **Phase 1.1 — PhyloP:** Mean vertebrate conservation score (100-way, hg38) per gene,
+  fetched from UCSC. Tests whether functional categories differ in evolutionary conservation.
+- **Phase 1.2 — GTEx:** Tissue expression breadth (number of tissues with median TPM > 1,
+  GTEx v8, 54 tissues). Tests Hypothesis 2: broadly expressed genes show stronger constraint.
+
+Both metrics are merged with the Raghunath 129-gene LOEUF dataset in:
+
+- `data/network_constraint_phylop.csv`
+- `data/network_constraint_gtex.csv`
+
+---
+
+## Phase 1.1 — PhyloP evolutionary conservation
+
+```{python}
+#| echo: false
+#| warning: false
+import pandas as pd
+import numpy as np
+from scipy import stats
+import warnings
+warnings.filterwarnings('ignore')
+
+phylop = pd.read_csv('../data/network_constraint_phylop.csv')
+df = phylop.dropna(subset=['mean_phylop_100way', 'LOEUF'])
+
+rho, pval = stats.spearmanr(df['mean_phylop_100way'], df['LOEUF'])
+
+CATEGORY_ORDER = [
+    'Pigment-specific', 'Developmental/NC', 'Generic signaling',
+    'Cytokines/growth factors', 'Apoptosis/cell death', 'Other',
+]
+groups = [df.loc[df['functional_category'] == c, 'mean_phylop_100way'].values
+          for c in CATEGORY_ORDER]
+kw_stat, kw_p = stats.kruskal(*[g for g in groups if len(g) > 0])
+```
+
+**Spearman ρ(PhyloP, LOEUF) = `{python} f"{rho:.3f}"`**, p = `{python} f"{pval:.3e}"` —
+genes with higher PhyloP conservation scores tend to be more LoF-intolerant (lower LOEUF),
+consistent with both metrics capturing evolutionary constraint. The Kruskal-Wallis test
+across functional categories is significant (p = `{python} f"{kw_p:.3e}"`), with
+Developmental/NC genes most conserved and Pigment-specific genes least conserved.
+
+```{python}
+#| echo: false
+#| fig-align: center
+import os
+from IPython.display import Image, display
+fig_path = '../output/figure_phase1_phylop.png'
+if os.path.exists(fig_path):
+    display(Image(filename=fig_path, width=1100))
+else:
+    print("Figure not yet generated. Run `analysis/phase1_phylop_analysis.py`.")
+```
+
+### Key genes
+
+```{python}
+#| echo: false
+key_genes = ['TYR', 'TYRP1', 'DCT', 'OCA2', 'MC1R', 'SOX10', 'PAX3', 'MITF', 'TFAP2A']
+(phylop[phylop['gene'].isin(key_genes)]
+ [['gene', 'functional_category', 'LOEUF', 'mean_phylop_100way']]
+ .sort_values('mean_phylop_100way', ascending=False)
+ .rename(columns={'mean_phylop_100way': 'Mean PhyloP 100-way'})
+ .reset_index(drop=True))
+```
+
+### PhyloP summary by functional category
+
+```{python}
+#| echo: false
+summary = (df.groupby('functional_category')['mean_phylop_100way']
+           .agg(['count', 'median', 'mean'])
+           .round(3)
+           .rename(columns={'count': 'N', 'median': 'Median PhyloP', 'mean': 'Mean PhyloP'}))
+summary.loc[[c for c in CATEGORY_ORDER if c in summary.index]]
+```
+
+---
+
+## Phase 1.2 — GTEx tissue expression breadth
+
+```{python}
+#| echo: false
+gtex = pd.read_csv('../data/network_constraint_gtex.csv')
+df_g = gtex.dropna(subset=['tissue_breadth', 'LOEUF'])
+
+rho_g, pval_g = stats.spearmanr(df_g['tissue_breadth'], df_g['LOEUF'])
+groups_g = [df_g.loc[df_g['functional_category'] == c, 'tissue_breadth'].values
+            for c in CATEGORY_ORDER]
+kw_stat_g, kw_p_g = stats.kruskal(*[g for g in groups_g if len(g) > 0])
+```
+
+**Spearman ρ(tissue breadth, LOEUF) = `{python} f"{rho_g:.3f}"`**,
+p = `{python} f"{pval_g:.3e}"` — the strongest constraint signal in Phase 1.
+Genes expressed broadly across tissues are far more LoF-intolerant than
+tissue-specific genes. The Kruskal-Wallis test is highly significant
+(p = `{python} f"{kw_p_g:.3e}"`).
+
+```{python}
+#| echo: false
+#| fig-align: center
+fig_path = '../output/figure_phase1_gtex.png'
+if os.path.exists(fig_path):
+    display(Image(filename=fig_path, width=1100))
+else:
+    print("Figure not yet generated. Run `analysis/phase1_gtex_analysis.py`.")
+```
+
+### Hypothesis 2 test — Regression: LOEUF ~ tissue breadth + functional category
+
+```{python}
+#| echo: false
+import statsmodels.formula.api as smf
+
+model = smf.ols(
+    'LOEUF ~ tissue_breadth + C(functional_category, Treatment("Pigment-specific"))',
+    data=df_g).fit()
+model.summary().tables[1]
+```
+
+After controlling for functional category, tissue breadth remains a significant
+predictor of LOEUF (see `tissue_breadth` coefficient above). Pigment-specific
+genes are used as the reference category.
+
+### Tissue breadth summary by functional category
+
+```{python}
+#| echo: false
+summary_g = (df_g.groupby('functional_category')['tissue_breadth']
+             .agg(['count', 'median', 'mean'])
+             .round(1)
+             .rename(columns={'count': 'N', 'median': 'Median breadth',
+                              'mean': 'Mean breadth'}))
+summary_g.loc[[c for c in CATEGORY_ORDER if c in summary_g.index]]
+```
+
+---
+
+## Phase 1.2 supplementary — Tissue specificity (Tau) vs. LOEUF
+
+**Tau (τ)** is a continuous tissue-specificity index from log2(TPM+1)
+expression: τ = 0 means uniform expression across all 54 tissues, τ = 1 means
+expressed in only one tissue. Stronger signal than the binary tissue-breadth
+count.
+
+```{python}
+#| echo: false
+#| fig-align: center
+fig_path = '../output/figure_phase1_gtex_tau.png'
+if os.path.exists(fig_path):
+    display(Image(filename=fig_path, width=1100))
+else:
+    print("Figure not yet generated. Run `analysis/phase1_gtex_extras.py`.")
+```
+
+---
+
+## Phase 1.2 supplementary — Per-tissue effect on LOEUF
+
+For each of the 54 GTEx tissues, the difference in median LOEUF between genes
+expressed there (TPM > 1) vs. not expressed (Mann-Whitney). Negative ΔLOEUF
+means genes expressed in that tissue are more LoF-constrained.
+
+```{python}
+#| echo: false
+#| fig-align: center
+fig_path = '../output/figure_phase1_gtex_per_tissue.png'
+if os.path.exists(fig_path):
+    display(Image(filename=fig_path, width=900))
+else:
+    print("Figure not yet generated. Run `analysis/phase1_gtex_extras.py`.")
+```
+
+---
+
+## Phase 1.2 supplementary — Clustered expression heatmap
+
+Genes (rows) sorted by LOEUF (top = most constrained) with functional category
+strip; tissues (columns) hierarchically clustered by co-expression
+(correlation distance). Color = log2(TPM + 1).
+
+```{python}
+#| echo: false
+#| fig-align: center
+fig_path = '../output/figure_phase1_gtex_heatmap.png'
+if os.path.exists(fig_path):
+    display(Image(filename=fig_path, width=1200))
+else:
+    print("Figure not yet generated. Run `analysis/phase1_gtex_extras.py`.")
+```
+
+---
+
+## Phase 1.2 supplementary — UpSet plot of tissue intersections
+
+Top intersections (≥2 genes) of expression across all 54 tissues, with LOEUF
+distribution per intersection. Most network genes (n = 71) are expressed in
+all 54 tissues — true housekeeping pattern.
+
+```{python}
+#| echo: false
+#| fig-align: center
+fig_path = '../output/figure_phase1_gtex_upset.png'
+if os.path.exists(fig_path):
+    display(Image(filename=fig_path, width=1100))
+else:
+    print("Figure not yet generated. Run `analysis/phase1_gtex_upset.py`.")
+```
+
+---
+
+## Data provenance
+
+| File | Description | Source |
+|------|-------------|--------|
+| `data/phylop_scores.csv` | Mean PhyloP 100-way per gene (hg38) | UCSC REST API via `analysis/fetch_phylop_scores.py` |
+| `data/GTEx_v8_gene_median_tpm.gct.gz` | GTEx v8 median TPM, 54 tissues | GTEx Portal (auto-downloaded) |
+| `data/network_constraint_phylop.csv` | LOEUF + PhyloP merged | `analysis/phase1_phylop_analysis.py` |
+| `data/network_constraint_gtex.csv` | LOEUF + tissue breadth merged | `analysis/phase1_gtex_analysis.py` |
+| `data/gtex_tissue_membership.csv` | Per-gene boolean expression in all 54 GTEx tissues | `analysis/phase1_gtex_upset.py` |
+| `output/table_phase1_gtex_per_tissue.csv` | ΔLOEUF and Mann-Whitney p per tissue | `analysis/phase1_gtex_extras.py` |

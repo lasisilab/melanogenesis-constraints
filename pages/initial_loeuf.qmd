@@ -1,0 +1,217 @@
+---
+title: "Initial LOEUF Constraint Analysis"
+subtitle: "LOEUF distributions by functional category and disease class"
+---
+
+## Overview
+
+Baseline analysis of LOEUF (Loss-of-Function Observed/Expected Upper bound
+fraction) across the 129-gene Raghunath melanocyte signaling network, stratified
+by functional category and by disease class.
+
+```{python}
+#| echo: false
+#| warning: false
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+from scipy import stats
+import scikit_posthocs as sp
+import warnings
+warnings.filterwarnings('ignore')
+
+loeuf = pd.read_excel('../data/LOEUF_by_functional_category.xlsx',
+                      sheet_name='All Genes by Category')
+loeuf.columns = ['gene', 'functional_category', 'disease_class',
+                  'LOEUF', 'pLI', 'betweenness_centrality']
+
+CATEGORY_ORDER = [
+    'Pigment-specific', 'Developmental/NC', 'Generic signaling',
+    'Cytokines/growth factors', 'Apoptosis/cell death', 'Other',
+]
+CATEGORY_COLORS = {
+    'Pigment-specific':         '#D94040',
+    'Developmental/NC':         '#E8907E',
+    'Generic signaling':        '#F5C242',
+    'Cytokines/growth factors': '#4878CF',
+    'Apoptosis/cell death':     '#6BAD6B',
+    'Other':                    '#B0B0B0',
+}
+CATEGORY_SHORT = {
+    'Pigment-specific':         'Pigment-\nspecific',
+    'Developmental/NC':         'Developmental\n/NC',
+    'Generic signaling':        'Generic\nsignaling',
+    'Cytokines/growth factors': 'Cytokines/\nGF',
+    'Apoptosis/cell death':     'Apoptosis/\ncell death',
+    'Other':                    'Other',
+}
+```
+
+### LOEUF by functional category
+
+Genes in the Raghunath network classified into six functional categories.
+Kruskal-Wallis test with Dunn's posthoc (Bonferroni correction).
+
+```{python}
+#| echo: false
+#| fig-width: 11
+#| fig-height: 7
+df_clean = loeuf.dropna(subset=['LOEUF'])
+groups = [df_clean.loc[df_clean['functional_category'] == c, 'LOEUF'].values
+          for c in CATEGORY_ORDER]
+kw_stat, kw_p = stats.kruskal(*[g for g in groups if len(g) > 0])
+dunn = sp.posthoc_dunn(df_clean, val_col='LOEUF',
+                        group_col='functional_category', p_adjust='bonferroni')
+
+fig, ax = plt.subplots(figsize=(11, 7))
+bp_data = [df_clean.loc[df_clean['functional_category'] == c, 'LOEUF'].values
+           for c in CATEGORY_ORDER]
+ns = [len(v) for v in bp_data]
+positions = list(range(len(CATEGORY_ORDER)))
+
+bp = ax.boxplot(bp_data, positions=positions, widths=0.6,
+                patch_artist=True, showfliers=False,
+                medianprops=dict(color='black', linewidth=1.5),
+                whiskerprops=dict(color='gray'), capprops=dict(color='gray'))
+for patch, cat in zip(bp['boxes'], CATEGORY_ORDER):
+    patch.set_facecolor(CATEGORY_COLORS[cat])
+    patch.set_alpha(0.85)
+    patch.set_edgecolor('gray')
+
+rng = np.random.default_rng(42)
+for i, (vals, cat) in enumerate(zip(bp_data, CATEGORY_ORDER)):
+    jitter = rng.uniform(-0.15, 0.15, len(vals))
+    ax.scatter(np.full(len(vals), i) + jitter, vals,
+               c=CATEGORY_COLORS[cat], s=20, alpha=0.7,
+               edgecolors='white', linewidths=0.3, zorder=3)
+
+# Significance brackets
+sig_pairs = []
+for i in range(len(CATEGORY_ORDER)):
+    for j in range(i + 1, len(CATEGORY_ORDER)):
+        c1, c2 = CATEGORY_ORDER[i], CATEGORY_ORDER[j]
+        if c1 in dunn.index and c2 in dunn.columns:
+            p = dunn.loc[c1, c2]
+            if p < 0.05:
+                sig_pairs.append((i, j, p))
+sig_pairs.sort(key=lambda x: x[1] - x[0])
+
+y_max = max(v for vals in bp_data for v in vals)
+bracket_start = y_max + 0.12
+bracket_step = 0.14
+for k, (i, j, p) in enumerate(sig_pairs):
+    y = bracket_start + k * bracket_step
+    p_text = '***' if p < 0.001 else '**' if p < 0.01 else '*'
+    ax.plot([i, i, j, j], [y - 0.03, y, y, y - 0.03], color='black', lw=1)
+    ax.text((i + j) / 2, y + 0.01, p_text, ha='center', va='bottom', fontsize=13)
+
+top_y = bracket_start + len(sig_pairs) * bracket_step + 0.05
+# Set ylim before placing n= labels and KW box
+ax.set_ylim(-0.15, top_y + 0.18)
+
+for i, n in enumerate(ns):
+    ax.text(i, -0.1, f'n={n}', ha='center', fontsize=10,
+            color='#555555', fontstyle='italic')
+
+ax.text(len(CATEGORY_ORDER) / 2 - 0.5, top_y + 0.02,
+        f'Kruskal-Wallis p = {kw_p:.2e}', fontsize=12, ha='center', va='bottom',
+        bbox=dict(boxstyle='round,pad=0.3', facecolor='white', edgecolor='gray', alpha=0.9))
+
+ax.set_xticks(positions)
+ax.set_xticklabels([CATEGORY_SHORT[c] for c in CATEGORY_ORDER],
+                   fontsize=12, rotation=30, ha='right')
+ax.set_ylabel('LOEUF (lower = more constrained)', fontsize=13)
+ax.set_title('LoF intolerance by functional category', fontsize=14, fontweight='bold', loc='left')
+fig.subplots_adjust(bottom=0.18, top=0.92)
+plt.show()
+```
+
+### LOEUF by disease class
+
+Genes classified as syndromic/pleiotropic vs. isolated pigmentation phenotype.
+
+```{python}
+#| echo: false
+#| fig-width: 8
+#| fig-height: 5
+disease_map = {
+    'Syndromic/developmental': 'Syndromic /\ndevelopmental',
+    'Isolated pigment':        'Isolated\npigment',
+    'Other Mendelian':         'Other\nMendelian',
+    'Not classified':          'Not\nclassified',
+}
+disease_order = list(disease_map.keys())
+disease_colors = {
+    'Syndromic/developmental': '#6B5FCF',
+    'Isolated pigment':        '#D94040',
+    'Other Mendelian':         '#4878CF',
+    'Not classified':          '#B0B0B0',
+}
+
+df_d = loeuf.dropna(subset=['LOEUF'])
+bp_data = [df_d.loc[df_d['disease_class'] == c, 'LOEUF'].values
+           for c in disease_order]
+ns = [len(v) for v in bp_data]
+
+# Mann-Whitney: syndromic vs. isolated pigment
+synd = df_d.loc[df_d['disease_class'] == 'Syndromic/developmental', 'LOEUF']
+isol = df_d.loc[df_d['disease_class'] == 'Isolated pigment', 'LOEUF']
+u_stat, mw_p = stats.mannwhitneyu(synd, isol, alternative='two-sided')
+
+fig, ax = plt.subplots(figsize=(8, 6))
+positions = list(range(len(disease_order)))
+bp = ax.boxplot(bp_data, positions=positions, widths=0.5,
+                patch_artist=True, showfliers=False,
+                medianprops=dict(color='black', linewidth=1.5),
+                whiskerprops=dict(color='gray'), capprops=dict(color='gray'))
+for patch, cat in zip(bp['boxes'], disease_order):
+    patch.set_facecolor(disease_colors[cat])
+    patch.set_alpha(0.85)
+    patch.set_edgecolor('gray')
+
+rng = np.random.default_rng(42)
+for i, (vals, cat) in enumerate(zip(bp_data, disease_order)):
+    if len(vals) == 0:
+        continue
+    jitter = rng.uniform(-0.12, 0.12, len(vals))
+    ax.scatter(np.full(len(vals), i) + jitter, vals,
+               c=disease_colors[cat], s=20, alpha=0.7,
+               edgecolors='white', linewidths=0.3, zorder=3)
+
+y_max = max(v for vals in bp_data for v in vals if len(vals) > 0)
+ax.set_ylim(-0.15, y_max + 0.45)
+
+# n= labels at fixed position inside plot
+for i, n in enumerate(ns):
+    ax.text(i, -0.1, f'n={n}', ha='center', fontsize=10,
+            color='#555555', fontstyle='italic')
+
+# Significance bracket
+bh = y_max + 0.12
+ax.plot([0, 0, 1, 1], [bh - 0.03, bh, bh, bh - 0.03], color='black', lw=1)
+ax.text(0.5, bh + 0.01, f'p = {mw_p:.2e}', ha='center', va='bottom', fontsize=12)
+
+ax.set_xticks(positions)
+ax.set_xticklabels([disease_map[c] for c in disease_order], fontsize=12)
+ax.set_ylabel('LOEUF (lower = more constrained)', fontsize=13)
+ax.set_title('LoF intolerance by disease class', fontsize=14, fontweight='bold', loc='left')
+fig.subplots_adjust(bottom=0.12, top=0.92)
+plt.show()
+```
+
+**Key result:** Complete separation between disease classes — syndromic/developmental
+genes are universally constrained (low LOEUF), while isolated pigmentation genes
+are LoF-tolerant (high LOEUF), p = `{python} f"{mw_p:.2e}"`.
+
+### Summary statistics
+
+```{python}
+#| echo: false
+summary = (df_clean.groupby('functional_category')['LOEUF']
+           .agg(['count', 'median', 'mean'])
+           .round(3)
+           .rename(columns={'count': 'N', 'median': 'Median LOEUF', 'mean': 'Mean LOEUF'}))
+summary = summary.loc[[c for c in CATEGORY_ORDER if c in summary.index]]
+summary
+```

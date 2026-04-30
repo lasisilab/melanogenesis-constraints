@@ -1,10 +1,7 @@
-# Quarto
+# Quarto build artifacts
 _site/
 .quarto/
-/.luarc.json
-
-# Generated outputs
-output/
+**/*.quarto_ipynb
 
 # Python
 venv/
@@ -16,12 +13,14 @@ __pycache__/
 .Python
 .ipynb_checkpoints/
 
-# R
+# pybiomart cache (regenerated on demand)
+.pybiomart.sqlite
+
+# R session state
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
-*.Rproj
 
 # macOS
 .DS_Store
@@ -33,8 +32,4 @@ __pycache__/
 # Claude Code session memory (internal tooling, not project code)
 memory/
 
-# Data (uncomment if you don't want to track data files)
-# data/
-
 /.quarto/
-**/*.quarto_ipynb

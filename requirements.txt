@@ -9,3 +9,4 @@ adjustText
 scikit-posthocs
 openpyxl
 statsmodels
+upsetplot

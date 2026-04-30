@@ -12,7 +12,9 @@ Strategy
        → KEGG ID (hsa:ENTREZID) → pathway set
    KEGG IDs are identical to NCBI gene IDs, so hsa:{ENTREZID} is the key.
 
-Output:  data/kegg_pathway_counts.csv — columns: gene, kegg_id, kegg_pathway_count
+Output:
+  data/kegg_pathway_counts.csv — gene, kegg_id, kegg_pathway_count
+  data/kegg_pathway_lists.csv  — gene, kegg_id, pathway_id, pathway_name (long form)
 """
 
 import os
@@ -24,6 +26,7 @@ from collections import defaultdict
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MASTER_CSV  = os.path.join(PROJECT_DIR, 'data', 'network_constraint_gtex.csv')
 OUT_CSV     = os.path.join(PROJECT_DIR, 'data', 'kegg_pathway_counts.csv')
+LISTS_CSV   = os.path.join(PROJECT_DIR, 'data', 'kegg_pathway_lists.csv')
 
 # ── Load gene list ─────────────────────────────────────────────────────────
 df    = pd.read_csv(MASTER_CSV)

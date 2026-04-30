@@ -1,7 +1,8 @@
 project:
   type: website
   render:
-    - "*.qmd"
+    - index.qmd
+    - "pages/*.qmd"
 
 website:
   title: "Melanogenesis Constraints"
@@ -9,21 +10,19 @@ website:
     left:
       - href: index.html
         text: Overview
-      - href: phase0.html
-        text: Phase 0 — Network & KEGG
-      - href: phase1.html
-        text: Phase 1 — Conservation & Expression
-      - href: phase1_ancestry.html
-        text: Phase 1.3 — Ancestry LOEUF
-      - href: phase2.html
-        text: Phase 2 — Population Genomics
+      - href: pages/initial_loeuf.html
+        text: Initial LOEUF
+      - href: pages/kegg.html
+        text: Phase 0 — KEGG
+      - href: pages/gtex.html
+        text: Phase 1 — GTEx
+      - href: pages/ancestry_loeuf.html
+        text: Phase 1.3 — Ancestry
+      - href: pages/popgen_selection.html
+        text: Phase 2 — Popgen Selection
 
 format:
   html:
     theme: cosmo
     css: styles.css
     toc: true
-
-publish:
-  gh-pages:
-    branch: gh-pages
