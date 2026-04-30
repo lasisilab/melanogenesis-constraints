@@ -1,17 +1,14 @@
 """
-phase2_network_selection.py
+phase2_network_constraint_loeuf.py
 
-Network position vs. population-specific selection — two-panel figure
+LoF intolerance vs. population-specific selection — two-panel figure
 for the PEQG 2026 poster.
 
-Replicates the Raghunath-style scatter (betweenness centrality × KEGG
-pathway count) but encodes PBS value as node size, directly testing:
-
-  "Do population-specific selection signatures concentrate at peripheral
-   network positions while core pathway genes remain universally constrained?"
+Variant on phase2_network_selection.py using LOEUF instead of betweenness
+centrality to test whether constrained genes show different PBS patterns.
 
 Layout (1 × 2):
-  Panel A: Within-pathway centrality (Y) × Cross-system connectivity (X)
+  Panel A: LoF intolerance (Y, higher = less constrained) × Cross-system connectivity (X)
            Node size ∝ PBS-1 (African selection, S. Asian outgroup)
   Panel B: Same axes
            Node size ∝ PBS-3 (Melanesian selection, S. Asian outgroup)
@@ -19,7 +16,7 @@ Layout (1 × 2):
 Node color = PEQG poster functional category (6 categories).
 Labeled genes: key pigment genes + top PBS genes per panel.
 
-Output: output/figure_phase2_network_selection.png / .pdf
+Output: output/figure_phase2_network_constraint_loeuf.png / .pdf
 """
 
 import os
@@ -72,17 +69,18 @@ pbs['gene'] = pbs['gene'].str.upper()
 pbs['pbs1_african']    = pbs['pbs1_african'].clip(lower=0)
 pbs['pbs3_melanesian'] = pbs['pbs3_melanesian'].clip(lower=0)
 
-df = (master[['gene', 'functional_category', 'LOEUF', 'betweenness_centrality']]
+df = (master[['gene', 'functional_category', 'LOEUF']]
       .merge(kegg, on='gene', how='left')
       .merge(pbs,  on='gene', how='left'))
 
-df = df.dropna(subset=['betweenness_centrality', 'kegg_pathway_count'])
-print(f"  {len(df)} genes with betweenness + KEGG data")
+df = df.dropna(subset=['LOEUF', 'kegg_pathway_count'])
+print(f"  {len(df)} genes with LOEUF + KEGG data")
 
 # ── Square-root transform for plotting (spread skewed distributions) ──────
-# Most genes cluster near 0 on both axes; sqrt spreads the mass more evenly.
+# KEGG is skewed; sqrt spreads the mass more evenly.
+# LOEUF is not transformed.
 df['x_plot'] = np.sqrt(df['kegg_pathway_count'].clip(lower=0))
-df['y_plot'] = np.sqrt(df['betweenness_centrality'].clip(lower=0))
+df['y_plot'] = df['LOEUF']
 
 # ── Node size scaling ──────────────────────────────────────────────────────
 # Map PBS → marker area (s parameter in scatter).
@@ -111,9 +109,9 @@ def top_pbs_genes(col, n=8):
 
 
 # ── Print statistics ───────────────────────────────────────────────────────
-print("\n=== Spearman correlations (within-network) ===")
+print("\n=== Spearman correlations (LOEUF vs. PBS and KEGG) ===")
 for pbs_col, label in [('pbs1_african', 'PBS-1 African'), ('pbs3_melanesian', 'PBS-3 Melanesian')]:
-    for x_col, x_label in [('betweenness_centrality', 'betweenness'),
+    for x_col, x_label in [('LOEUF', 'LOEUF'),
                             ('kegg_pathway_count', 'KEGG count')]:
         sub = df.dropna(subset=[pbs_col, x_col])
         r, p = stats.spearmanr(sub[x_col], sub[pbs_col])
@@ -122,7 +120,7 @@ for pbs_col, label in [('pbs1_african', 'PBS-1 African'), ('pbs3_melanesian', 'P
 print("\n=== Top 10 genes per PBS scan ===")
 for col, label in [('pbs1_african', 'PBS-1 African'), ('pbs3_melanesian', 'PBS-3 Melanesian')]:
     top = df.nlargest(10, col)[['gene', 'functional_category', col,
-                                 'betweenness_centrality', 'kegg_pathway_count']]
+                                 'LOEUF', 'kegg_pathway_count']]
     print(f"\n{label}:")
     print(top.to_string(index=False))
 
@@ -182,20 +180,22 @@ for ax, (pbs_col, size_col, letter, subtitle) in zip(axes, PANEL_SPECS):
                 iter_lim=1000)
 
 
-    # ── Axis ticks — evenly-spaced in sqrt-plot space, labels in original units
+    # ── Axis ticks — evenly-spaced in sqrt-plot space for X, regular for Y
     x_ticks_sqrt = np.linspace(0, df['x_plot'].max(), 6)
     x_tick_labels = [f'{v**2:.0f}' for v in x_ticks_sqrt]
-    y_ticks_sqrt = np.linspace(0, df['y_plot'].max(), 6)
-    y_tick_labels = [f'{v**2:.3f}' for v in y_ticks_sqrt]
     ax.set_xticks(x_ticks_sqrt)
     ax.set_xticklabels(x_tick_labels)
-    ax.set_yticks(y_ticks_sqrt)
-    ax.set_yticklabels(y_tick_labels)
+
+    # Y-axis ticks: evenly spaced LOEUF values
+    y_min, y_max = df['y_plot'].min(), df['y_plot'].max()
+    y_ticks = np.linspace(y_min, y_max, 6)
+    ax.set_yticks(y_ticks)
+    ax.set_yticklabels([f'{v:.2f}' for v in y_ticks])
 
     # ── Axis labels and titles ─────────────────────────────────────────────
     ax.set_xlabel('Cross-system connectivity\n(number of KEGG pathways)',
                   fontsize=13)
-    ax.set_ylabel('Within-pathway centrality\n(betweenness centrality)',
+    ax.set_ylabel('LOEUF (higher = less constrained)',
                   fontsize=13)
     ax.set_title(subtitle, fontsize=12, fontweight='bold', loc='left', pad=10)
     ax.tick_params(labelsize=11)
@@ -239,13 +239,13 @@ fig.legend(handles=cat_patches,
            title_fontsize=9.5)
 
 fig.suptitle(
-    'Network position vs. population-specific selection in the melanogenesis network\n'
+    'LoF intolerance vs. population-specific selection in the melanogenesis network\n'
     'Node size = PBS value  |  Larger nodes = stronger population-specific selection signal',
     fontsize=12, fontweight='bold', y=0.975)
 
 # ── Save ───────────────────────────────────────────────────────────────────
 for ext in ('png', 'pdf'):
-    path = os.path.join(OUT_DIR, f'figure_phase2_network_selection.{ext}')
+    path = os.path.join(OUT_DIR, f'figure_phase2_network_constraint_loeuf.{ext}')
     fig.savefig(path, dpi=300, bbox_inches='tight', facecolor='white')
     print(f"\nSaved → {path}")
 plt.close(fig)

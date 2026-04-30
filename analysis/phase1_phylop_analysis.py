@@ -37,10 +37,15 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 # ── Load and merge ─────────────────────────────────────────────────────────
 print("Loading LOEUF network data...")
-loeuf = pd.read_excel(LOEUF_FILE, sheet_name='All Genes by Category')
-loeuf.columns = ['gene', 'functional_category', 'disease_class',
-                  'LOEUF', 'pLI', 'betweenness_centrality']
-loeuf['gene'] = loeuf['gene'].str.upper()
+if os.path.exists(LOEUF_FILE):
+    loeuf = pd.read_excel(LOEUF_FILE, sheet_name='All Genes by Category')
+    loeuf.columns = ['gene', 'functional_category', 'disease_class',
+                      'LOEUF', 'pLI', 'betweenness_centrality']
+    loeuf['gene'] = loeuf['gene'].str.upper()
+else:
+    # Load from phase0 output if Excel file missing
+    phase0_csv = os.path.join(PROJECT_DIR, 'data', 'network_constraint_gtex.csv')
+    loeuf = pd.read_csv(phase0_csv)[['gene', 'functional_category', 'LOEUF', 'betweenness_centrality']]
 
 print("Loading PhyloP scores...")
 phylop = pd.read_csv(PHYLOP_FILE)[['gene', 'mean_phylop_100way']]
@@ -148,7 +153,7 @@ ax.text(0.98, -0.20, f'Spearman ρ = {rho:.3f},  p = {pval:.2e}',
                   edgecolor='gray', alpha=0.9))
 
 ax.set_xlabel('Mean PhyloP 100-way\n(higher = more conserved)', fontsize=16)
-ax.set_ylabel('LOEUF (lower = more constrained)', fontsize=16)
+ax.set_ylabel('LOEUF (higher = less constrained)', fontsize=16)
 ax.set_title('Evolutionary conservation vs.\nLoF intolerance', fontsize=16,
              fontweight='bold', loc='left', pad=10)
 ax.legend(fontsize=11, loc='upper center', bbox_to_anchor=(0.5, -0.32),
