@@ -211,8 +211,8 @@ heatmap_log = np.log2(heatmap_data.values + 1)
 tissue_labels = [TISSUES[i] for i in tissue_order]
 
 # Build figure with side annotation columns and colorbars
-fig = plt.figure(figsize=(20, 22))
-gs = fig.add_gridspec(1, 6, width_ratios=[0.6, 0.3, 0.6, 0.3, 14, 0.4], wspace=0.15)
+fig = plt.figure(figsize=(24, 22))
+gs = fig.add_gridspec(1, 6, width_ratios=[0.6, 0.5, 0.6, 0.5, 14, 0.5], wspace=0.25)
 
 # LOEUF column
 ax_loeuf = fig.add_subplot(gs[0, 0])
