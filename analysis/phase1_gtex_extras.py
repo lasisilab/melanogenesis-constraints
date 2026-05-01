@@ -210,39 +210,47 @@ heatmap_data = expr_df.loc[gene_order].iloc[:, tissue_order]
 heatmap_log = np.log2(heatmap_data.values + 1)
 tissue_labels = [TISSUES[i] for i in tissue_order]
 
-# Build figure with side annotation columns
-fig = plt.figure(figsize=(16, 22))
-gs = fig.add_gridspec(1, 3, width_ratios=[0.6, 0.6, 14], wspace=0.05)
+# Build figure with side annotation columns and colorbars
+fig = plt.figure(figsize=(20, 22))
+gs = fig.add_gridspec(1, 6, width_ratios=[0.6, 0.3, 0.6, 0.3, 14, 0.4], wspace=0.15)
 
 # LOEUF column
 ax_loeuf = fig.add_subplot(gs[0, 0])
-ax_loeuf.imshow(loeuf_order.reshape(-1, 1), aspect='auto', cmap='viridis_r')
+im_loeuf = ax_loeuf.imshow(loeuf_order.reshape(-1, 1), aspect='auto', cmap='viridis_r')
 ax_loeuf.set_xticks([0]); ax_loeuf.set_xticklabels(['LOEUF'], rotation=90, fontsize=10)
 ax_loeuf.set_yticks(range(len(gene_order)))
 ax_loeuf.set_yticklabels(gene_order, fontsize=6)
 ax_loeuf.tick_params(axis='y', length=0, pad=2)
 
+# LOEUF colorbar
+ax_cb_loeuf = fig.add_subplot(gs[0, 1])
+cb_loeuf = fig.colorbar(im_loeuf, cax=ax_cb_loeuf, orientation='vertical')
+cb_loeuf.set_label('LOEUF', fontsize=10, rotation=270, labelpad=20)
+
 # Tau (tissue specificity) column
-ax_tau = fig.add_subplot(gs[0, 1])
+ax_tau = fig.add_subplot(gs[0, 2])
 im_tau = ax_tau.imshow(tau_order.reshape(-1, 1), aspect='auto', cmap='RdYlBu_r',
                         vmin=0, vmax=1)
 ax_tau.set_xticks([0]); ax_tau.set_xticklabels(['Tau'], rotation=90, fontsize=10)
 ax_tau.set_yticks([])
 
-# Colorbar for tau
-cb_tau = fig.colorbar(im_tau, ax=ax_tau, fraction=0.4, pad=0.02)
-cb_tau.set_label('Tissue specificity (τ)', fontsize=9)
+# Tau colorbar
+ax_cb_tau = fig.add_subplot(gs[0, 3])
+cb_tau = fig.colorbar(im_tau, cax=ax_cb_tau, orientation='vertical')
+cb_tau.set_label('Tissue specificity (τ)', fontsize=10, rotation=270, labelpad=20)
 
 # Heatmap
-ax_h = fig.add_subplot(gs[0, 2])
+ax_h = fig.add_subplot(gs[0, 4])
 im = ax_h.imshow(heatmap_log, aspect='auto', cmap='magma',
                  vmin=0, vmax=np.percentile(heatmap_log, 99))
 ax_h.set_xticks(range(len(tissue_labels)))
 ax_h.set_xticklabels(tissue_labels, rotation=90, fontsize=8)
 ax_h.set_yticks([])
 
-cb = fig.colorbar(im, ax=ax_h, fraction=0.015, pad=0.01)
-cb.set_label('log2(TPM + 1)', fontsize=11)
+# Heatmap colorbar
+ax_cb_h = fig.add_subplot(gs[0, 5])
+cb = fig.colorbar(im, cax=ax_cb_h, orientation='vertical')
+cb.set_label('log2(TPM + 1)', fontsize=11, rotation=270, labelpad=20)
 
 fig.suptitle(
     f'GTEx expression heatmap — {len(gene_order)} network genes × '
