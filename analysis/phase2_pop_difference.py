@@ -326,20 +326,29 @@ ax_top.text(thr_a, lim_max*0.98, f' x = {thr_a:.3f}', fontsize=8, color='#888', 
 ax_top.text(lim_max*0.98, thr_m, f' y = {thr_m:.3f} ', fontsize=8, color='#888',
             ha='right', va='bottom')
 
-# Bottom: 3 violins
+# Bottom: 3 violins (colored by KEGG connectivity)
 VIOLIN_PANELS = [
     (gs[1, 0], 'LOEUF',              'LOEUF (higher = less constrained)'),
     (gs[1, 1], 'tau',                'Tissue specificity (τ)'),
     (gs[1, 2], 'kegg_pathway_count', 'KEGG pathway count'),
 ]
 
+# Prepare KEGG coloring (normalize for viridis)
+kegg_max_sqrt = float(np.sqrt(df['kegg_pathway_count'].max()))
+df['kegg_sqrt'] = np.sqrt(df['kegg_pathway_count'].clip(lower=0))
+cmap = plt.cm.viridis
+
 for slot, col, ylabel in VIOLIN_PANELS:
     ax = fig.add_subplot(slot)
     data = [df.loc[df['quadrant'] == q, col].dropna().values for q in QUAD_ORDER]
     parts = ax.violinplot(data, showmeans=False, showmedians=True, widths=0.8)
 
+    # Color violins by median KEGG count in each quadrant
     for i, pc in enumerate(parts['bodies']):
-        pc.set_facecolor(QUAD_COLORS[QUAD_ORDER[i]])
+        quad_kegg = df.loc[df['quadrant'] == QUAD_ORDER[i], 'kegg_sqrt'].median()
+        normalized_kegg = quad_kegg / kegg_max_sqrt if kegg_max_sqrt > 0 else 0.5
+        color = cmap(normalized_kegg)
+        pc.set_facecolor(color)
         pc.set_edgecolor('#333')
         pc.set_alpha(0.78)
     for k in ('cbars', 'cmins', 'cmaxes', 'cmedians'):
@@ -347,11 +356,15 @@ for slot, col, ylabel in VIOLIN_PANELS:
             parts[k].set_color('#222')
             parts[k].set_lw(1.0)
 
-    # Overlay individual points
+    # Overlay individual points colored by KEGG
     for i, vals in enumerate(data):
+        quad = QUAD_ORDER[i]
+        quad_df = df[df['quadrant'] == quad].dropna(subset=[col, 'kegg_sqrt'])
+        quad_kegg = quad_df['kegg_sqrt'].values
         x_jitter = np.random.normal(i + 1, 0.045, len(vals))
-        ax.scatter(x_jitter, vals, s=14, c=QUAD_COLORS[QUAD_ORDER[i]],
-                   edgecolors='#222', linewidths=0.3, alpha=0.7, zorder=4)
+        scatter = ax.scatter(x_jitter, vals, s=14,
+                            c=quad_kegg, cmap='viridis', vmin=0, vmax=kegg_max_sqrt,
+                            edgecolors='#222', linewidths=0.3, alpha=0.7, zorder=4)
 
     ax.set_xticks(np.arange(1, len(QUAD_ORDER) + 1))
     ax.set_xticklabels([f'{q}\n(n={(df["quadrant"]==q).sum()})'
@@ -365,6 +378,14 @@ for slot, col, ylabel in VIOLIN_PANELS:
         ax.set_title(f'MW (Afr vs. Mel): p = {p:.2e}{sig}',
                      fontsize=11, loc='left', pad=6,
                      fontweight='bold' if p < 0.05 else 'normal')
+
+# Add KEGG colorbar
+sm = plt.cm.ScalarMappable(cmap='viridis',
+                           norm=plt.Normalize(vmin=0, vmax=kegg_max_sqrt))
+sm.set_array([])
+cbar_ax = fig.add_axes([0.93, 0.08, 0.015, 0.3])
+cbar = fig.colorbar(sm, cax=cbar_ax)
+cbar.set_label('KEGG pathway count\n(sqrt-scaled)', fontsize=10, rotation=270, labelpad=20)
 
 fig.suptitle(
     'African vs. Melanesian PBS quadrants and their constraint profiles\n'
