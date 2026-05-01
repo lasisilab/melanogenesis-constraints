@@ -219,6 +219,100 @@ else:
 
 ---
 
+## Alternative categorizations (data-driven)
+
+The hand-curated `functional_category` column (Pigment-specific,
+Developmental/NC, Generic signaling, etc.) comes from
+[analysis/notebooks/melanogenesis_network_constraint_v2.ipynb](../analysis/notebooks/melanogenesis_network_constraint_v2.ipynb)
+and is persisted in
+[data/LOEUF_by_functional_category.xlsx](../data/LOEUF_by_functional_category.xlsx).
+To compare hand-curation against unbiased schemes, two additional categories
+are computed in
+[analysis/phase1_new_categories.py](../analysis/phase1_new_categories.py)
+and merged into
+[data/network_constraint_categorized.csv](../data/network_constraint_categorized.csv).
+
+### `gtex_tissue_category` — derived from GTEx v8 expression
+
+Computed on log2(TPM + 1) across all 54 GTEx tissues:
+
+- **τ (tau)** — Yanai 2005 tissue specificity index. τ = 0 → uniform; τ = 1 → expressed in one tissue.
+- **n_expr** — # tissues with median TPM > 1
+- **max_tissue** — tissue with highest TPM
+
+**Decision tree (first match wins):**
+
+| Category | Rule |
+|---|---|
+| Housekeeping            | τ < 0.4 AND n_expr ≥ 40 |
+| Skin-restricted         | τ ≥ 0.6 AND max_tissue ∈ skin |
+| Brain-restricted        | τ ≥ 0.6 AND max_tissue ∈ CNS / nerve / pituitary |
+| Reproductive-restricted | τ ≥ 0.6 AND max_tissue ∈ gonads / uterus / cervix / prostate |
+| Immune-restricted       | τ ≥ 0.6 AND max_tissue ∈ blood / spleen / lymphocytes |
+| Liver-restricted        | τ ≥ 0.6 AND max_tissue == Liver |
+| Other-restricted        | τ ≥ 0.6 AND any other tissue |
+| Broad                   | everything else (intermediate τ) |
+
+Thresholds (τ ≥ 0.6, n_expr ≥ 40) follow conventions in the tissue-specificity
+literature (Sonawane 2017, Kryuchkova-Mostacci 2017). To change them, edit the
+constants at the top of `phase1_new_categories.py`.
+
+### `kegg_primary_pathway` — derived from KEGG pathway membership
+
+[analysis/fetch_kegg_pathways.py](../analysis/fetch_kegg_pathways.py) fetches
+`link/pathway/hsa` and `list/pathway/hsa` from the KEGG REST API and writes
+the long-form per-gene pathway list to
+[data/kegg_pathway_lists.csv](../data/kegg_pathway_lists.csv).
+
+Each gene is assigned a single primary pathway using this priority order
+(first match wins, so pigmentation-specific Melanogenesis outranks generic
+signaling cascades):
+
+| Priority | Pathway | KEGG ID |
+|---|---|---|
+| 1 | Melanogenesis              | hsa04916 |
+| 2 | MAPK signaling             | hsa04010 |
+| 3 | PI3K-Akt signaling         | hsa04151 |
+| 4 | Apoptosis                  | hsa04210 |
+| 5 | Cytokine-cytokine receptor | hsa04060 |
+| 6 | Wnt signaling              | hsa04310 |
+| 7 | JAK-STAT signaling         | hsa04630 |
+| 8 | NF-κB signaling            | hsa04064 |
+| 9 | Other (in KEGG)            | (any pathway, none above) |
+| 10 | Not in KEGG               | (gene absent from KEGG hsa) |
+
+### Network gene counts under each scheme
+
+```{python}
+#| echo: false
+import pandas as pd
+cat_path = '../data/network_constraint_categorized.csv'
+if os.path.exists(cat_path):
+    cat_df = pd.read_csv(cat_path)
+    g_counts = (cat_df['gtex_tissue_category'].value_counts()
+                .rename('Genes').to_frame())
+    k_counts = (cat_df['kegg_primary_pathway'].value_counts()
+                .rename('Genes').to_frame())
+    print("GTEx tissue category:")
+    display(g_counts)
+    print("\nKEGG primary pathway:")
+    display(k_counts)
+else:
+    print("Run `analysis/phase1_new_categories.py` to generate the file.")
+```
+
+### Cross-tabulation: GTEx category × KEGG pathway
+
+```{python}
+#| echo: false
+if os.path.exists(cat_path):
+    ct = pd.crosstab(cat_df['gtex_tissue_category'],
+                     cat_df['kegg_primary_pathway'])
+    display(ct)
+```
+
+---
+
 ## Data provenance
 
 | File | Description | Source |
@@ -229,3 +323,5 @@ else:
 | `data/network_constraint_gtex.csv` | LOEUF + tissue breadth merged | `analysis/phase1_gtex_analysis.py` |
 | `data/gtex_tissue_membership.csv` | Per-gene boolean expression in all 54 GTEx tissues | `analysis/phase1_gtex_upset.py` |
 | `output/table_phase1_gtex_per_tissue.csv` | ΔLOEUF and Mann-Whitney p per tissue | `analysis/phase1_gtex_extras.py` |
+| `data/kegg_pathway_lists.csv` | Long-form gene × KEGG pathway membership with names | `analysis/fetch_kegg_pathways.py` |
+| `data/network_constraint_categorized.csv` | Network LOEUF + tau, n_expr, max_tissue, gtex_tissue_category, kegg_primary_pathway | `analysis/phase1_new_categories.py` |

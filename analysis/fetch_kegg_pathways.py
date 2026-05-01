@@ -79,18 +79,40 @@ for line in resp.text.strip().split('\n'):
         n_lines += 1
 print(f"  Loaded {n_lines:,} gene-pathway links for {len(kegg_to_pathways):,} unique genes")
 
-# ── Step 3: Count pathways per melanogenesis gene ──────────────────────────
-print("\nStep 3: Counting KEGG pathways per gene...")
-rows = []
+# Pathway ID → name (single REST call, ~340 entries)
+print("\nStep 2b: Fetching pathway names (list/pathway/hsa)...")
+resp = requests.get("https://rest.kegg.jp/list/pathway/hsa", timeout=60)
+resp.raise_for_status()
+pathway_names: dict[str, str] = {}
+for line in resp.text.strip().split('\n'):
+    parts = line.split('\t')
+    if len(parts) == 2:
+        # Normalize ID to "path:hsa04010" form (matches link output)
+        pid = parts[0] if parts[0].startswith('path:') else f'path:{parts[0]}'
+        pathway_names[pid] = parts[1]
+print(f"  Loaded {len(pathway_names):,} pathway names")
+
+# ── Step 3: Count pathways and emit long-form list per gene ───────────────
+print("\nStep 3: Counting KEGG pathways and building long-form pathway list...")
+rows_count = []
+rows_long  = []
 for gene in genes:
     entrez = symbol_to_entrez.get(gene, '')
     kegg_id = f'hsa:{entrez}' if entrez else ''
-    n = len(kegg_to_pathways[kegg_id]) if kegg_id else None
-    rows.append({'gene': gene, 'kegg_id': kegg_id, 'kegg_pathway_count': n})
+    pathways = kegg_to_pathways.get(kegg_id, set()) if kegg_id else set()
+    rows_count.append({'gene': gene, 'kegg_id': kegg_id,
+                       'kegg_pathway_count': len(pathways) if kegg_id else None})
+    for pid in pathways:
+        rows_long.append({'gene': gene, 'kegg_id': kegg_id,
+                          'pathway_id': pid,
+                          'pathway_name': pathway_names.get(pid, '')})
 
-out_df = pd.DataFrame(rows)
+out_df  = pd.DataFrame(rows_count)
+long_df = pd.DataFrame(rows_long).sort_values(['gene', 'pathway_id'])
 out_df.to_csv(OUT_CSV, index=False)
-print(f"\nSaved → {OUT_CSV}")
+long_df.to_csv(LISTS_CSV, index=False)
+print(f"\nSaved counts → {OUT_CSV}")
+print(f"Saved per-pathway list → {LISTS_CSV}  ({len(long_df)} rows)")
 
 # ── Summary ────────────────────────────────────────────────────────────────
 valid = out_df.dropna(subset=['kegg_pathway_count'])

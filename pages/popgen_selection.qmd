@@ -516,6 +516,211 @@ rather than global network-level constraint patterns.
 
 ---
 
+## Phase 2.6 — Tissue specificity (τ) variants
+
+Tau (τ) from GTEx v8 replaces or supplements KEGG pathway count as an expression-based
+constraint axis. τ = 0 means uniformly expressed across all 54 tissues (housekeeping);
+τ = 1 means expressed in only one tissue. Source: `analysis/phase2_tau_variants.py`.
+
+### Figure A — Tissue specificity × LoF intolerance, node size = PBS
+
+X-axis = τ (tissue specificity); Y-axis = LOEUF. Tests whether the tissue-specificity
+gradient (from GTEx) also stratifies population-specific selection.
+Spearman ρ(τ, LOEUF) = 0.342, p = 7.9×10⁻⁵: tissue-specific genes are systematically
+less LoF-intolerant than broadly expressed housekeeping genes.
+
+```{python}
+#| echo: false
+#| fig-align: center
+from IPython.display import Image, display
+import os
+if os.path.exists('../output/figure_phase2_tau_loeuf.png'):
+    display(Image(filename='../output/figure_phase2_tau_loeuf.png', width=1100))
+else:
+    print("Figure not yet generated. Run `analysis/phase2_tau_variants.py`.")
+```
+
+---
+
+### Figure B — Tissue specificity × within-pathway centrality, node size = PBS
+
+X-axis = τ; Y-axis = betweenness centrality. Tests whether network position (hub vs.
+peripheral) also tracks tissue-specificity.
+Spearman ρ(τ, betweenness) = −0.158, p = 0.076: weak trend only — housekeeping genes
+tend toward slightly higher centrality but the relationship is not significant,
+suggesting tissue-specificity and network topology are largely independent axes.
+
+```{python}
+#| echo: false
+#| fig-align: center
+if os.path.exists('../output/figure_phase2_tau_centrality.png'):
+    display(Image(filename='../output/figure_phase2_tau_centrality.png', width=1100))
+else:
+    print("Figure not yet generated. Run `analysis/phase2_tau_variants.py`.")
+```
+
+---
+
+### Figure C — KEGG × LOEUF with τ as node color (size = PBS)
+
+Original KEGG × LOEUF axes retained; τ is encoded as **continuous node color**
+(blue = housekeeping/τ≈0; red = tissue-specific/τ≈1). Node size = PBS value.
+Three constraint dimensions visible at once.
+
+```{python}
+#| echo: false
+#| fig-align: center
+if os.path.exists('../output/figure_phase2_kegg_loeuf_tau_color.png'):
+    display(Image(filename='../output/figure_phase2_kegg_loeuf_tau_color.png', width=1100))
+else:
+    print("Figure not yet generated. Run `analysis/phase2_tau_variants.py`.")
+```
+
+The color gradient reveals that **broadly expressed genes (blue) cluster toward
+lower LOEUF (more constrained) and span all connectivity levels**, while
+**tissue-specific genes (red) tend toward higher LOEUF**, irrespective of KEGG
+pathway count. The tissue-specificity axis (τ × LOEUF) is independent of the
+cross-system connectivity axis (KEGG × LOEUF).
+
+---
+
+### Figure D — τ × LOEUF with KEGG connectivity as node color (size = PBS)
+
+Tissue specificity (x) × LoF intolerance (y) with **KEGG pathway count** encoded
+as a continuous color gradient (viridis: dark = low connectivity, yellow = high).
+Node size = PBS value. The same three constraint dimensions as Figure C, with τ
+and KEGG swapped between axis and color.
+
+```{python}
+#| echo: false
+#| fig-align: center
+if os.path.exists('../output/figure_phase2_tau_loeuf_kegg_color.png'):
+    display(Image(filename='../output/figure_phase2_tau_loeuf_kegg_color.png', width=1100))
+else:
+    print("Figure not yet generated. Run `analysis/phase2_tau_variants.py`.")
+```
+
+This view emphasizes the τ × LOEUF surface and uses KEGG color to show that the
+high-connectivity hubs (yellow — MAPK3, AKT1, MAPK1) cluster at low τ
+(housekeeping) and low LOEUF (constrained), while the high-τ, high-LOEUF region
+(top-right) is occupied almost entirely by low-KEGG genes (dark) — the
+tissue-specific pigment effectors. KEGG connectivity and τ are inversely related,
+which is why the color and x-axis tend to anti-correlate.
+
+---
+
+### Figure E — τ × LOEUF with π (nucleotide diversity) as node color
+
+Same axes as Figure D, but the color gradient now encodes **π** in the matched
+population (Panel A: π_african; Panel B: π_melanesian). Plasma colormap.
+Color scale shared between panels and clipped at the 5th–95th percentile to keep
+high-diversity outliers (MC1R) from compressing the dynamic range.
+
+```{python}
+#| echo: false
+#| fig-align: center
+if os.path.exists('../output/figure_phase2_tau_loeuf_pi_color.png'):
+    display(Image(filename='../output/figure_phase2_tau_loeuf_pi_color.png', width=1100))
+else:
+    print("Figure not yet generated. Run `analysis/phase2_tau_variants.py`.")
+```
+
+The π color reveals which selected genes also carry elevated within-population
+diversity. MC1R (top-right of both panels) is the most diverse pigment-specific
+gene in both populations. Most BCL2L1 / KITLG / TFAP2A African signals (Panel A)
+sit at *low* π — selection has reduced diversity. Melanesian signals (Panel B,
+ADCY4, FZD3, MAPK3) span a wider π range — diverse selection histories.
+
+---
+
+## Phase 2.7 — African vs. Melanesian selection contrast
+
+Three figures isolating the population-specific signal while preserving
+LOEUF / τ / KEGG context. Source: `analysis/phase2_pop_difference.py`.
+
+### Figure F — ΔPBS (Melanesian − African) vs. each constraint axis
+
+Three panels. Y-axis = PBS-3 − PBS-1 in all. Above zero = Melanesian-dominant
+selection; below zero = African-dominant. X-axis cycles through LOEUF, τ, and
+KEGG pathway count. Spearman ρ in each panel.
+
+```{python}
+#| echo: false
+#| fig-align: center
+if os.path.exists('../output/figure_phase2_dpbs_constraint.png'):
+    display(Image(filename='../output/figure_phase2_dpbs_constraint.png', width=1200))
+else:
+    print("Figure not yet generated. Run `analysis/phase2_pop_difference.py`.")
+```
+
+The middle panel (ΔPBS vs. τ) shows the strongest signal:
+ρ(τ, ΔPBS) = 0.258, p = 3.9×10⁻³ — **Melanesian-dominant genes are
+significantly more tissue-specific than African-dominant genes.** LOEUF and KEGG
+show no significant gradient. African selection is concentrated on low-τ
+(broadly expressed) genes like BCL2L1, KITLG, TFAP2A.
+
+---
+
+### Figure G — PBS-1 × PBS-3 scatter, three colorings (LOEUF / τ / KEGG)
+
+Direct visualization of the African × Melanesian selection plane. Diagonal y=x
+marks equal selection; off-diagonal points are population-specific.
+Three independent panels recolor the same scatter by LOEUF, τ, and KEGG so the
+constraint structure within the off-diagonal genes is visible.
+
+```{python}
+#| echo: false
+#| fig-align: center
+if os.path.exists('../output/figure_phase2_pbs_pbs_scatter.png'):
+    display(Image(filename='../output/figure_phase2_pbs_pbs_scatter.png', width=1200))
+else:
+    print("Figure not yet generated. Run `analysis/phase2_pop_difference.py`.")
+```
+
+The τ panel (middle) shows a clear gradient — the upper-left cluster
+(Melanesian-dominant: ADCY4, FZD3, PRKACA, MAPK3, MITF, FASLG) skews
+yellow-orange (intermediate-to-high τ), whereas the lower-right cluster
+(African-dominant: BCL2L1, KITLG, BBC3, TFAP2A) skews blue (low τ /
+broadly expressed).
+
+---
+
+### Figure H — Quadrant analysis with constraint distributions
+
+Top: PBS-1 × PBS-3 scatter partitioned at the 75th-percentile threshold of each
+axis into four quadrants (African-specific, Melanesian-specific, Both, Neither).
+Bottom row: violin plots of LOEUF, τ, and KEGG pathway count within each
+quadrant, with Mann-Whitney p-values comparing African-specific vs.
+Melanesian-specific quadrants.
+
+```{python}
+#| echo: false
+#| fig-align: center
+if os.path.exists('../output/figure_phase2_pbs_quadrants.png'):
+    display(Image(filename='../output/figure_phase2_pbs_quadrants.png', width=1200))
+else:
+    print("Figure not yet generated. Run `analysis/phase2_pop_difference.py`.")
+```
+
+**Quadrant counts:** 22 African-specific, 22 Melanesian-specific, 9 Both,
+71 Neither.
+
+**Mann-Whitney (Afr-specific vs. Mel-specific):**
+
+| Constraint | p | Interpretation |
+|---|---|---|
+| LOEUF | 0.97 | No constraint difference between population-specific quadrants |
+| **τ**     | **0.032 \*** | **Mel-specific genes are more tissue-specific than Afr-specific** |
+| KEGG  | 0.70 | No connectivity difference |
+
+This is the headline statistical result for the population contrast: the two
+populations are selecting genes from different positions on the
+**tissue-specificity** axis, but they show **no difference** in LoF intolerance
+or cross-system connectivity. African selection prefers broadly expressed
+network genes; Melanesian selection prefers more tissue-specific ones.
+
+---
+
 ## Data provenance
 
 | File | Description | Generated by |
