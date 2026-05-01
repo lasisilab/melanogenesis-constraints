@@ -204,7 +204,7 @@ tissue_order = leaves_list(tissue_link)
 gene_order_idx = df['LOEUF'].sort_values().index
 gene_order = df.loc[gene_order_idx, 'gene'].values
 loeuf_order = df.loc[gene_order_idx, 'LOEUF'].values
-cat_order = df.loc[gene_order_idx, 'functional_category'].values
+tau_order = df.loc[gene_order_idx, 'tau'].values
 
 heatmap_data = expr_df.loc[gene_order].iloc[:, tissue_order]
 heatmap_log = np.log2(heatmap_data.values + 1)
@@ -222,15 +222,16 @@ ax_loeuf.set_yticks(range(len(gene_order)))
 ax_loeuf.set_yticklabels(gene_order, fontsize=6)
 ax_loeuf.tick_params(axis='y', length=0, pad=2)
 
-# Functional category column
-ax_cat = fig.add_subplot(gs[0, 1])
-cat_to_idx = {c: i for i, c in enumerate(CATEGORY_COLORS)}
-cat_codes = np.array([cat_to_idx.get(c, -1) for c in cat_order]).reshape(-1, 1)
-from matplotlib.colors import ListedColormap
-cat_cmap = ListedColormap(['#888888'] + list(CATEGORY_COLORS.values()))
-ax_cat.imshow(cat_codes + 1, aspect='auto', cmap=cat_cmap, vmin=0, vmax=len(CATEGORY_COLORS))
-ax_cat.set_xticks([0]); ax_cat.set_xticklabels(['Category'], rotation=90, fontsize=10)
-ax_cat.set_yticks([])
+# Tau (tissue specificity) column
+ax_tau = fig.add_subplot(gs[0, 1])
+im_tau = ax_tau.imshow(tau_order.reshape(-1, 1), aspect='auto', cmap='RdYlBu_r',
+                        vmin=0, vmax=1)
+ax_tau.set_xticks([0]); ax_tau.set_xticklabels(['Tau'], rotation=90, fontsize=10)
+ax_tau.set_yticks([])
+
+# Colorbar for tau
+cb_tau = fig.colorbar(im_tau, ax=ax_tau, fraction=0.4, pad=0.02)
+cb_tau.set_label('Tissue specificity (τ)', fontsize=9)
 
 # Heatmap
 ax_h = fig.add_subplot(gs[0, 2])
@@ -243,16 +244,10 @@ ax_h.set_yticks([])
 cb = fig.colorbar(im, ax=ax_h, fraction=0.015, pad=0.01)
 cb.set_label('log2(TPM + 1)', fontsize=11)
 
-# Legend for categories
-import matplotlib.patches as mpatches
-patches = [mpatches.Patch(color=col, label=cat)
-           for cat, col in CATEGORY_COLORS.items()]
-ax_h.legend(handles=patches, loc='upper left', bbox_to_anchor=(1.04, 0.55),
-            fontsize=9, title='Category', title_fontsize=10, framealpha=0.9)
-
 fig.suptitle(
     f'GTEx expression heatmap — {len(gene_order)} network genes × '
-    f'{len(TISSUES)} tissues (genes sorted by LOEUF, tissues hierarchically clustered)',
+    f'{len(TISSUES)} tissues\n'
+    f'(genes sorted by LOEUF, tissues hierarchically clustered, color strip = tissue specificity τ)',
     fontsize=13, fontweight='bold', y=0.995)
 
 for ext in ('png', 'pdf'):
