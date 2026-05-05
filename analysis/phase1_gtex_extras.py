@@ -231,7 +231,8 @@ def draw_heatmap(tissue_subset, fname, n_tissues_label):
     tissue_labels  = [tissue_subset[i] for i in t_order]
 
     n = len(gene_order)
-    fig = plt.figure(figsize=(22, 22))
+    fig_width = max(14, round(22 * len(tissue_subset) / 54))
+    fig = plt.figure(figsize=(fig_width, 22))
     left         = 0.06
     bottom       = 0.13
     height       = 0.77
