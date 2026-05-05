@@ -210,42 +210,32 @@ heatmap_data = expr_df.loc[gene_order].iloc[:, tissue_order]
 heatmap_log = np.log2(heatmap_data.values + 1)
 tissue_labels = [TISSUES[i] for i in tissue_order]
 
-# Build figure: gene names | LOEUF bar | Tau bar | heatmap | colorbar
+# Build figure: LOEUF bar (gene names left, scale right) | heatmap | colorbar
 fig = plt.figure(figsize=(22, 22))
-gs = fig.add_gridspec(1, 4, width_ratios=[2.2, 0.5, 0.5, 14], wspace=0.08)
+gs = fig.add_gridspec(1, 2, width_ratios=[2.0, 14], wspace=0.04)
 
-# Gene names (left)
-ax_genes = fig.add_subplot(gs[0, 0])
-ax_genes.set_yticks(range(len(gene_order)))
-ax_genes.set_yticklabels(gene_order, fontsize=7.5)
-ax_genes.set_xticks([])
-for spine in ax_genes.spines.values():
-    spine.set_visible(False)
-ax_genes.tick_params(axis='y', length=0, pad=2)
-ax_genes.set_xlim(0, 1)
-ax_genes.set_ylim(-0.5, len(gene_order) - 0.5)
-
-# LOEUF bar with values as right-side tick labels
-ax_loeuf = fig.add_subplot(gs[0, 1])
+# LOEUF bar — gene names as left ticks, scale as right ticks
+ax_loeuf = fig.add_subplot(gs[0, 0])
 im_loeuf = ax_loeuf.imshow(loeuf_order.reshape(-1, 1), aspect='auto', cmap='viridis_r')
 ax_loeuf.set_xticks([0])
 ax_loeuf.set_xticklabels(['LOEUF'], rotation=90, fontsize=10)
-ax_loeuf.yaxis.set_label_position('right')
-ax_loeuf.yaxis.tick_right()
 ax_loeuf.set_yticks(range(len(gene_order)))
-ax_loeuf.set_yticklabels([f'{v:.2f}' for v in loeuf_order], fontsize=6)
-ax_loeuf.tick_params(axis='y', length=0, pad=2)
+ax_loeuf.set_yticklabels(gene_order, fontsize=7.5)
+ax_loeuf.tick_params(axis='y', length=0, pad=3)
 
-# Tau bar (no colorbar)
-ax_tau = fig.add_subplot(gs[0, 2])
-im_tau = ax_tau.imshow(tau_order.reshape(-1, 1), aspect='auto', cmap='RdYlBu_r',
-                        vmin=0, vmax=1)
-ax_tau.set_xticks([0])
-ax_tau.set_xticklabels(['Tau'], rotation=90, fontsize=10)
-ax_tau.set_yticks([])
+# Right-side scale at specific LOEUF values
+loeuf_min, loeuf_max = loeuf_order.min(), loeuf_order.max()
+scale_vals = [v for v in [0.0, 1.0, 1.5, 2.0] if loeuf_min <= v <= loeuf_max]
+scale_pos  = [(v - loeuf_min) / (loeuf_max - loeuf_min) * (len(gene_order) - 1)
+              for v in scale_vals]
+ax_loeuf_r = ax_loeuf.twinx()
+ax_loeuf_r.set_ylim(ax_loeuf.get_ylim())
+ax_loeuf_r.set_yticks(scale_pos)
+ax_loeuf_r.set_yticklabels([f'{v:.1f}' for v in scale_vals], fontsize=9)
+ax_loeuf_r.tick_params(axis='y', length=4, pad=3)
 
 # Heatmap
-ax_h = fig.add_subplot(gs[0, 3])
+ax_h = fig.add_subplot(gs[0, 1])
 im = ax_h.imshow(heatmap_log, aspect='auto', cmap='magma',
                  vmin=0, vmax=np.percentile(heatmap_log, 99))
 ax_h.set_xticks(range(len(tissue_labels)))
