@@ -194,69 +194,116 @@ print("  Saved figure_phase1_gtex_per_tissue.png/pdf")
 # ===========================================================================
 print("\nFigure 3: Clustered heatmap...")
 expr_df = df.set_index('gene')[TISSUES]
-log_expr = np.log2(expr_df.values + 1)
-
-# Hierarchical clustering of tissues (columns)
-tissue_link = linkage(pdist(log_expr.T, metric='correlation'), method='average')
-tissue_order = leaves_list(tissue_link)
 
 # Sort genes by LOEUF (low = constrained at top)
 gene_order_idx = df['LOEUF'].sort_values().index
-gene_order = df.loc[gene_order_idx, 'gene'].values
-loeuf_order = df.loc[gene_order_idx, 'LOEUF'].values
-tau_order = df.loc[gene_order_idx, 'tau'].values
+gene_order    = df.loc[gene_order_idx, 'gene'].values
+loeuf_order   = df.loc[gene_order_idx, 'LOEUF'].values
 
-heatmap_data = expr_df.loc[gene_order].iloc[:, tissue_order]
-heatmap_log = np.log2(heatmap_data.values + 1)
-tissue_labels = [TISSUES[i] for i in tissue_order]
-
-# Build figure: LOEUF bar (gene names left, scale right) | heatmap | colorbar
-fig = plt.figure(figsize=(22, 22))
-gs = fig.add_gridspec(1, 2, width_ratios=[2.0, 14], wspace=0.04)
-
-# LOEUF bar — gene names as left ticks, scale as right ticks
-ax_loeuf = fig.add_subplot(gs[0, 0])
-im_loeuf = ax_loeuf.imshow(loeuf_order.reshape(-1, 1), aspect='auto', cmap='viridis_r')
-ax_loeuf.set_xticks([0])
-ax_loeuf.set_xticklabels(['LOEUF'], rotation=90, fontsize=10)
-ax_loeuf.set_yticks(range(len(gene_order)))
-ax_loeuf.set_yticklabels(gene_order, fontsize=7.5)
-ax_loeuf.tick_params(axis='y', length=0, pad=3)
-
-# Right-side scale at specific LOEUF values
 loeuf_min, loeuf_max = loeuf_order.min(), loeuf_order.max()
 scale_vals = [v for v in [0.0, 1.0, 1.5, 2.0] if loeuf_min <= v <= loeuf_max]
 scale_pos  = [(v - loeuf_min) / (loeuf_max - loeuf_min) * (len(gene_order) - 1)
               for v in scale_vals]
-ax_loeuf_r = ax_loeuf.twinx()
-ax_loeuf_r.set_ylim(ax_loeuf.get_ylim())
-ax_loeuf_r.set_yticks(scale_pos)
-ax_loeuf_r.set_yticklabels([f'{v:.1f}' for v in scale_vals], fontsize=9)
-ax_loeuf_r.tick_params(axis='y', length=4, pad=3)
 
-# Heatmap
-ax_h = fig.add_subplot(gs[0, 1])
-im = ax_h.imshow(heatmap_log, aspect='auto', cmap='magma',
-                 vmin=0, vmax=np.percentile(heatmap_log, 99))
-ax_h.set_xticks(range(len(tissue_labels)))
-ax_h.set_xticklabels(tissue_labels, rotation=90, fontsize=11)
-ax_h.set_yticks([])
+EXCLUDE_TISSUES = {
+    'Cells - EBV-transformed lymphocytes',
+    'Brain - Caudate (basal ganglia)',
+    'Brain - Nucleus accumbens (basal ganglia)',
+    'Brain - Putamen (basal ganglia)',
+    'Brain - Anterior cingulate cortex (BA24)',
+    'Minor Salivary Gland',
+    'Small Intestine - Terminal Ileum',
+    'Brain - Cerebellar Hemisphere',
+    'Esophagus - Muscularis',
+    'Esophagus - Mucosa',
+    'Esophagus - Gastroesophageal Junction',
+}
 
-# Expression colorbar only
-cbar_ax = fig.add_axes([0.93, 0.15, 0.013, 0.72])
-cb = fig.colorbar(im, cax=cbar_ax, orientation='vertical')
-cb.set_label('log2(TPM + 1)', fontsize=11, rotation=270, labelpad=20)
 
-fig.suptitle(
-    f'GTEx expression heatmap — {len(gene_order)} network genes × '
-    f'{len(TISSUES)} tissues\n'
-    f'(genes sorted by LOEUF, tissues hierarchically clustered, color strip = tissue specificity τ)',
-    fontsize=13, fontweight='bold', y=0.995)
+def draw_heatmap(tissue_subset, fname, n_tissues_label):
+    sub_expr = expr_df[tissue_subset].loc[gene_order]
+    log_data = np.log2(sub_expr.values + 1)
 
-for ext in ('png', 'pdf'):
-    fig.savefig(os.path.join(OUT_DIR, f'figure_phase1_gtex_heatmap.{ext}'),
-                dpi=180, bbox_inches='tight', facecolor='white')
-plt.close(fig)
-print("  Saved figure_phase1_gtex_heatmap.png/pdf")
+    # Hierarchical clustering of tissues (columns)
+    t_link  = linkage(pdist(log_data.T, metric='correlation'), method='average')
+    t_order = leaves_list(t_link)
+    heatmap_log    = log_data[:, t_order]
+    tissue_labels  = [tissue_subset[i] for i in t_order]
+
+    n = len(gene_order)
+    fig = plt.figure(figsize=(22, 22))
+    left         = 0.06
+    bottom       = 0.13
+    height       = 0.77
+    names_width  = 0.08
+    strip_width  = 0.013
+    scale_gap    = 0.045   # space for LOEUF scale tick labels
+    heatmap_width = 0.67
+    gap          = 0.005
+
+    ax_names = fig.add_axes([left, bottom, names_width, height])
+    ax_loeuf = fig.add_axes([left + names_width + gap, bottom, strip_width, height])
+    ax_h     = fig.add_axes([left + names_width + gap + strip_width + scale_gap,
+                             bottom, heatmap_width, height])
+
+    # Gene names
+    ax_names.set_yticks(np.arange(n))
+    ax_names.set_yticklabels(gene_order, fontsize=7.5)
+    ax_names.set_ylim(-0.5, n - 0.5)
+    ax_names.invert_yaxis()
+    ax_names.set_xticks([])
+    ax_names.tick_params(axis='y', length=0, pad=3)
+    for sp in ax_names.spines.values():
+        sp.set_visible(False)
+
+    # LOEUF bar
+    ax_loeuf.imshow(loeuf_order.reshape(-1, 1), aspect='auto', cmap='viridis_r')
+    ax_loeuf.set_xticks([])
+    ax_loeuf.set_yticks([])
+    ax_loeuf.set_frame_on(False)
+
+    # LOEUF scale on right side (within scale_gap space)
+    ax_loeuf_r = ax_loeuf.twinx()
+    ax_loeuf_r.set_ylim(ax_loeuf.get_ylim())
+    ax_loeuf_r.set_yticks(scale_pos)
+    ax_loeuf_r.set_yticklabels([f'{v:.1f}' for v in scale_vals], fontsize=9)
+    ax_loeuf_r.tick_params(axis='y', length=4, pad=3)
+    for sp in ax_loeuf_r.spines.values():
+        sp.set_visible(False)
+
+    # Heatmap
+    im = ax_h.imshow(heatmap_log, aspect='auto', cmap='magma',
+                     vmin=0, vmax=np.percentile(heatmap_log, 99))
+    ax_h.set_xticks(range(len(tissue_labels)))
+    ax_h.set_xticklabels(tissue_labels, rotation=90, fontsize=11)
+    ax_h.set_yticks([])
+    ax_h.set_frame_on(False)
+
+    # Expression colorbar
+    cbar_x = left + names_width + gap + strip_width + scale_gap + heatmap_width + gap
+    cbar_ax = fig.add_axes([cbar_x, bottom, strip_width, height])
+    cb = fig.colorbar(im, cax=cbar_ax, orientation='vertical')
+    cb.set_label('log2(TPM + 1)', fontsize=11, rotation=270, labelpad=20)
+
+    fig.suptitle(
+        f'GTEx expression heatmap — {n} network genes × {n_tissues_label}\n'
+        f'(genes sorted by LOEUF; tissues hierarchically clustered)',
+        fontsize=13, fontweight='bold', y=0.995)
+
+    for ext in ('png', 'pdf'):
+        fig.savefig(os.path.join(OUT_DIR, f'{fname}.{ext}'),
+                    dpi=180, bbox_inches='tight', facecolor='white')
+    plt.close(fig)
+    print(f"  Saved {fname}.png/pdf")
+
+
+# Full heatmap (all 54 tissues)
+draw_heatmap(TISSUES, 'figure_phase1_gtex_heatmap',
+             f'{len(TISSUES)} tissues')
+
+# Limited heatmap (curated tissue subset)
+limited_tissues = [t for t in TISSUES if t not in EXCLUDE_TISSUES]
+draw_heatmap(limited_tissues, 'figure_phase1_gtex_heatmap_limited',
+             f'{len(limited_tissues)} tissues (curated)')
 
 print("\nDone!")
