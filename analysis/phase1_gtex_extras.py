@@ -270,7 +270,9 @@ def draw_heatmap(tissue_subset, fname, n_tissues_label):
     ax_loeuf.tick_params(axis='y', length=5, pad=4, direction='out')
     ax_loeuf.set_xlabel('LOEUF', fontsize=12, fontweight='bold', labelpad=10)
     for sp in ax_loeuf.spines.values():
-        sp.set_visible(False)
+        sp.set_visible(True)
+        sp.set_color('black')
+        sp.set_linewidth(0.8)
 
     # Gene names — between LOEUF bar and heatmap, right-aligned to the heatmap edge
     ax_names.set_xlim(0, 1)
