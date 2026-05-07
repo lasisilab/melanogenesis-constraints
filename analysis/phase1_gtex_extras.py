@@ -201,9 +201,18 @@ gene_order    = df.loc[gene_order_idx, 'gene'].values
 loeuf_order   = df.loc[gene_order_idx, 'LOEUF'].values
 
 loeuf_min, loeuf_max = loeuf_order.min(), loeuf_order.max()
-scale_vals = [v for v in [0.0, 1.0, 1.5, 2.0] if loeuf_min <= v <= loeuf_max]
-scale_pos  = [(v - loeuf_min) / (loeuf_max - loeuf_min) * (len(gene_order) - 1)
-              for v in scale_vals]
+scale_vals = [0.0, 1.0, 1.5, 2.0]
+
+
+def _loeuf_to_pos(v, n):
+    if v <= loeuf_min:
+        return 0
+    if v >= loeuf_max:
+        return n - 1
+    return (v - loeuf_min) / (loeuf_max - loeuf_min) * (n - 1)
+
+
+scale_pos = [_loeuf_to_pos(v, len(gene_order)) for v in scale_vals]
 
 EXCLUDE_TISSUES = {
     'Cells - EBV-transformed lymphocytes',
@@ -261,10 +270,10 @@ def draw_heatmap(tissue_subset, fname, n_tissues_label):
     ax_loeuf.imshow(loeuf_order.reshape(-1, 1), aspect='auto', cmap='viridis_r')
     ax_loeuf.set_xticks([])
     ax_loeuf.set_yticks(scale_pos)
-    ax_loeuf.set_yticklabels([f'{v:.1f}' for v in scale_vals], fontsize=9)
+    ax_loeuf.set_yticklabels([f'{v:.1f}' for v in scale_vals], fontsize=11)
     ax_loeuf.yaxis.tick_left()
-    ax_loeuf.tick_params(axis='y', length=4, pad=3, direction='out')
-    ax_loeuf.set_xlabel('LOEUF', fontsize=10, labelpad=8)
+    ax_loeuf.tick_params(axis='y', length=5, pad=4, direction='out')
+    ax_loeuf.set_xlabel('LOEUF', fontsize=12, fontweight='bold', labelpad=10)
     for sp in ax_loeuf.spines.values():
         sp.set_visible(False)
 
