@@ -268,7 +268,8 @@ def draw_heatmap(tissue_subset, fname, n_tissues_label):
     ax_loeuf.set_yticklabels([f'{v:.1f}' for v in scale_vals], fontsize=11)
     ax_loeuf.yaxis.tick_left()
     ax_loeuf.tick_params(axis='y', length=5, pad=4, direction='out')
-    ax_loeuf.set_xlabel('LOEUF', fontsize=12, fontweight='bold', labelpad=10)
+    ax_loeuf.set_ylabel('LOEUF', fontsize=12, fontweight='bold',
+                        rotation=90, labelpad=22)
     for sp in ax_loeuf.spines.values():
         sp.set_visible(True)
         sp.set_color('black')
@@ -298,7 +299,8 @@ def draw_heatmap(tissue_subset, fname, n_tissues_label):
               + names_width + gap_names_heat + heatmap_width + gap_heat_cbar)
     cbar_ax = fig.add_axes([cbar_x, bottom, strip_width, height])
     cb = fig.colorbar(im, cax=cbar_ax, orientation='vertical')
-    cb.set_label('log2(TPM + 1)', fontsize=11, rotation=270, labelpad=20)
+    cb.set_label('log2(TPM + 1)', fontsize=12, fontweight='bold',
+                 rotation=270, labelpad=22)
 
     fig.suptitle(
         f'GTEx expression heatmap — {n} network genes × {n_tissues_label}\n'
