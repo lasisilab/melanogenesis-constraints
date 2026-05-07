@@ -242,29 +242,24 @@ def draw_heatmap(tissue_subset, fname, n_tissues_label):
     n = len(gene_order)
     fig_width = max(14, round(22 * len(tissue_subset) / 54))
     fig = plt.figure(figsize=(fig_width, 22))
-    left          = 0.06
-    bottom        = 0.13
-    height        = 0.77
-    names_width   = 0.08
-    scale_gap     = 0.04    # space between gene names and LOEUF strip for scale labels
-    strip_width   = 0.013
-    gap           = 0.008
-    heatmap_width = 0.67
+    left            = 0.06
+    bottom          = 0.13
+    height          = 0.77
+    scale_gap       = 0.045   # space for LOEUF scale labels (LEFT of bar)
+    strip_width     = 0.013
+    gap_strip_names = 0.003
+    names_width     = 0.045   # gene names live BETWEEN bar and heatmap
+    gap_names_heat  = 0.003
+    heatmap_width   = 0.62
+    gap_heat_cbar   = 0.008
 
-    ax_names = fig.add_axes([left, bottom, names_width, height])
-    ax_loeuf = fig.add_axes([left + names_width + scale_gap, bottom, strip_width, height])
-    ax_h     = fig.add_axes([left + names_width + scale_gap + strip_width + gap,
+    # Order from LEFT → RIGHT: scale | LOEUF bar | gene names | heatmap | cbar
+    ax_loeuf = fig.add_axes([left + scale_gap, bottom, strip_width, height])
+    ax_names = fig.add_axes([left + scale_gap + strip_width + gap_strip_names,
+                             bottom, names_width, height])
+    ax_h     = fig.add_axes([left + scale_gap + strip_width + gap_strip_names
+                             + names_width + gap_names_heat,
                              bottom, heatmap_width, height])
-
-    # Gene names
-    ax_names.set_yticks(np.arange(n))
-    ax_names.set_yticklabels(gene_order, fontsize=7.5)
-    ax_names.set_ylim(-0.5, n - 0.5)
-    ax_names.invert_yaxis()
-    ax_names.set_xticks([])
-    ax_names.tick_params(axis='y', length=0, pad=3)
-    for sp in ax_names.spines.values():
-        sp.set_visible(False)
 
     # LOEUF bar with scale ticks on LEFT side, "LOEUF" label at bottom
     ax_loeuf.imshow(loeuf_order.reshape(-1, 1), aspect='auto', cmap='viridis_r')
@@ -277,6 +272,17 @@ def draw_heatmap(tissue_subset, fname, n_tissues_label):
     for sp in ax_loeuf.spines.values():
         sp.set_visible(False)
 
+    # Gene names — between LOEUF bar and heatmap, right-aligned to the heatmap edge
+    ax_names.set_xlim(0, 1)
+    ax_names.set_ylim(-0.5, n - 0.5)
+    ax_names.invert_yaxis()
+    ax_names.set_xticks([])
+    ax_names.set_yticks([])
+    for sp in ax_names.spines.values():
+        sp.set_visible(False)
+    for i, gene in enumerate(gene_order):
+        ax_names.text(1.0, i, gene, fontsize=7.5, ha='right', va='center')
+
     # Heatmap
     im = ax_h.imshow(heatmap_log, aspect='auto', cmap='magma',
                      vmin=0, vmax=np.percentile(heatmap_log, 99))
@@ -286,7 +292,8 @@ def draw_heatmap(tissue_subset, fname, n_tissues_label):
     ax_h.set_frame_on(False)
 
     # Expression colorbar
-    cbar_x = left + names_width + scale_gap + strip_width + gap + heatmap_width + gap
+    cbar_x = (left + scale_gap + strip_width + gap_strip_names
+              + names_width + gap_names_heat + heatmap_width + gap_heat_cbar)
     cbar_ax = fig.add_axes([cbar_x, bottom, strip_width, height])
     cb = fig.colorbar(im, cax=cbar_ax, orientation='vertical')
     cb.set_label('log2(TPM + 1)', fontsize=11, rotation=270, labelpad=20)
