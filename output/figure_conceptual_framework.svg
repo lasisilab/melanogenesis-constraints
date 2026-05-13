@@ -1,0 +1,296 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="constraintGrad" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a3d6c"/>
+      <stop offset="40%" stop-color="#6baed6"/>
+      <stop offset="70%" stop-color="#f5b8a0"/>
+      <stop offset="100%" stop-color="#b02020"/>
+    </linearGradient>
+    <linearGradient id="arrowGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a3d6c"/>
+      <stop offset="100%" stop-color="#b02020"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="720" fill="white"/>
+
+  <!-- Title -->
+  <text x="70" y="38" font-size="20" font-weight="bold" fill="#222">D</text>
+  <text x="95" y="38" font-size="16" font-weight="bold" fill="#333">Conceptual framework: Network position predicts evolvability</text>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- AXIS ANNOTATIONS -->
+  <!-- ═══════════════════════════════════════ -->
+
+  <!-- Y-axis: Betweenness centrality -->
+  <line x1="62" y1="80" x2="62" y2="590" stroke="#888" stroke-width="1.5"/>
+  <polygon points="62,75 56,90 68,90" fill="#888"/>
+  <polygon points="62,595 56,580 68,580" fill="#888"/>
+  <text transform="translate(30,340) rotate(-90)" text-anchor="middle" font-size="11" fill="#555" font-weight="bold">Betweenness centrality (within-pathway integration)</text>
+  <text x="62" y="68" text-anchor="middle" font-size="9" fill="#444" font-weight="bold">HIGH</text>
+  <text x="62" y="612" text-anchor="middle" font-size="9" fill="#444" font-weight="bold">LOW</text>
+
+  <!-- X-axis: KEGG pathway count -->
+  <line x1="80" y1="628" x2="720" y2="628" stroke="#888" stroke-width="1.5"/>
+  <polygon points="75,628 90,622 90,634" fill="#888"/>
+  <polygon points="725,628 710,622 710,634" fill="#888"/>
+  <text x="400" y="652" text-anchor="middle" font-size="11" fill="#555" font-weight="bold">KEGG pathway count (cross-system connectivity)</text>
+  <text x="80" y="652" text-anchor="middle" font-size="9" fill="#444" font-weight="bold">FEW</text>
+  <text x="720" y="652" text-anchor="middle" font-size="9" fill="#444" font-weight="bold">MANY</text>
+
+  <!-- (grid lines removed) -->
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- ZONE LABELS (corners) -->
+  <!-- ═══════════════════════════════════════ -->
+
+  <text x="100" y="100" font-size="10" font-weight="bold" fill="#AA6600" opacity="0.55" font-style="italic">Within-pathway hubs</text>
+  <text x="100" y="114" font-size="9" fill="#AA6600" opacity="0.45">High BC, few pathways</text>
+
+  <text x="700" y="100" text-anchor="end" font-size="10" font-weight="bold" fill="#2C5F8A" opacity="0.55" font-style="italic">Pleiotropic hubs</text>
+  <text x="700" y="114" text-anchor="end" font-size="9" fill="#2C5F8A" opacity="0.45">High BC, many pathways</text>
+
+  <text x="100" y="575" font-size="10" font-weight="bold" fill="#CC3333" opacity="0.55" font-style="italic">Peripheral specialists</text>
+  <text x="100" y="589" font-size="9" fill="#CC3333" opacity="0.45">Low BC, few pathways</text>
+
+  <text x="700" y="575" text-anchor="end" font-size="10" font-weight="bold" fill="#556688" opacity="0.55" font-style="italic">Cross-system connectors</text>
+  <text x="700" y="589" text-anchor="end" font-size="9" fill="#556688" opacity="0.45">Low BC, many pathways</text>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- NETWORK CONNECTIONS (behind nodes) -->
+  <!-- Based on known signaling relationships -->
+  <!-- Thicker, more visible to emphasize network topology -->
+  <!-- ═══════════════════════════════════════ -->
+
+  <!-- MAPK cascade: KITLG→KIT→MAP2K1→MAPK1 -->
+  <path d="M175,215 Q200,240 230,260" stroke="#b0b8c0" stroke-width="2.0" fill="none" opacity="0.6"/>
+  <path d="M230,260 Q420,340 600,380" stroke="#b0b8c0" stroke-width="1.8" fill="none" opacity="0.5"/>
+  <path d="M600,380 Q630,290 635,190" stroke="#b0b8c0" stroke-width="1.8" fill="none" opacity="0.5"/>
+
+  <!-- PI3K-AKT: PIK3CA→AKT1 -->
+  <path d="M630,145 Q615,158 590,175" stroke="#b0b8c0" stroke-width="2.0" fill="none" opacity="0.6"/>
+
+  <!-- KITLG→KIT→MITF -->
+  <path d="M175,215 Q165,180 160,145" stroke="#c8a898" stroke-width="2.0" fill="none" opacity="0.6"/>
+  <path d="M230,260 Q195,200 160,145" stroke="#c8a898" stroke-width="1.8" fill="none" opacity="0.55"/>
+
+  <!-- MITF→TYR/TYRP1/DCT (transcriptional targets) -->
+  <path d="M160,145 Q160,220 170,305" stroke="#d0a090" stroke-width="2.0" fill="none" opacity="0.55"/>
+  <path d="M160,145 Q130,330 130,525" stroke="#d0a090" stroke-width="1.5" fill="none" opacity="0.45"/>
+  <path d="M160,145 Q175,320 220,505" stroke="#d0a090" stroke-width="1.5" fill="none" opacity="0.45"/>
+
+  <!-- EDNRB→MITF -->
+  <path d="M145,190 Q150,168 160,145" stroke="#c8a898" stroke-width="2.0" fill="none" opacity="0.6"/>
+
+  <!-- AKT1→NFKB1 -->
+  <path d="M590,175 Q560,130 520,95" stroke="#b0b8c0" stroke-width="1.8" fill="none" opacity="0.55"/>
+
+  <!-- CREB1→NFKB1, CREB1→AKT1 -->
+  <path d="M395,158 Q455,120 520,95" stroke="#b0b8c0" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <path d="M395,158 Q490,155 590,175" stroke="#b0b8c0" stroke-width="1.5" fill="none" opacity="0.5"/>
+
+  <!-- GSK3B→CTNNB1 -->
+  <path d="M595,495 Q565,490 530,480" stroke="#b0b8c0" stroke-width="1.8" fill="none" opacity="0.55"/>
+
+  <!-- CTNNB1→MITF (Wnt pathway — long-range connection) -->
+  <path d="M530,480 Q340,350 160,145" stroke="#c8b8b0" stroke-width="1.3" fill="none" opacity="0.35" stroke-dasharray="6,3"/>
+
+  <!-- JAK1→STAT3 -->
+  <path d="M370,380 Q450,420 530,455" stroke="#b0b8c0" stroke-width="1.5" fill="none" opacity="0.5"/>
+
+  <!-- MC1R→MITF (cAMP signaling) -->
+  <path d="M115,430 Q120,290 160,145" stroke="#d0a090" stroke-width="1.3" fill="none" opacity="0.4" stroke-dasharray="6,3"/>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- GENE NODES -->
+  <!-- Positions approximate real BC (y) and KEGG (x) -->
+  <!-- Circle radius scaled by LOEUF (bigger = more evolvable) -->
+  <!-- Colors match functional categories -->
+  <!-- ═══════════════════════════════════════ -->
+
+  <!-- ── UPPER-RIGHT: Pleiotropic hubs ── -->
+
+  <!-- NFKB1: BC=0.215, KEGG=76, LOEUF=0.138 — Pleiotropic (blue) -->
+  <circle cx="520" cy="95" r="16" fill="#4878CF" opacity="0.9" stroke="white" stroke-width="2"/>
+  <text x="520" y="99" text-anchor="middle" font-size="8.5" font-weight="bold" font-style="italic" fill="white">NFKB1</text>
+  <text x="520" y="78" text-anchor="middle" font-size="7" fill="#666">0.14</text>
+
+  <!-- PIK3CA: BC=0.053, KEGG=109, LOEUF=0.117 — Pleiotropic (blue) -->
+  <circle cx="630" cy="145" r="15" fill="#4878CF" opacity="0.9" stroke="white" stroke-width="2"/>
+  <text x="630" y="149" text-anchor="middle" font-size="7.5" font-weight="bold" font-style="italic" fill="white">PIK3CA</text>
+  <text x="630" y="128" text-anchor="middle" font-size="7" fill="#666">0.12</text>
+
+  <!-- AKT1: BC=0.064, KEGG=103, LOEUF=0.315 — Pleiotropic (blue) -->
+  <circle cx="590" cy="175" r="19" fill="#4878CF" opacity="0.9" stroke="white" stroke-width="2"/>
+  <text x="590" y="179" text-anchor="middle" font-size="9" font-weight="bold" font-style="italic" fill="white">AKT1</text>
+  <text x="590" y="157" text-anchor="middle" font-size="7" fill="#666">0.32</text>
+
+  <!-- MAPK1: BC=0.030, KEGG=119, LOEUF=0.175 — Shared (gold) -->
+  <circle cx="635" cy="190" r="17" fill="#F5C242" opacity="0.9" stroke="white" stroke-width="2"/>
+  <text x="678" y="194" text-anchor="start" font-size="8.5" font-weight="bold" font-style="italic" fill="#555">MAPK1</text>
+  <text x="678" y="205" text-anchor="start" font-size="7" fill="#888">0.18</text>
+
+  <!-- CREB1: BC=0.076, KEGG=43, LOEUF=0.223 — Shared (gold) -->
+  <circle cx="395" cy="158" r="17" fill="#F5C242" opacity="0.9" stroke="white" stroke-width="2"/>
+  <text x="395" y="162" text-anchor="middle" font-size="8.5" font-weight="bold" font-style="italic" fill="#333">CREB1</text>
+  <text x="395" y="140" text-anchor="middle" font-size="7" fill="#666">0.22</text>
+
+  <!-- ── UPPER-LEFT: Within-pathway hubs ── -->
+
+  <!-- MITF: BC=0.082, KEGG=7, LOEUF=0.308 — Melanocyte regulatory (salmon) -->
+  <circle cx="160" cy="145" r="19" fill="#E8907E" opacity="0.9" stroke="white" stroke-width="2"/>
+  <text x="160" y="149" text-anchor="middle" font-size="9.5" font-weight="bold" font-style="italic" fill="white">MITF</text>
+  <text x="160" y="125" text-anchor="middle" font-size="7" fill="#666">0.31</text>
+
+  <!-- EDNRB: BC=0.062, KEGG=6, LOEUF=0.593 — Melanocyte regulatory (salmon) -->
+  <circle cx="145" cy="190" r="21" fill="#E8907E" opacity="0.9" stroke="white" stroke-width="2"/>
+  <text x="145" y="194" text-anchor="middle" font-size="8" font-weight="bold" font-style="italic" fill="white">EDNRB</text>
+  <text x="115" y="180" text-anchor="middle" font-size="7" fill="#666">0.59</text>
+
+  <!-- KITLG: BC=0.062, KEGG=8, LOEUF=0.419 — Shared (gold) -->
+  <circle cx="175" cy="215" r="19" fill="#F5C242" opacity="0.9" stroke="white" stroke-width="2"/>
+  <text x="175" y="219" text-anchor="middle" font-size="8" font-weight="bold" font-style="italic" fill="#333">KITLG</text>
+  <text x="202" y="230" text-anchor="start" font-size="7" fill="#666">0.42</text>
+
+  <!-- TYR: BC=0.027, KEGG=3, LOEUF=1.964 — Pigmentation enzymes (red) -->
+  <circle cx="170" cy="305" r="30" fill="#D94040" opacity="0.9" stroke="white" stroke-width="2"/>
+  <text x="170" y="309" text-anchor="middle" font-size="11" font-weight="bold" font-style="italic" fill="white">TYR</text>
+  <text x="205" y="310" text-anchor="start" font-size="7" fill="#666">1.96</text>
+
+  <!-- ── MIDDLE: KIT, JAK1, MAP2K1 ── -->
+
+  <!-- KIT: BC=0.068, KEGG=11, LOEUF=0.305 — Shared (gold) -->
+  <circle cx="230" cy="260" r="19" fill="#F5C242" opacity="0.9" stroke="white" stroke-width="2"/>
+  <text x="230" y="264" text-anchor="middle" font-size="9.5" font-weight="bold" font-style="italic" fill="#333">KIT</text>
+  <text x="253" y="260" text-anchor="start" font-size="7" fill="#666">0.31</text>
+
+  <!-- JAK1: BC=0.010, KEGG=28, LOEUF=0.214 — Pleiotropic (blue) -->
+  <circle cx="370" cy="380" r="17" fill="#4878CF" opacity="0.9" stroke="white" stroke-width="2"/>
+  <text x="370" y="384" text-anchor="middle" font-size="8.5" font-weight="bold" font-style="italic" fill="white">JAK1</text>
+  <text x="370" y="365" text-anchor="middle" font-size="7" fill="#666">0.21</text>
+
+  <!-- MAP2K1: BC=0.013, KEGG=91, LOEUF=0.377 — Shared (gold) -->
+  <circle cx="600" cy="380" r="19" fill="#F5C242" opacity="0.9" stroke="white" stroke-width="2"/>
+  <text x="600" y="384" text-anchor="middle" font-size="7.5" font-weight="bold" font-style="italic" fill="#333">MAP2K1</text>
+  <text x="600" y="363" text-anchor="middle" font-size="7" fill="#666">0.38</text>
+
+  <!-- ── LOWER-LEFT: Peripheral specialists ── -->
+
+  <!-- MC1R: BC=0.017, KEGG=3, LOEUF=1.967 — Pigmentation enzymes (red) -->
+  <circle cx="115" cy="430" r="30" fill="#D94040" opacity="0.9" stroke="white" stroke-width="2"/>
+  <text x="115" y="434" text-anchor="middle" font-size="9.5" font-weight="bold" font-style="italic" fill="white">MC1R</text>
+  <text x="90" y="460" text-anchor="middle" font-size="7" fill="#666">1.97</text>
+
+  <!-- TYRP1: BC=0.0004, KEGG=3, LOEUF=1.889 — Pigmentation enzymes (red) -->
+  <circle cx="130" cy="525" r="29" fill="#D94040" opacity="0.9" stroke="white" stroke-width="2"/>
+  <text x="130" y="529" text-anchor="middle" font-size="8.5" font-weight="bold" font-style="italic" fill="white">TYRP1</text>
+  <text x="130" y="556" text-anchor="middle" font-size="7" fill="#666">1.89</text>
+
+  <!-- DCT: BC=0.002, KEGG=3, LOEUF=1.174 — Pigmentation enzymes (red) -->
+  <circle cx="220" cy="505" r="24" fill="#D94040" opacity="0.9" stroke="white" stroke-width="2"/>
+  <text x="220" y="509" text-anchor="middle" font-size="9" font-weight="bold" font-style="italic" fill="white">DCT</text>
+  <text x="220" y="531" text-anchor="middle" font-size="7" fill="#666">1.17</text>
+
+  <!-- PAX3: BC=0.000, KEGG=1, LOEUF=0.475 — Melanocyte regulatory (salmon) -->
+  <circle cx="95" cy="575" r="20" fill="#E8907E" opacity="0.9" stroke="white" stroke-width="2"/>
+  <text x="95" y="579" text-anchor="middle" font-size="9" font-weight="bold" font-style="italic" fill="white">PAX3</text>
+  <text x="95" y="597" text-anchor="middle" font-size="7" fill="#666">0.48</text>
+
+  <!-- ── LOWER-RIGHT: Cross-system connectors ── -->
+
+  <!-- CTNNB1: BC=0.004, KEGG=33, LOEUF=0.129 — Shared (gold) -->
+  <circle cx="530" cy="480" r="15" fill="#F5C242" opacity="0.9" stroke="white" stroke-width="2"/>
+  <text x="530" y="484" text-anchor="middle" font-size="7" font-weight="bold" font-style="italic" fill="#333">CTNNB1</text>
+  <text x="530" y="498" text-anchor="middle" font-size="7" fill="#666">0.13</text>
+
+  <!-- GSK3B: BC=0.002, KEGG=48, LOEUF=0.334 — Shared (gold) -->
+  <circle cx="595" cy="495" r="18" fill="#F5C242" opacity="0.9" stroke="white" stroke-width="2"/>
+  <text x="595" y="499" text-anchor="middle" font-size="8" font-weight="bold" font-style="italic" fill="#333">GSK3B</text>
+  <text x="595" y="516" text-anchor="middle" font-size="7" fill="#666">0.33</text>
+
+  <!-- STAT3: BC=0.012, KEGG=33, LOEUF=0.095 — Pleiotropic (blue) -->
+  <circle cx="530" cy="455" r="14" fill="#4878CF" opacity="0.9" stroke="white" stroke-width="2"/>
+  <text x="530" y="459" text-anchor="middle" font-size="7.5" font-weight="bold" font-style="italic" fill="white">STAT3</text>
+  <text x="548" y="455" text-anchor="start" font-size="7" fill="#666">0.10</text>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- DIAGONAL CONSTRAINT GRADIENT -->
+  <!-- ═══════════════════════════════════════ -->
+
+  <!-- Diagonal constraint gradient: upper-right (constrained) to lower-left (evolvable) -->
+  <line x1="690" y1="82" x2="88" y2="605" stroke="url(#arrowGrad)" stroke-width="2.5" opacity="0.4" stroke-dasharray="10,5"/>
+
+  <!-- Arrowhead at constrained end (upper-right) -->
+  <polygon points="693,76 680,90 696,90" fill="#1a3d6c" opacity="0.5"/>
+
+  <!-- Arrowhead at evolvable end (lower-left) -->
+  <polygon points="82,610 95,596 80,600" fill="#b02020" opacity="0.5"/>
+
+  <!-- Constraint labels along diagonal -->
+  <text x="700" y="78" font-size="11" font-weight="bold" fill="#1a3d6c" opacity="0.75">Constrained</text>
+  <text x="700" y="92" font-size="8.5" fill="#1a3d6c" opacity="0.55">(low LOEUF)</text>
+  <text x="78" y="612" font-size="11" font-weight="bold" fill="#b02020" opacity="0.75" text-anchor="start">Evolvable</text>
+  <text x="78" y="626" font-size="8.5" fill="#b02020" opacity="0.55" text-anchor="start">(high LOEUF)</text>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- LEGEND -->
+  <!-- ═══════════════════════════════════════ -->
+
+  <rect x="760" y="80" width="185" height="260" rx="8" fill="#fafafa" stroke="#ddd" stroke-width="1"/>
+
+  <text x="852" y="102" text-anchor="middle" font-size="10" font-weight="bold" fill="#333">Legend</text>
+
+  <!-- Category colors -->
+  <text x="775" y="122" font-size="9" font-weight="bold" fill="#555">Functional category (color):</text>
+
+  <circle cx="785" cy="140" r="7" fill="#D94040" opacity="0.9"/>
+  <text x="798" y="144" font-size="8.5" fill="#444">Pigmentation enzymes</text>
+
+  <circle cx="785" cy="160" r="7" fill="#E8907E" opacity="0.9"/>
+  <text x="798" y="164" font-size="8.5" fill="#444">Melanocyte regulatory</text>
+
+  <circle cx="785" cy="180" r="7" fill="#F5C242" opacity="0.9"/>
+  <text x="798" y="184" font-size="8.5" fill="#444">Shared melan. signaling</text>
+
+  <circle cx="785" cy="200" r="7" fill="#4878CF" opacity="0.9"/>
+  <text x="798" y="204" font-size="8.5" fill="#444">Pleiotropic signaling</text>
+
+  <!-- Size = LOEUF -->
+  <text x="775" y="228" font-size="9" font-weight="bold" fill="#555">Constraint (node size):</text>
+
+  <circle cx="790" cy="248" r="10" fill="#999" opacity="0.5" stroke="white" stroke-width="1"/>
+  <text x="808" y="252" font-size="8" fill="#666">Small = constrained</text>
+
+  <circle cx="790" cy="273" r="18" fill="#999" opacity="0.5" stroke="white" stroke-width="1"/>
+  <text x="815" y="277" font-size="8" fill="#666">Large = evolvable</text>
+
+  <!-- LOEUF annotation -->
+  <text x="775" y="305" font-size="9" font-weight="bold" fill="#555">LOEUF values shown</text>
+  <text x="775" y="318" font-size="8" fill="#777">below/beside each node</text>
+  <text x="775" y="330" font-size="8" fill="#777">(gnomAD v2.1.1)</text>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- KEY INSIGHT BOX -->
+  <!-- ═══════════════════════════════════════ -->
+
+  <rect x="760" y="360" width="185" height="95" rx="8" fill="#fff8f0" stroke="#e0c8a0" stroke-width="1"/>
+  <text x="852" y="382" text-anchor="middle" font-size="9" font-weight="bold" fill="#AA6600">Key finding</text>
+  <text x="775" y="400" font-size="8.5" fill="#555">Pigmentation enzymes cluster</text>
+  <text x="775" y="414" font-size="8.5" fill="#555">in the lower-left: low centrality</text>
+  <text x="775" y="428" font-size="8.5" fill="#555">+ few pathways = reduced</text>
+  <text x="775" y="442" font-size="8.5" fill="#555">pleiotropic constraint → more</text>
+  <text x="775" y="456" font-size="8.5" fill="#555">evolvable (high LOEUF).</text>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- DATA SOURCE ANNOTATION -->
+  <!-- ═══════════════════════════════════════ -->
+
+  <text x="400" y="695" text-anchor="middle" font-size="8" fill="#999">
+    Gene positions reflect real betweenness centrality (Raghunath et al. 2015) and KEGG pathway counts.
+  </text>
+  <text x="400" y="708" text-anchor="middle" font-size="8" fill="#999">
+    Node sizes proportional to LOEUF (gnomAD v2.1.1). Lines indicate known signaling relationships.
+  </text>
+
+</svg>
