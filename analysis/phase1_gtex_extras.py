@@ -228,23 +228,124 @@ EXCLUDE_TISSUES = {
     'Esophagus - Gastroesophageal Junction',
 }
 
+# Manual tissue groupings for the limited (poster) heatmap.
+# Order within each group is preserved; groups are drawn left-to-right.
+TISSUE_GROUPS = [
+    ('Skin', [
+        'Skin - Sun Exposed (Lower leg)',
+        'Skin - Not Sun Exposed (Suprapubic)',
+    ]),
+    ('Neural / Pigment', [
+        'Brain - Substantia nigra',
+        'Cells - Cultured fibroblasts',
+        'Brain - Cerebellum',
+        'Brain - Cortex',
+        'Brain - Frontal Cortex (BA9)',
+        'Brain - Hippocampus',
+        'Brain - Hypothalamus',
+        'Brain - Amygdala',
+        'Brain - Spinal cord (cervical c-1)',
+        'Pituitary',
+        'Nerve - Tibial',
+    ]),
+    ('Cardiovascular', [
+        'Heart - Atrial Appendage',
+        'Heart - Left Ventricle',
+        'Artery - Aorta',
+        'Artery - Coronary',
+        'Artery - Tibial',
+    ]),
+    ('Endocrine / Metabolic', [
+        'Thyroid',
+        'Adrenal Gland',
+        'Pancreas',
+        'Liver',
+        'Adipose - Subcutaneous',
+        'Adipose - Visceral (Omentum)',
+    ]),
+    ('Respiratory / Excretory', [
+        'Lung',
+        'Kidney - Cortex',
+        'Kidney - Medulla',
+        'Bladder',
+    ]),
+    ('Female Reproductive', [
+        'Ovary',
+        'Uterus',
+        'Vagina',
+        'Cervix - Ectocervix',
+        'Cervix - Endocervix',
+        'Fallopian Tube',
+        'Breast - Mammary Tissue',
+    ]),
+    ('Male Reproductive', [
+        'Testis',
+        'Prostate',
+    ]),
+    ('Digestive', [
+        'Stomach',
+        'Colon - Sigmoid',
+        'Colon - Transverse',
+    ]),
+    ('Immune', [
+        'Whole Blood',
+        'Spleen',
+    ]),
+    ('Muscular', [
+        'Muscle - Skeletal',
+    ]),
+]
 
-def draw_heatmap(tissue_subset, fname, n_tissues_label):
+BOLD_TISSUES = {
+    'Skin - Sun Exposed (Lower leg)',
+    'Skin - Not Sun Exposed (Suprapubic)',
+    'Brain - Substantia nigra',
+    'Cells - Cultured fibroblasts',
+}
+BOX_TISSUES = {
+    'Skin - Sun Exposed (Lower leg)',
+    'Skin - Not Sun Exposed (Suprapubic)',
+}
+
+
+def draw_heatmap(tissue_subset, fname, n_tissues_label, groups=None):
     sub_expr = expr_df[tissue_subset].loc[gene_order]
     log_data = np.log2(sub_expr.values + 1)
 
-    # Hierarchical clustering of tissues (columns)
-    t_link  = linkage(pdist(log_data.T, metric='correlation'), method='average')
-    t_order = leaves_list(t_link)
-    heatmap_log    = log_data[:, t_order]
-    tissue_labels  = [tissue_subset[i] for i in t_order]
+    if groups is None:
+        # Hierarchical clustering of tissues (columns)
+        t_link  = linkage(pdist(log_data.T, metric='correlation'), method='average')
+        t_order = leaves_list(t_link)
+        heatmap_log   = log_data[:, t_order]
+        tissue_labels = [tissue_subset[i] for i in t_order]
+        group_boundaries = []   # (start_idx, end_idx, label)
+        cluster_method   = 'hierarchically clustered'
+    else:
+        # Manual ordering by groups
+        manual_order = []
+        group_boundaries = []
+        idx_lookup = {t: i for i, t in enumerate(tissue_subset)}
+        cursor = 0
+        for label, tissues in groups:
+            present = [t for t in tissues if t in idx_lookup]
+            if not present:
+                continue
+            start = cursor
+            for t in present:
+                manual_order.append(idx_lookup[t])
+            cursor += len(present)
+            group_boundaries.append((start, cursor, label))
+        heatmap_log   = log_data[:, manual_order]
+        tissue_labels = [tissue_subset[i] for i in manual_order]
+        cluster_method = 'grouped by system'
 
     n = len(gene_order)
-    fig_width = max(14, round(22 * len(tissue_subset) / 54))
+    fig_width = max(14, round(22 * len(tissue_labels) / 54))
     fig = plt.figure(figsize=(fig_width, 22))
     left            = 0.06
     bottom          = 0.13
-    height          = 0.77
+    # leave a little more room at the top when category headers are drawn
+    height          = 0.74 if groups is not None else 0.77
     scale_gap       = 0.045   # space for LOEUF scale labels (LEFT of bar)
     strip_width     = 0.013
     gap_strip_names = 0.003
@@ -294,6 +395,32 @@ def draw_heatmap(tissue_subset, fname, n_tissues_label):
     ax_h.set_yticks([])
     ax_h.set_frame_on(False)
 
+    # Bold tissue labels for skin + pigment-relevant tissues
+    for ticklabel, tname in zip(ax_h.get_xticklabels(), tissue_labels):
+        if tname in BOLD_TISSUES:
+            ticklabel.set_fontweight('bold')
+
+    # Group decorations: vertical separators, headers above heatmap, box around skin
+    if group_boundaries:
+        import matplotlib.patches as mpatches
+        for start, end, label in group_boundaries:
+            # Vertical separator at right edge of each group (except last)
+            if end < len(tissue_labels):
+                ax_h.axvline(end - 0.5, color='black', lw=0.8, alpha=0.55, zorder=4)
+            # Category header above the heatmap (y in axis coords; 1.0 = top edge)
+            center = (start + end - 1) / 2
+            ax_h.text(center, 1.005, label, ha='center', va='bottom',
+                      fontsize=10, fontweight='bold', color='#222',
+                      rotation=45, rotation_mode='anchor',
+                      transform=ax_h.get_xaxis_transform())
+            # Box around the Skin group (red, bold)
+            if label == 'Skin':
+                rect = mpatches.Rectangle(
+                    (start - 0.5, -0.5), end - start, n,
+                    linewidth=2.0, edgecolor='#c0282c', facecolor='none',
+                    zorder=5, clip_on=False)
+                ax_h.add_patch(rect)
+
     # Expression colorbar
     cbar_x = (left + scale_gap + strip_width + gap_strip_names
               + names_width + gap_names_heat + heatmap_width + gap_heat_cbar)
@@ -304,7 +431,7 @@ def draw_heatmap(tissue_subset, fname, n_tissues_label):
 
     fig.suptitle(
         f'GTEx expression heatmap — {n} network genes × {n_tissues_label}\n'
-        f'(genes sorted by LOEUF; tissues hierarchically clustered)',
+        f'(genes sorted by LOEUF; tissues {cluster_method})',
         fontsize=13, fontweight='bold', y=0.995)
 
     for ext in ('png', 'pdf'):
@@ -318,9 +445,10 @@ def draw_heatmap(tissue_subset, fname, n_tissues_label):
 draw_heatmap(TISSUES, 'figure_phase1_gtex_heatmap',
              f'{len(TISSUES)} tissues')
 
-# Limited heatmap (curated tissue subset)
+# Limited heatmap (curated tissue subset, grouped by system)
 limited_tissues = [t for t in TISSUES if t not in EXCLUDE_TISSUES]
 draw_heatmap(limited_tissues, 'figure_phase1_gtex_heatmap_limited',
-             f'{len(limited_tissues)} tissues (curated)')
+             f'{len(limited_tissues)} tissues (curated)',
+             groups=TISSUE_GROUPS)
 
 print("\nDone!")
