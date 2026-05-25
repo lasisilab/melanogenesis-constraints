@@ -96,6 +96,10 @@ master['gene'] = master['gene'].str.upper()
 kegg = pd.read_csv(KEGG_CSV)[['gene', 'kegg_pathway_count']]
 kegg['gene'] = kegg['gene'].str.upper()
 
+BREADTH_CSV = os.path.join(PROJECT_DIR, 'data', 'gtex_tissue_breadth.csv')
+breadth = pd.read_csv(BREADTH_CSV)[['gene', 'tissue_breadth']]
+breadth['gene'] = breadth['gene'].str.upper()
+
 HAS_PBS = os.path.exists(PBS_CSV)
 if HAS_PBS:
     pbs = pd.read_csv(PBS_CSV)[['gene', 'pbs1_african', 'pbs3_melanesian']]
@@ -126,11 +130,122 @@ else:
     print("  π data not found — Figure 5 will be skipped")
 
 df = (master[['gene', 'functional_category', 'LOEUF', 'betweenness_centrality', 'tau']]
-      .merge(kegg, on='gene', how='left')
-      .merge(pbs,  on='gene', how='left')
-      .merge(pi,   on='gene', how='left'))
+      .merge(kegg,    on='gene', how='left')
+      .merge(breadth, on='gene', how='left')
+      .merge(pbs,     on='gene', how='left')
+      .merge(pi,      on='gene', how='left'))
 
 print(f"  {len(df)} total genes; {df['tau'].notna().sum()} with tau")
+
+# ── Joint regression: does each axis independently predict LOEUF? ─────────
+# Addresses reviewer comment: marginal Spearman ρ shows that τ and connectivity
+# each track LOEUF, but does NOT establish that they do so *independently*.
+# A multiple regression with both predictors is needed for the "independent
+# axes" claim. We fit:
+#   M1: LOEUF ~ τ + log1p(kegg_pathway_count)        (cross-system axis)
+#   M2: LOEUF ~ τ + sqrt(betweenness_centrality)     (within-pathway axis)
+#   M3: LOEUF ~ τ + log1p(kegg) + sqrt(betweenness)  (all three)
+# Predictors are z-scored so coefficients are directly comparable.
+# Partial Spearman ρ is also reported as a rank-based complement (the rest of
+# the analyses use Spearman, so this keeps things consistent).
+
+import statsmodels.api as sm
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+
+def _zscore(s):
+    s = pd.to_numeric(s, errors='coerce')
+    return (s - s.mean()) / s.std(ddof=0)
+
+def _partial_spearman(df_in, x, y, controls):
+    """Spearman ρ between x and y after regressing both on controls (rank-based)."""
+    sub = df_in.dropna(subset=[x, y] + list(controls)).copy()
+    if len(sub) < 10:
+        return np.nan, np.nan, len(sub)
+    rx = sub[x].rank()
+    ry = sub[y].rank()
+    rc = sub[list(controls)].rank()
+    C = sm.add_constant(rc.values)
+    ex = rx.values - sm.OLS(rx.values, C).fit().fittedvalues
+    ey = ry.values - sm.OLS(ry.values, C).fit().fittedvalues
+    r, p = stats.spearmanr(ex, ey)
+    return r, p, len(sub)
+
+def _fit_and_format(df_in, predictors, label):
+    sub = df_in.dropna(subset=['LOEUF'] + list(predictors)).copy()
+    X = pd.DataFrame({p: _zscore(sub[p]) for p in predictors})
+    y = sub['LOEUF'].values
+    Xc = sm.add_constant(X.values)
+    res = sm.OLS(y, Xc).fit()
+    names = ['const'] + list(predictors)
+    out = [f"\n=== {label}  (n = {len(sub)}) ==="]
+    out.append(f"  LOEUF ~ {' + '.join(predictors)}   (predictors z-scored)")
+    out.append(f"  R² = {res.rsquared:.4f}    adj-R² = {res.rsquared_adj:.4f}    F p = {res.f_pvalue:.3e}")
+    out.append(f"  {'term':<28} {'β (std)':>10} {'SE':>8} {'t':>8} {'p':>12}")
+    for i, nm in enumerate(names):
+        out.append(f"  {nm:<28} {res.params[i]:>10.4f} {res.bse[i]:>8.4f} "
+                   f"{res.tvalues[i]:>8.3f} {res.pvalues[i]:>12.3e}")
+    # VIF (skip intercept)
+    if X.shape[1] >= 2:
+        out.append("  VIF:")
+        Xv = X.values
+        for i, nm in enumerate(predictors):
+            vif = variance_inflation_factor(np.column_stack([np.ones(len(Xv)), Xv]), i + 1)
+            out.append(f"    {nm:<26} {vif:>6.3f}")
+    return out, res, sub
+
+df['kegg_log1p']    = np.log1p(df['kegg_pathway_count'])
+df['betw_sqrt']     = np.sqrt(df['betweenness_centrality'].clip(lower=0))
+
+print("\nJoint regression of LOEUF on tissue specificity (τ) and network connectivity:")
+
+reg_lines = []
+reg_lines.append("phase2_tau_variants.py — joint regression of LOEUF on τ and network connectivity")
+reg_lines.append("=" * 78)
+reg_lines.append("Each model fits LOEUF as outcome. Predictors are z-scored before fitting so")
+reg_lines.append("coefficients (β) are directly comparable across predictors. VIF < 5 indicates")
+reg_lines.append("acceptable collinearity. Partial Spearman ρ is the rank-based analogue: it")
+reg_lines.append("measures the association between two predictors of LOEUF after controlling")
+reg_lines.append("for the other(s).")
+
+for predictors, label in [
+    (['tau', 'kegg_log1p'],                'Model 1: τ + log1p(KEGG pathway count)'),
+    (['tau', 'betw_sqrt'],                 'Model 2: τ + sqrt(betweenness centrality)'),
+    (['tau', 'kegg_log1p', 'betw_sqrt'],   'Model 3: τ + log1p(KEGG) + sqrt(betweenness)'),
+    (['tissue_breadth', 'kegg_log1p'],     'Model 4: GTEx tissue_breadth + log1p(KEGG)'),
+    (['tissue_breadth', 'betw_sqrt'],      'Model 5: GTEx tissue_breadth + sqrt(betweenness)'),
+    (['tissue_breadth', 'kegg_log1p', 'betw_sqrt'],
+                                           'Model 6: GTEx tissue_breadth + log1p(KEGG) + sqrt(betweenness)'),
+]:
+    lines, _, _ = _fit_and_format(df, predictors, label)
+    reg_lines.extend(lines)
+    for ln in lines:
+        print(ln)
+
+# Partial Spearman
+reg_lines.append("\n=== Partial Spearman ρ (rank-based) ===")
+print("\nPartial Spearman ρ (rank-based):")
+for (x, y, ctrl, lab) in [
+    ('tau',        'LOEUF', ['kegg_log1p'],            'ρ(τ, LOEUF | KEGG)'),
+    ('kegg_log1p', 'LOEUF', ['tau'],                   'ρ(KEGG, LOEUF | τ)'),
+    ('tau',        'LOEUF', ['betw_sqrt'],             'ρ(τ, LOEUF | betweenness)'),
+    ('betw_sqrt',  'LOEUF', ['tau'],                   'ρ(betweenness, LOEUF | τ)'),
+    ('tau',        'LOEUF', ['kegg_log1p', 'betw_sqrt'],'ρ(τ, LOEUF | KEGG, betweenness)'),
+    ('kegg_log1p', 'LOEUF', ['tau', 'betw_sqrt'],      'ρ(KEGG, LOEUF | τ, betweenness)'),
+    ('betw_sqrt',  'LOEUF', ['tau', 'kegg_log1p'],     'ρ(betweenness, LOEUF | τ, KEGG)'),
+    ('tissue_breadth', 'LOEUF', ['kegg_log1p'],        'ρ(breadth, LOEUF | KEGG)'),
+    ('kegg_log1p',     'LOEUF', ['tissue_breadth'],    'ρ(KEGG, LOEUF | breadth)'),
+    ('tissue_breadth', 'LOEUF', ['betw_sqrt'],         'ρ(breadth, LOEUF | betweenness)'),
+    ('betw_sqrt',      'LOEUF', ['tissue_breadth'],    'ρ(betweenness, LOEUF | breadth)'),
+]:
+    r, p, n = _partial_spearman(df, x, y, ctrl)
+    line = f"  {lab:<42}  ρ = {r:+.3f}   p = {p:.3e}   n = {n}"
+    reg_lines.append(line)
+    print(line)
+
+_reg_path = os.path.join(OUT_DIR, 'phase2_joint_regression.txt')
+with open(_reg_path, 'w') as _f:
+    _f.write("\n".join(reg_lines) + "\n")
+print(f"\n  Written: {_reg_path}")
 
 # ── Node size scaling (PBS → marker area) ─────────────────────────────────
 S_MIN, S_MAX = 20, 1400

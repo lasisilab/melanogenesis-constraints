@@ -546,9 +546,14 @@ else:
 
 X-axis = τ; Y-axis = betweenness centrality. Tests whether network position (hub vs.
 peripheral) also tracks tissue-specificity.
-Spearman ρ(τ, betweenness) = −0.158, p = 0.076: weak trend only — housekeeping genes
-tend toward slightly higher centrality but the relationship is not significant,
-suggesting tissue-specificity and network topology are largely independent axes.
+Spearman ρ(τ, betweenness) = −0.158, p = 0.076: a weak trend only — housekeeping
+genes tend toward slightly higher centrality but the relationship is not
+significant. In a joint regression of LOEUF on τ + betweenness (z-scored, n = 128),
+τ remains a strong predictor (β = +0.174, p = 2.5 × 10⁻⁵) and betweenness
+contributes weakly (β = −0.094, p = 0.020); once KEGG pathway count is also
+included, betweenness no longer adds significant signal (p = 0.19). Within-pathway
+centrality therefore overlaps with cross-system connectivity rather than indexing
+a distinct constraint axis.
 
 ```{python}
 #| echo: false
@@ -579,8 +584,18 @@ else:
 The color gradient reveals that **broadly expressed genes (blue) cluster toward
 lower LOEUF (more constrained) and span all connectivity levels**, while
 **tissue-specific genes (red) tend toward higher LOEUF**, irrespective of KEGG
-pathway count. The tissue-specificity axis (τ × LOEUF) is independent of the
-cross-system connectivity axis (KEGG × LOEUF).
+pathway count. A joint regression confirms that the tissue-specificity axis
+(τ × LOEUF) is **independent** of the cross-system connectivity axis
+(KEGG × LOEUF): fitting LOEUF ~ τ + log1p(KEGG) with z-scored predictors (n = 127)
+gives β<sub>τ</sub> = +0.126 (p = 3.6 × 10⁻³) and β<sub>KEGG</sub> = −0.126
+(p = 3.5 × 10⁻³), with VIF ≈ 1.22 ruling out collinearity. Replacing τ with the
+literal expression-breadth count (GTEx tissues with median TPM > 1) gives the
+same conclusion, slightly more strongly: β<sub>breadth</sub> = −0.135
+(p = 1.3 × 10⁻³) and β<sub>KEGG</sub> = −0.131 (p = 1.8 × 10⁻³), R² = 0.21.
+The rank-based partial Spearman ρ(τ, LOEUF | KEGG) = +0.23 (p = 9 × 10⁻³) and
+ρ(KEGG, LOEUF | τ) = −0.16 (p = 0.06) give the same picture: each axis
+contributes after controlling for the other. (Full table:
+[`output/phase2_joint_regression.txt`](../output/phase2_joint_regression.txt).)
 
 ---
 

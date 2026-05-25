@@ -1,0 +1,90 @@
+phase2_tau_variants.py — joint regression of LOEUF on τ and network connectivity
+==============================================================================
+Each model fits LOEUF as outcome. Predictors are z-scored before fitting so
+coefficients (β) are directly comparable across predictors. VIF < 5 indicates
+acceptable collinearity. Partial Spearman ρ is the rank-based analogue: it
+measures the association between two predictors of LOEUF after controlling
+for the other(s).
+
+=== Model 1: τ + log1p(KEGG pathway count)  (n = 127) ===
+  LOEUF ~ tau + kegg_log1p   (predictors z-scored)
+  R² = 0.1992    adj-R² = 0.1863    F p = 1.041e-06
+  term                            β (std)       SE        t            p
+  const                            0.6661   0.0384   17.357    5.525e-35
+  tau                              0.1260   0.0425    2.969    3.591e-03
+  kegg_log1p                      -0.1263   0.0425   -2.974    3.532e-03
+  VIF:
+    tau                         1.224
+    kegg_log1p                  1.224
+
+=== Model 2: τ + sqrt(betweenness centrality)  (n = 128) ===
+  LOEUF ~ tau + betw_sqrt   (predictors z-scored)
+  R² = 0.1876    adj-R² = 0.1746    F p = 2.291e-06
+  term                            β (std)       SE        t            p
+  const                            0.6755   0.0393   17.198    9.588e-35
+  tau                              0.1744   0.0398    4.381    2.470e-05
+  betw_sqrt                       -0.0939   0.0398   -2.359    1.987e-02
+  VIF:
+    tau                         1.027
+    betw_sqrt                   1.027
+
+=== Model 3: τ + log1p(KEGG) + sqrt(betweenness)  (n = 127) ===
+  LOEUF ~ tau + kegg_log1p + betw_sqrt   (predictors z-scored)
+  R² = 0.2106    adj-R² = 0.1913    F p = 2.033e-06
+  term                            β (std)       SE        t            p
+  const                            0.6661   0.0383   17.411    5.497e-35
+  tau                              0.1264   0.0423    2.987    3.398e-03
+  kegg_log1p                      -0.1055   0.0451   -2.340    2.090e-02
+  betw_sqrt                       -0.0549   0.0413   -1.330    1.861e-01
+  VIF:
+    tau                         1.224
+    kegg_log1p                  1.390
+    betw_sqrt                   1.163
+
+=== Model 4: GTEx tissue_breadth + log1p(KEGG)  (n = 127) ===
+  LOEUF ~ tissue_breadth + kegg_log1p   (predictors z-scored)
+  R² = 0.2116    adj-R² = 0.1989    F p = 3.965e-07
+  term                            β (std)       SE        t            p
+  const                            0.6661   0.0381   17.493    2.778e-35
+  tissue_breadth                  -0.1351   0.0409   -3.301    1.259e-03
+  kegg_log1p                      -0.1307   0.0409   -3.193    1.787e-03
+  VIF:
+    tissue_breadth              1.155
+    kegg_log1p                  1.155
+
+=== Model 5: GTEx tissue_breadth + sqrt(betweenness)  (n = 127) ===
+  LOEUF ~ tissue_breadth + betw_sqrt   (predictors z-scored)
+  R² = 0.1791    adj-R² = 0.1659    F p = 4.856e-06
+  term                            β (std)       SE        t            p
+  const                            0.6661   0.0389   17.143    1.645e-34
+  tissue_breadth                  -0.1691   0.0394   -4.297    3.471e-05
+  betw_sqrt                       -0.0869   0.0394   -2.209    2.904e-02
+  VIF:
+    tissue_breadth              1.026
+    betw_sqrt                   1.026
+
+=== Model 6: GTEx tissue_breadth + log1p(KEGG) + sqrt(betweenness)  (n = 127) ===
+  LOEUF ~ tissue_breadth + kegg_log1p + betw_sqrt   (predictors z-scored)
+  R² = 0.2212    adj-R² = 0.2022    F p = 9.030e-07
+  term                            β (std)       SE        t            p
+  const                            0.6661   0.0380   17.530    3.027e-35
+  tissue_breadth                  -0.1338   0.0409   -3.275    1.372e-03
+  kegg_log1p                      -0.1122   0.0435   -2.580    1.107e-02
+  betw_sqrt                       -0.0505   0.0410   -1.233    2.201e-01
+  VIF:
+    tissue_breadth              1.156
+    kegg_log1p                  1.310
+    betw_sqrt                   1.164
+
+=== Partial Spearman ρ (rank-based) ===
+  ρ(τ, LOEUF | KEGG)                          ρ = +0.231   p = 9.121e-03   n = 127
+  ρ(KEGG, LOEUF | τ)                          ρ = -0.164   p = 6.468e-02   n = 127
+  ρ(τ, LOEUF | betweenness)                   ρ = +0.314   p = 3.008e-04   n = 128
+  ρ(betweenness, LOEUF | τ)                   ρ = -0.148   p = 9.574e-02   n = 128
+  ρ(τ, LOEUF | KEGG, betweenness)             ρ = +0.229   p = 9.593e-03   n = 127
+  ρ(KEGG, LOEUF | τ, betweenness)             ρ = -0.145   p = 1.043e-01   n = 127
+  ρ(betweenness, LOEUF | τ, KEGG)             ρ = -0.062   p = 4.907e-01   n = 127
+  ρ(breadth, LOEUF | KEGG)                    ρ = -0.242   p = 6.095e-03   n = 127
+  ρ(KEGG, LOEUF | breadth)                    ρ = -0.208   p = 1.910e-02   n = 127
+  ρ(breadth, LOEUF | betweenness)             ρ = -0.302   p = 5.688e-04   n = 127
+  ρ(betweenness, LOEUF | breadth)             ρ = -0.149   p = 9.346e-02   n = 127
