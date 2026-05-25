@@ -159,7 +159,7 @@ def draw_bracket(ax, x1, x2, y, p_text, y_range, lw=1.0, fontsize=12):
 
 
 def scatter_panel(ax, data, x_col, rho, pval, xlabel, title, panel_letter,
-                  x_label_note=''):
+                  x_label_note='', x_endpoint_labels=None):
     """Scatter of x_col vs. LOEUF, colored by functional category."""
     for cat in CATEGORY_ORDER:
         sub = data[data['functional_category'] == cat]
@@ -208,6 +208,17 @@ def scatter_panel(ax, data, x_col, rho, pval, xlabel, title, panel_letter,
     ax.set_ylabel('LOEUF (higher = less constrained)', fontsize=12)
     ax.set_title(title, fontsize=13, fontweight='bold', loc='left', pad=8)
     ax.tick_params(labelsize=11)
+
+    # Directional endpoint labels under the x-axis (e.g., "Less connected" /
+    # "More connected") — sit just below the tick labels.
+    if x_endpoint_labels is not None:
+        left_lbl, right_lbl = x_endpoint_labels
+        ax.annotate(left_lbl, xy=(0.0, -0.14), xycoords='axes fraction',
+                    ha='left', va='top', fontsize=10, style='italic',
+                    color='#444444')
+        ax.annotate(right_lbl, xy=(1.0, -0.14), xycoords='axes fraction',
+                    ha='right', va='top', fontsize=10, style='italic',
+                    color='#444444')
     ax.text(-0.10, 1.06, panel_letter, transform=ax.transAxes, fontsize=20,
             fontweight='bold', va='top')
 
@@ -314,10 +325,10 @@ scatter_panel(
     ax_A, df_bc,
     x_col='betweenness_centrality',
     rho=rho_bc, pval=pval_bc,
-    xlabel='Betweenness centrality',
-    x_label_note='(within-pathway integration)',
+    xlabel='Network centrality (betweenness)',
     title='Network position vs.\nevolutionary constraint',
     panel_letter='A',
+    x_endpoint_labels=('← Less connected', 'More connected →'),
 )
 
 # ── Panel B: KEGG pathway count vs. LOEUF ─────────────────────────────────

@@ -67,12 +67,10 @@ def fit_zscored(df_in, predictors):
     return res, sub, X
 
 MODELS = [
-    ('Breadth + KEGG',         ['tissue_breadth', 'kegg_log1p']),
-    ('Breadth + betw.',        ['tissue_breadth', 'betw_sqrt']),
-    ('τ + KEGG',               ['tau',            'kegg_log1p']),
-    ('τ + betw.',              ['tau',            'betw_sqrt']),
-    ('Breadth + KEGG + betw.', ['tissue_breadth', 'kegg_log1p', 'betw_sqrt']),
-    ('τ + KEGG + betw.',       ['tau',            'kegg_log1p', 'betw_sqrt']),
+    ('Breadth + KEGG',  ['tissue_breadth', 'kegg_log1p']),
+    ('Breadth + betw.', ['tissue_breadth', 'betw_sqrt']),
+    ('τ + KEGG',        ['tau',            'kegg_log1p']),
+    ('τ + betw.',       ['tau',            'betw_sqrt']),
 ]
 
 fits = []
@@ -107,7 +105,7 @@ POINT_COLOR = '#E89A3C'   # uniform orange — category coloring removed
 colors = np.array([POINT_COLOR] * len(sub))
 
 # ── Figure ────────────────────────────────────────────────────────────────
-fig = plt.figure(figsize=(17, 7.2))
+fig = plt.figure(figsize=(17, 6.2))
 gs  = fig.add_gridspec(1, 3, width_ratios=[1.0, 1.0, 1.15], wspace=0.62)
 ax1 = fig.add_subplot(gs[0, 0])
 ax2 = fig.add_subplot(gs[0, 1])

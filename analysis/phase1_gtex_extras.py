@@ -195,24 +195,10 @@ print("  Saved figure_phase1_gtex_per_tissue.png/pdf")
 print("\nFigure 3: Clustered heatmap...")
 expr_df = df.set_index('gene')[TISSUES]
 
-# Sort genes by LOEUF (low = constrained at top)
-gene_order_idx = df['LOEUF'].sort_values().index
-gene_order    = df.loc[gene_order_idx, 'gene'].values
-loeuf_order   = df.loc[gene_order_idx, 'LOEUF'].values
-
-loeuf_min, loeuf_max = loeuf_order.min(), loeuf_order.max()
-scale_vals = [0.0, 1.0, 1.5, 2.0]
-
-
-def _loeuf_to_pos(v, n):
-    if v <= loeuf_min:
-        return 0
-    if v >= loeuf_max:
-        return n - 1
-    return (v - loeuf_min) / (loeuf_max - loeuf_min) * (n - 1)
-
-
-scale_pos = [_loeuf_to_pos(v, len(gene_order)) for v in scale_vals]
+# Master gene list — actual row order is computed per-heatmap via hierarchical
+# clustering of the normalized expression profiles (so genes with similar
+# tissue patterns cluster into modules).
+gene_order = df['gene'].values
 
 EXCLUDE_TISSUES = {
     'Cells - EBV-transformed lymphocytes',
@@ -299,8 +285,6 @@ TISSUE_GROUPS = [
 BOLD_TISSUES = {
     'Skin - Sun Exposed (Lower leg)',
     'Skin - Not Sun Exposed (Suprapubic)',
-    'Brain - Substantia nigra',
-    'Cells - Cultured fibroblasts',
 }
 BOX_TISSUES = {
     'Skin - Sun Exposed (Lower leg)',
@@ -311,12 +295,29 @@ BOX_TISSUES = {
 def draw_heatmap(tissue_subset, fname, n_tissues_label, groups=None):
     sub_expr = expr_df[tissue_subset].loc[gene_order]
     log_data = np.log2(sub_expr.values + 1)
+    # Row-normalize: each cell = x_i / max_i(x). Range 0–1. This is the
+    # "tau-style" expression view — tau = mean(1 - normalized) across tissues.
+    row_max  = log_data.max(axis=1, keepdims=True)
+    safe_max = np.where(row_max == 0, 1.0, row_max)
+    norm_data = log_data / safe_max
+    norm_data = np.where(row_max == 0, np.nan, norm_data)
+
+    # Hierarchical clustering of rows (genes) on the normalized profiles, so
+    # genes with similar tissue-expression patterns cluster into modules.
+    g_link  = linkage(pdist(np.nan_to_num(norm_data), metric='correlation'),
+                      method='average')
+    g_order = leaves_list(g_link)
+    norm_data    = norm_data[g_order]
+    gene_labels  = gene_order[g_order]
+    gene_sort_method = 'rows clustered by expression profile'
 
     if groups is None:
-        # Hierarchical clustering of tissues (columns)
-        t_link  = linkage(pdist(log_data.T, metric='correlation'), method='average')
+        # Hierarchical clustering of tissues (columns) — cluster on the
+        # normalized data so column ordering reflects the same view shown.
+        t_link  = linkage(pdist(np.nan_to_num(norm_data).T, metric='correlation'),
+                          method='average')
         t_order = leaves_list(t_link)
-        heatmap_log   = log_data[:, t_order]
+        heatmap_data  = norm_data[:, t_order]
         tissue_labels = [tissue_subset[i] for i in t_order]
         group_boundaries = []   # (start_idx, end_idx, label)
         cluster_method   = 'hierarchically clustered'
@@ -335,48 +336,30 @@ def draw_heatmap(tissue_subset, fname, n_tissues_label, groups=None):
                 manual_order.append(idx_lookup[t])
             cursor += len(present)
             group_boundaries.append((start, cursor, label))
-        heatmap_log   = log_data[:, manual_order]
+        heatmap_data  = norm_data[:, manual_order]
         tissue_labels = [tissue_subset[i] for i in manual_order]
         cluster_method = 'grouped by system'
 
-    n = len(gene_order)
+    n = len(gene_labels)
     fig_width = max(14, round(22 * len(tissue_labels) / 54))
     fig = plt.figure(figsize=(fig_width, 22))
     left            = 0.06
     bottom          = 0.13
     # leave a little more room at the top when category headers are drawn
-    height          = 0.74 if groups is not None else 0.77
-    scale_gap       = 0.045   # space for LOEUF scale labels (LEFT of bar)
+    # (the limited heatmap staggers headers across two rows)
+    height          = 0.66 if groups is not None else 0.77
     strip_width     = 0.013
-    gap_strip_names = 0.003
-    names_width     = 0.045   # gene names live BETWEEN bar and heatmap
+    names_width     = 0.045   # gene names sit at the left edge now
     gap_names_heat  = 0.003
     heatmap_width   = 0.62
     gap_heat_cbar   = 0.008
 
-    # Order from LEFT → RIGHT: scale | LOEUF bar | gene names | heatmap | cbar
-    ax_loeuf = fig.add_axes([left + scale_gap, bottom, strip_width, height])
-    ax_names = fig.add_axes([left + scale_gap + strip_width + gap_strip_names,
-                             bottom, names_width, height])
-    ax_h     = fig.add_axes([left + scale_gap + strip_width + gap_strip_names
-                             + names_width + gap_names_heat,
+    # Order from LEFT → RIGHT: gene names | heatmap | cbar
+    ax_names = fig.add_axes([left, bottom, names_width, height])
+    ax_h     = fig.add_axes([left + names_width + gap_names_heat,
                              bottom, heatmap_width, height])
 
-    # LOEUF bar with scale ticks on LEFT side, "LOEUF" label at bottom
-    ax_loeuf.imshow(loeuf_order.reshape(-1, 1), aspect='auto', cmap='viridis_r')
-    ax_loeuf.set_xticks([])
-    ax_loeuf.set_yticks(scale_pos)
-    ax_loeuf.set_yticklabels([f'{v:.1f}' for v in scale_vals], fontsize=11)
-    ax_loeuf.yaxis.tick_left()
-    ax_loeuf.tick_params(axis='y', length=5, pad=4, direction='out')
-    ax_loeuf.set_ylabel('LOEUF', fontsize=12, fontweight='bold',
-                        rotation=90, labelpad=22)
-    for sp in ax_loeuf.spines.values():
-        sp.set_visible(True)
-        sp.set_color('black')
-        sp.set_linewidth(0.8)
-
-    # Gene names — between LOEUF bar and heatmap, right-aligned to the heatmap edge
+    # Gene names — right-aligned to the heatmap edge
     ax_names.set_xlim(0, 1)
     ax_names.set_ylim(-0.5, n - 0.5)
     ax_names.invert_yaxis()
@@ -384,12 +367,12 @@ def draw_heatmap(tissue_subset, fname, n_tissues_label, groups=None):
     ax_names.set_yticks([])
     for sp in ax_names.spines.values():
         sp.set_visible(False)
-    for i, gene in enumerate(gene_order):
+    for i, gene in enumerate(gene_labels):
         ax_names.text(1.0, i, gene, fontsize=7.5, ha='right', va='center')
 
-    # Heatmap
-    im = ax_h.imshow(heatmap_log, aspect='auto', cmap='magma',
-                     vmin=0, vmax=np.percentile(heatmap_log, 99))
+    # Heatmap (row-normalized expression, 0–1)
+    im = ax_h.imshow(heatmap_data, aspect='auto', cmap='magma',
+                     vmin=0, vmax=1)
     ax_h.set_xticks(range(len(tissue_labels)))
     ax_h.set_xticklabels(tissue_labels, rotation=90, fontsize=11)
     ax_h.set_yticks([])
@@ -407,11 +390,12 @@ def draw_heatmap(tissue_subset, fname, n_tissues_label, groups=None):
             # Vertical separator at right edge of each group (except last)
             if end < len(tissue_labels):
                 ax_h.axvline(end - 0.5, color='black', lw=0.8, alpha=0.55, zorder=4)
-            # Category header above the heatmap (y in axis coords; 1.0 = top edge)
+            # Category header — rotated 90° so all labels share the same
+            # baseline regardless of group width.
             center = (start + end - 1) / 2
-            ax_h.text(center, 1.005, label, ha='center', va='bottom',
-                      fontsize=10, fontweight='bold', color='#222',
-                      rotation=45, rotation_mode='anchor',
+            ax_h.text(center, 1.14, label, ha='center', va='bottom',
+                      rotation=90, rotation_mode='anchor',
+                      fontsize=14, fontweight='bold', color='#222',
                       transform=ax_h.get_xaxis_transform())
             # Box around the Skin group (red, bold)
             if label == 'Skin':
@@ -421,17 +405,18 @@ def draw_heatmap(tissue_subset, fname, n_tissues_label, groups=None):
                     zorder=5, clip_on=False)
                 ax_h.add_patch(rect)
 
-    # Expression colorbar
-    cbar_x = (left + scale_gap + strip_width + gap_strip_names
-              + names_width + gap_names_heat + heatmap_width + gap_heat_cbar)
+    # Expression colorbar (row-normalized expression → τ component)
+    cbar_x = (left + names_width + gap_names_heat + heatmap_width + gap_heat_cbar)
     cbar_ax = fig.add_axes([cbar_x, bottom, strip_width, height])
     cb = fig.colorbar(im, cax=cbar_ax, orientation='vertical')
-    cb.set_label('log2(TPM + 1)', fontsize=12, fontweight='bold',
-                 rotation=270, labelpad=22)
+    cb.set_label('Relative expression  (x / max per gene)\n'
+                 'τ  =  mean(1 − this)  across tissues',
+                 fontsize=12, fontweight='bold', rotation=270, labelpad=32)
 
     fig.suptitle(
         f'GTEx expression heatmap — {n} network genes × {n_tissues_label}\n'
-        f'(genes sorted by LOEUF; tissues {cluster_method})',
+        f'({gene_sort_method}; cells = τ-style row-normalized expression; '
+        f'tissues {cluster_method})',
         fontsize=13, fontweight='bold', y=0.995)
 
     for ext in ('png', 'pdf'):
@@ -450,5 +435,683 @@ limited_tissues = [t for t in TISSUES if t not in EXCLUDE_TISSUES]
 draw_heatmap(limited_tissues, 'figure_phase1_gtex_heatmap_limited',
              f'{len(limited_tissues)} tissues (curated)',
              groups=TISSUE_GROUPS)
+
+# ===========================================================================
+# Figure 4: Skin-specificity sorted pair (all 54 tissues, two orderings)
+# ===========================================================================
+# Two side-by-side heatmaps showing the same data but ordered by two different
+# per-gene skin-specificity scores:
+#   LEFT  — Option 2: mean(norm in skin) − mean(norm in non-skin)
+#   RIGHT — Welch's t-statistic on log2(TPM+1), skin vs non-skin
+# Same tissue grouping/labels/separators as the limited heatmap, but uses all
+# 54 GTEx tissues. Keeps the curated limited heatmap (above) unchanged.
+
+SKIN_SET = {
+    'Skin - Sun Exposed (Lower leg)',
+    'Skin - Not Sun Exposed (Suprapubic)',
+}
+
+# Full tissue groupings — covers ALL 54 GTEx v8 tissues, including the ones
+# excluded from the curated limited heatmap.
+TISSUE_GROUPS_FULL = [
+    ('Skin', [
+        'Skin - Sun Exposed (Lower leg)',
+        'Skin - Not Sun Exposed (Suprapubic)',
+    ]),
+    ('Neural / Pigment', [
+        'Brain - Substantia nigra',
+        'Cells - Cultured fibroblasts',
+        'Brain - Cerebellum',
+        'Brain - Cerebellar Hemisphere',
+        'Brain - Cortex',
+        'Brain - Frontal Cortex (BA9)',
+        'Brain - Anterior cingulate cortex (BA24)',
+        'Brain - Hippocampus',
+        'Brain - Amygdala',
+        'Brain - Hypothalamus',
+        'Brain - Caudate (basal ganglia)',
+        'Brain - Nucleus accumbens (basal ganglia)',
+        'Brain - Putamen (basal ganglia)',
+        'Brain - Spinal cord (cervical c-1)',
+        'Pituitary',
+        'Nerve - Tibial',
+    ]),
+    ('Cardiovascular', [
+        'Heart - Atrial Appendage',
+        'Heart - Left Ventricle',
+        'Artery - Aorta',
+        'Artery - Coronary',
+        'Artery - Tibial',
+    ]),
+    ('Endocrine / Metabolic', [
+        'Thyroid',
+        'Adrenal Gland',
+        'Pancreas',
+        'Liver',
+        'Adipose - Subcutaneous',
+        'Adipose - Visceral (Omentum)',
+    ]),
+    ('Respiratory / Excretory', [
+        'Lung',
+        'Kidney - Cortex',
+        'Kidney - Medulla',
+        'Bladder',
+    ]),
+    ('Female Reproductive', [
+        'Ovary',
+        'Uterus',
+        'Vagina',
+        'Cervix - Ectocervix',
+        'Cervix - Endocervix',
+        'Fallopian Tube',
+        'Breast - Mammary Tissue',
+    ]),
+    ('Male Reproductive', [
+        'Testis',
+        'Prostate',
+    ]),
+    ('Digestive', [
+        'Stomach',
+        'Esophagus - Mucosa',
+        'Esophagus - Gastroesophageal Junction',
+        'Esophagus - Muscularis',
+        'Small Intestine - Terminal Ileum',
+        'Colon - Sigmoid',
+        'Colon - Transverse',
+        'Minor Salivary Gland',
+    ]),
+    ('Immune', [
+        'Whole Blood',
+        'Spleen',
+        'Cells - EBV-transformed lymphocytes',
+    ]),
+    ('Muscular', [
+        'Muscle - Skeletal',
+    ]),
+]
+
+
+def make_skin_sorted_panels_figure(fname='figure_phase1_gtex_heatmap_skin_sorted',
+                                   tau_threshold=0.7):
+    """Three side-by-side heatmaps over all 54 tissues, all rows sharing the
+    same τ-style normalized cells but ordered three different ways:
+        LEFT   — Welch's t-statistic (skin vs non-skin), descending
+        MIDDLE — τ-split: τ ≥ tau_threshold on top (sorted by Welch's t),
+                 τ < tau_threshold below (also sorted by Welch's t); a
+                 horizontal divider marks the split
+        RIGHT  — Composite score: Welch's t × τ, descending
+    """
+    print(f"\nFigure 4: Skin-specificity sorted panels ({fname})...")
+    tissue_subset = TISSUES
+    groups = TISSUE_GROUPS_FULL
+
+    # Per-gene τ aligned to gene_order
+    tau_map = dict(zip(df['gene'].values, df['tau'].values))
+    tau_values = np.array([tau_map[g] for g in gene_order])
+
+    sub_expr = expr_df[tissue_subset].loc[gene_order]
+    log_data = np.log2(sub_expr.values + 1)
+    row_max  = log_data.max(axis=1, keepdims=True)
+    safe_max = np.where(row_max == 0, 1.0, row_max)
+    norm_data = log_data / safe_max
+    norm_data = np.where(row_max == 0, np.nan, norm_data)
+
+    skin_mask = np.array([t in SKIN_SET for t in tissue_subset])
+
+    # Welch's t-statistic on log2(TPM+1), skin vs non-skin (per gene)
+    with np.errstate(invalid='ignore', divide='ignore'):
+        t_stat, _ = stats.ttest_ind(log_data[:, skin_mask],
+                                    log_data[:, ~skin_mask],
+                                    axis=1, equal_var=False)
+    t_stat = np.where(np.isnan(t_stat), -np.inf, t_stat)
+
+    # Ordering 1 — Welch's t descending
+    welch_order = np.argsort(-t_stat)
+
+    # Ordering 2 — τ split: high-τ block on top (sorted by Welch's t),
+    #             low-τ block below (also sorted by Welch's t).
+    high_tau_idx = np.where(tau_values >= tau_threshold)[0]
+    low_tau_idx  = np.where(tau_values <  tau_threshold)[0]
+    high_sorted  = high_tau_idx[np.argsort(-t_stat[high_tau_idx])]
+    low_sorted   = low_tau_idx[np.argsort(-t_stat[low_tau_idx])]
+    split_order   = np.concatenate([high_sorted, low_sorted])
+    split_boundary = len(high_sorted)   # first row index of low-τ block
+
+    # Ordering 3 — Composite = Welch's t × τ
+    finite_t   = np.where(np.isfinite(t_stat), t_stat, np.nan)
+    composite  = finite_t * tau_values
+    composite_order = np.argsort(-np.where(np.isnan(composite), -np.inf, composite))
+
+    # Column ordering by tissue group
+    manual_order = []
+    group_boundaries = []
+    idx_lookup = {t: i for i, t in enumerate(tissue_subset)}
+    cursor = 0
+    for label, tissues in groups:
+        present = [t for t in tissues if t in idx_lookup]
+        if not present:
+            continue
+        start = cursor
+        for t in present:
+            manual_order.append(idx_lookup[t])
+        cursor += len(present)
+        group_boundaries.append((start, cursor, label))
+
+    norm_grouped  = norm_data[:, manual_order]
+    tissue_labels = [tissue_subset[i] for i in manual_order]
+    n = len(gene_order)
+
+    finite_t_vals = t_stat[np.isfinite(t_stat)]
+    finite_comp   = composite[np.isfinite(composite)]
+
+    panels = [
+        {
+            'order': welch_order,
+            'title': "Welch's t-statistic\n(skin vs non-skin)",
+            'subtitle': f"range: {finite_t_vals.min():+.1f} → {finite_t_vals.max():+.1f}",
+            'divider': None,
+        },
+        {
+            'order': split_order,
+            'title': f"τ-split  (τ ≥ {tau_threshold} on top,  τ < {tau_threshold} below)\n"
+                     "rows within each block sorted by Welch's t",
+            'subtitle': f"{len(high_sorted)} high-τ  ·  {len(low_sorted)} low-τ",
+            'divider': split_boundary,
+        },
+        {
+            'order': composite_order,
+            'title': "Composite:  Welch's t × τ\n(combines skin-enrichment and overall tissue-specificity)",
+            'subtitle': f"range: {finite_comp.min():+.1f} → {finite_comp.max():+.1f}",
+            'divider': None,
+        },
+    ]
+
+    # ── Figure layout (figure-fraction coords) ─────────────────────────────
+    fig = plt.figure(figsize=(36, 22))
+    bottom        = 0.10
+    height        = 0.62
+    left_margin   = 0.022
+    names_w       = 0.026
+    gap_nh        = 0.002
+    heatmap_w     = 0.270
+    panel_gap     = 0.022
+    gap_cbar      = 0.006
+    cbar_w        = 0.008
+
+    import matplotlib.patches as mpatches
+
+    def _draw_panel(ax_h, ax_names, data, genes, divider, panel_idx):
+        im = ax_h.imshow(data, aspect='auto', cmap='magma', vmin=0, vmax=1)
+        ax_h.set_xticks(range(len(tissue_labels)))
+        ax_h.set_xticklabels(tissue_labels, rotation=90, fontsize=8)
+        ax_h.set_yticks([])
+        ax_h.set_frame_on(False)
+        for ticklabel, tname in zip(ax_h.get_xticklabels(), tissue_labels):
+            if tname in BOLD_TISSUES:
+                ticklabel.set_fontweight('bold')
+        for start, end, label in group_boundaries:
+            if end < len(tissue_labels):
+                ax_h.axvline(end - 0.5, color='black', lw=0.8, alpha=0.55,
+                             zorder=4)
+            center = (start + end - 1) / 2
+            ax_h.text(center, 1.14, label, ha='center', va='bottom',
+                      rotation=90, rotation_mode='anchor',
+                      fontsize=12, fontweight='bold', color='#222',
+                      transform=ax_h.get_xaxis_transform())
+            if label == 'Skin':
+                rect = mpatches.Rectangle(
+                    (start - 0.5, -0.5), end - start, n,
+                    linewidth=2.0, edgecolor='#c0282c', facecolor='none',
+                    zorder=5, clip_on=False)
+                ax_h.add_patch(rect)
+        # Horizontal divider for τ-split panel
+        if divider is not None:
+            ax_h.axhline(divider - 0.5, color='#1f6feb', lw=2.0, zorder=6)
+            ax_h.text(-0.5, divider - 0.5, ' τ-split',
+                      ha='left', va='center', fontsize=10, fontweight='bold',
+                      color='#1f6feb', zorder=6,
+                      transform=ax_h.get_yaxis_transform())
+        # Gene names (on the left of each panel)
+        ax_names.set_xlim(0, 1)
+        ax_names.set_ylim(-0.5, n - 0.5)
+        ax_names.invert_yaxis()
+        ax_names.set_xticks([])
+        ax_names.set_yticks([])
+        for sp in ax_names.spines.values():
+            sp.set_visible(False)
+        for i, gene in enumerate(genes):
+            ax_names.text(1.0, i, gene, fontsize=7, ha='right', va='center')
+        return im
+
+    im = None
+    panel_centers = []
+    cursor_x = left_margin
+    for idx, panel in enumerate(panels):
+        ax_names = fig.add_axes([cursor_x, bottom, names_w, height])
+        ax_h     = fig.add_axes([cursor_x + names_w + gap_nh, bottom,
+                                 heatmap_w, height])
+        data  = norm_grouped[panel['order']]
+        genes = gene_order[panel['order']]
+        im_now = _draw_panel(ax_h, ax_names, data, genes,
+                             panel['divider'], idx)
+        if im is None:
+            im = im_now
+        panel_centers.append(cursor_x + names_w + gap_nh + heatmap_w / 2)
+        cursor_x += names_w + gap_nh + heatmap_w + panel_gap
+
+    cbar_x  = cursor_x - panel_gap + gap_cbar
+    cbar_ax = fig.add_axes([cbar_x, bottom, cbar_w, height])
+
+    # Panel titles ABOVE the rotated group labels
+    panel_title_y    = 0.945
+    panel_subtitle_y = 0.915
+    for cx, panel in zip(panel_centers, panels):
+        fig.text(cx, panel_title_y, panel['title'],
+                 ha='center', va='bottom', fontsize=14, fontweight='bold',
+                 linespacing=1.15)
+        fig.text(cx, panel_subtitle_y, panel['subtitle'],
+                 ha='center', va='top', fontsize=11, color='#555')
+
+    cb = fig.colorbar(im, cax=cbar_ax, orientation='vertical')
+    cb.set_label('Relative expression  (x / max per gene)\n'
+                 'τ  =  mean(1 − this)  across tissues',
+                 fontsize=12, fontweight='bold', rotation=270, labelpad=32)
+
+    fig.suptitle(
+        f'Skin-specificity orderings — {n} network genes × '
+        f'{len(tissue_labels)} GTEx tissues\n'
+        f'(cells = τ-style row-normalized expression; tissues grouped by system)',
+        fontsize=16, fontweight='bold', y=0.985)
+
+    for ext in ('png', 'pdf'):
+        path = os.path.join(OUT_DIR, f'{fname}.{ext}')
+        fig.savefig(path, dpi=180, bbox_inches='tight', facecolor='white')
+    plt.close(fig)
+    print(f"  Saved {fname}.png/pdf")
+
+
+make_skin_sorted_panels_figure()
+
+
+def make_skin_split_only_figure(fname='figure_phase1_gtex_heatmap_skin_split',
+                                tau_threshold=0.7):
+    """Standalone single-panel version of the τ-split heatmap: high-τ block
+    (tissue-specific) on top sorted by Welch's t, low-τ block (broadly
+    expressed) below also sorted by Welch's t, with a horizontal divider
+    marking the τ cutoff."""
+    print(f"\nFigure 5: τ-split heatmap only ({fname})...")
+    tissue_subset = TISSUES
+    groups = TISSUE_GROUPS_FULL
+
+    tau_map = dict(zip(df['gene'].values, df['tau'].values))
+    tau_values = np.array([tau_map[g] for g in gene_order])
+
+    sub_expr = expr_df[tissue_subset].loc[gene_order]
+    log_data = np.log2(sub_expr.values + 1)
+    row_max  = log_data.max(axis=1, keepdims=True)
+    safe_max = np.where(row_max == 0, 1.0, row_max)
+    norm_data = log_data / safe_max
+    norm_data = np.where(row_max == 0, np.nan, norm_data)
+
+    skin_mask = np.array([t in SKIN_SET for t in tissue_subset])
+    with np.errstate(invalid='ignore', divide='ignore'):
+        t_stat, _ = stats.ttest_ind(log_data[:, skin_mask],
+                                    log_data[:, ~skin_mask],
+                                    axis=1, equal_var=False)
+    t_stat = np.where(np.isnan(t_stat), -np.inf, t_stat)
+
+    high_tau_idx = np.where(tau_values >= tau_threshold)[0]
+    low_tau_idx  = np.where(tau_values <  tau_threshold)[0]
+    high_sorted  = high_tau_idx[np.argsort(-t_stat[high_tau_idx])]
+    low_sorted   = low_tau_idx[np.argsort(-t_stat[low_tau_idx])]
+    split_order  = np.concatenate([high_sorted, low_sorted])
+    split_boundary = len(high_sorted)
+
+    # Column ordering
+    manual_order = []
+    group_boundaries = []
+    idx_lookup = {t: i for i, t in enumerate(tissue_subset)}
+    cursor = 0
+    for label, tissues in groups:
+        present = [t for t in tissues if t in idx_lookup]
+        if not present:
+            continue
+        start = cursor
+        for t in present:
+            manual_order.append(idx_lookup[t])
+        cursor += len(present)
+        group_boundaries.append((start, cursor, label))
+
+    norm_grouped  = norm_data[:, manual_order]
+    tissue_labels = [tissue_subset[i] for i in manual_order]
+    n = len(gene_order)
+
+    data  = norm_grouped[split_order]
+    genes = gene_order[split_order]
+
+    # Layout: gene names | heatmap | cbar
+    fig = plt.figure(figsize=(16, 22))
+    bottom        = 0.10
+    height        = 0.62
+    left          = 0.06
+    names_w       = 0.045
+    gap_nh        = 0.003
+    heatmap_w     = 0.78
+    gap_cbar      = 0.008
+    cbar_w        = 0.012
+
+    ax_names = fig.add_axes([left, bottom, names_w, height])
+    ax_h     = fig.add_axes([left + names_w + gap_nh, bottom,
+                             heatmap_w, height])
+    cbar_x   = left + names_w + gap_nh + heatmap_w + gap_cbar
+    cbar_ax  = fig.add_axes([cbar_x, bottom, cbar_w, height])
+
+    import matplotlib.patches as mpatches
+
+    im = ax_h.imshow(data, aspect='auto', cmap='magma', vmin=0, vmax=1)
+    ax_h.set_xticks([])
+    ax_h.set_yticks([])
+    ax_h.set_frame_on(False)
+
+    for start, end, label in group_boundaries:
+        if end < len(tissue_labels):
+            ax_h.axvline(end - 0.5, color='black', lw=0.8, alpha=0.55, zorder=4)
+        center = (start + end - 1) / 2
+        # Category label below the heatmap (replaces per-tissue names),
+        # rotated to read top-to-bottom (anchor at top, text extends down).
+        ax_h.text(center, -0.02, label, ha='right', va='center',
+                  rotation=90, rotation_mode='anchor',
+                  fontsize=14, fontweight='bold', color='#222',
+                  transform=ax_h.get_xaxis_transform())
+        if label == 'Skin':
+            rect = mpatches.Rectangle(
+                (start - 0.5, -0.5), end - start, n,
+                linewidth=2.0, edgecolor='#c0282c', facecolor='none',
+                zorder=5, clip_on=False)
+            ax_h.add_patch(rect)
+
+    # τ-split divider line
+    ax_h.axhline(split_boundary - 0.5, color='#1f6feb', lw=2.5, zorder=6)
+
+    # Gene names
+    ax_names.set_xlim(0, 1)
+    ax_names.set_ylim(-0.5, n - 0.5)
+    ax_names.invert_yaxis()
+    ax_names.set_xticks([])
+    ax_names.set_yticks([])
+    for sp in ax_names.spines.values():
+        sp.set_visible(False)
+    for i, gene in enumerate(genes):
+        ax_names.text(1.0, i, gene, fontsize=8, ha='right', va='center')
+
+    cb = fig.colorbar(im, cax=cbar_ax, orientation='vertical')
+    cb.set_label('Relative expression  (x / max per gene)\n'
+                 'τ  =  mean(1 − this)  across tissues',
+                 fontsize=12, fontweight='bold', rotation=270, labelpad=32)
+
+    fig.suptitle(
+        f'τ-split skin-specificity heatmap — {n} network genes × '
+        f'{len(tissue_labels)} GTEx tissues\n'
+        f'tissue-specific (τ ≥ {tau_threshold}) on top, broadly expressed below; '
+        "within each block rows are sorted by Welch's t (skin vs non-skin)",
+        fontsize=14, fontweight='bold', y=0.985)
+
+    for ext in ('png', 'pdf'):
+        path = os.path.join(OUT_DIR, f'{fname}.{ext}')
+        fig.savefig(path, dpi=180, bbox_inches='tight', facecolor='white')
+    plt.close(fig)
+    print(f"  Saved {fname}.png/pdf")
+
+
+make_skin_split_only_figure()
+
+
+# ===========================================================================
+# Figure 6: τ-split heatmap with selection-quadrant side bar (overlay)
+# ===========================================================================
+# Overlays the population-specific-selection axis from phase2_pop_difference.py
+# directly onto the τ-split heatmap. Each gene row gets a colored cell in a
+# slim column between the gene names and the heatmap, with the same purple /
+# yellow-green / teal / grey palette as the PBS quadrant scatter. Lets the
+# reader see at a glance whether Melanesian-specific selection (yellow-green)
+# concentrates in the upper, tissue-restricted block and African-specific
+# selection (purple) concentrates in the lower, broadly-expressed block.
+COLOR_AFR  = '#6600cc'    # purple — African-specific
+COLOR_MEL  = '#ccff00'    # yellow-green — Melanesian-specific
+COLOR_BOTH = '#00daa7'    # teal — both
+COLOR_NONE = '#cccccc'    # light gray — neither
+QUAD_COLORS = {'African': COLOR_AFR, 'Melanesian': COLOR_MEL,
+               'Both': COLOR_BOTH, 'Neither': COLOR_NONE,
+               'No PBS': '#ffffff'}
+
+
+def make_skin_split_with_selection_figure(
+        fname='figure_phase1_gtex_heatmap_skin_split_selection',
+        tau_threshold=0.7):
+    """τ-split heatmap with a selection-quadrant side bar to overlay the
+    PBS-quadrant analysis on the tissue-specificity heatmap."""
+    print(f"\nFigure 6: τ-split heatmap with selection overlay ({fname})...")
+    tissue_subset = TISSUES
+    groups = TISSUE_GROUPS_FULL
+
+    # Per-gene τ
+    tau_map = dict(zip(df['gene'].values, df['tau'].values))
+    tau_values = np.array([tau_map[g] for g in gene_order])
+
+    # Load PBS data and assign quadrants (same logic as phase2_pop_difference.py)
+    pbs_csv = os.path.join(PROJECT_DIR, 'data', 'pbs_per_gene.csv')
+    pbs = pd.read_csv(pbs_csv)[['gene', 'pbs1_african', 'pbs3_melanesian']]
+    pbs['gene'] = pbs['gene'].str.upper()
+    pbs_for_genes = (pd.DataFrame({'gene': gene_order})
+                     .merge(pbs, on='gene', how='left'))
+    thr_a = pbs_for_genes['pbs1_african'].quantile(0.75)
+    thr_m = pbs_for_genes['pbs3_melanesian'].quantile(0.75)
+
+    def _q(row):
+        if pd.isna(row['pbs1_african']) or pd.isna(row['pbs3_melanesian']):
+            return 'No PBS'
+        hi_a = row['pbs1_african']    >= thr_a
+        hi_m = row['pbs3_melanesian'] >= thr_m
+        if hi_a and hi_m: return 'Both'
+        if hi_a:          return 'African'
+        if hi_m:          return 'Melanesian'
+        return 'Neither'
+
+    quadrants = pbs_for_genes.apply(_q, axis=1).values
+
+    # ── Stats: contingency between τ-block and selection quadrant ────────
+    tau_block = np.where(tau_values >= tau_threshold, 'high-τ', 'low-τ')
+
+    print(f"\n  Contingency (τ-block × selection quadrant), all genes:")
+    contingency_full = pd.crosstab(pd.Series(tau_block, name='τ-block'),
+                                   pd.Series(quadrants, name='quadrant'))
+    print(contingency_full.to_string())
+
+    afr_mel_mask = np.isin(quadrants, ['African', 'Melanesian'])
+    table_2x2 = pd.crosstab(pd.Series(tau_block[afr_mel_mask], name='τ-block'),
+                            pd.Series(quadrants[afr_mel_mask], name='quadrant'))
+    # Force consistent row/column order for the test
+    for col in ['African', 'Melanesian']:
+        if col not in table_2x2.columns:
+            table_2x2[col] = 0
+    for row in ['high-τ', 'low-τ']:
+        if row not in table_2x2.index:
+            table_2x2.loc[row] = 0
+    table_2x2 = table_2x2.loc[['high-τ', 'low-τ'], ['African', 'Melanesian']]
+    print("\n  Restricted to African-specific and Melanesian-specific only:")
+    print(table_2x2.to_string())
+    odds, p_fisher = stats.fisher_exact(table_2x2.values)
+    print(f"  Fisher's exact:  OR = {odds:.3f},  p = {p_fisher:.3e}")
+
+    # ── Expression data + Welch's t for row ordering (mirrors split-only) ─
+    sub_expr = expr_df[tissue_subset].loc[gene_order]
+    log_data = np.log2(sub_expr.values + 1)
+    row_max  = log_data.max(axis=1, keepdims=True)
+    safe_max = np.where(row_max == 0, 1.0, row_max)
+    norm_data = log_data / safe_max
+    norm_data = np.where(row_max == 0, np.nan, norm_data)
+
+    skin_mask = np.array([t in SKIN_SET for t in tissue_subset])
+    with np.errstate(invalid='ignore', divide='ignore'):
+        t_stat, _ = stats.ttest_ind(log_data[:, skin_mask],
+                                    log_data[:, ~skin_mask],
+                                    axis=1, equal_var=False)
+    t_stat = np.where(np.isnan(t_stat), -np.inf, t_stat)
+
+    high_tau_idx = np.where(tau_values >= tau_threshold)[0]
+    low_tau_idx  = np.where(tau_values <  tau_threshold)[0]
+    high_sorted  = high_tau_idx[np.argsort(-t_stat[high_tau_idx])]
+    low_sorted   = low_tau_idx[np.argsort(-t_stat[low_tau_idx])]
+    split_order  = np.concatenate([high_sorted, low_sorted])
+    split_boundary = len(high_sorted)
+
+    manual_order = []
+    group_boundaries = []
+    idx_lookup = {t: i for i, t in enumerate(tissue_subset)}
+    cursor = 0
+    for label, tissues in groups:
+        present = [t for t in tissues if t in idx_lookup]
+        if not present:
+            continue
+        start = cursor
+        for t in present:
+            manual_order.append(idx_lookup[t])
+        cursor += len(present)
+        group_boundaries.append((start, cursor, label))
+
+    norm_grouped  = norm_data[:, manual_order]
+    tissue_labels = [tissue_subset[i] for i in manual_order]
+    n = len(gene_order)
+
+    data       = norm_grouped[split_order]
+    genes      = gene_order[split_order]
+    quad_order = quadrants[split_order]
+
+    # ── Layout: gene names | quadrant bar | heatmap | cbar ───────────────
+    fig = plt.figure(figsize=(16, 22))
+    bottom    = 0.10
+    height    = 0.62
+    left      = 0.04
+    names_w   = 0.045
+    gap_nq    = 0.002
+    quad_w    = 0.014
+    gap_qh    = 0.005
+    heatmap_w = 0.74
+    gap_cbar  = 0.008
+    cbar_w    = 0.012
+
+    ax_names = fig.add_axes([left, bottom, names_w, height])
+    ax_quad  = fig.add_axes([left + names_w + gap_nq, bottom,
+                             quad_w, height])
+    ax_h     = fig.add_axes([left + names_w + gap_nq + quad_w + gap_qh,
+                             bottom, heatmap_w, height])
+    cbar_x   = (left + names_w + gap_nq + quad_w + gap_qh
+                + heatmap_w + gap_cbar)
+    cbar_ax  = fig.add_axes([cbar_x, bottom, cbar_w, height])
+
+    import matplotlib.patches as mpatches
+
+    im = ax_h.imshow(data, aspect='auto', cmap='magma', vmin=0, vmax=1)
+    ax_h.set_xticks([])
+    ax_h.set_yticks([])
+    ax_h.set_frame_on(False)
+    for start, end, label in group_boundaries:
+        if end < len(tissue_labels):
+            ax_h.axvline(end - 0.5, color='black', lw=0.8, alpha=0.55, zorder=4)
+        center = (start + end - 1) / 2
+        ax_h.text(center, -0.02, label, ha='right', va='center',
+                  rotation=90, rotation_mode='anchor',
+                  fontsize=14, fontweight='bold', color='#222',
+                  transform=ax_h.get_xaxis_transform())
+        if label == 'Skin':
+            rect = mpatches.Rectangle(
+                (start - 0.5, -0.5), end - start, n,
+                linewidth=2.0, edgecolor='#c0282c', facecolor='none',
+                zorder=5, clip_on=False)
+            ax_h.add_patch(rect)
+    # τ-split divider on the heatmap
+    ax_h.axhline(split_boundary - 0.5, color='#1f6feb', lw=2.5, zorder=6)
+
+    # Quadrant side-bar — one colored cell per gene row
+    ax_quad.set_xlim(0, 1)
+    ax_quad.set_ylim(-0.5, n - 0.5)
+    ax_quad.invert_yaxis()
+    ax_quad.set_xticks([])
+    ax_quad.set_yticks([])
+    for sp in ax_quad.spines.values():
+        sp.set_visible(True)
+        sp.set_linewidth(0.5)
+        sp.set_color('#888')
+    for i, q in enumerate(quad_order):
+        ax_quad.add_patch(plt.Rectangle((0, i - 0.5), 1, 1,
+                                        facecolor=QUAD_COLORS[q],
+                                        edgecolor='none'))
+    ax_quad.axhline(split_boundary - 0.5, color='#1f6feb', lw=2.0, zorder=6)
+    ax_quad.set_title('Sel.', fontsize=10, fontweight='bold', pad=5)
+
+    # Gene names
+    ax_names.set_xlim(0, 1)
+    ax_names.set_ylim(-0.5, n - 0.5)
+    ax_names.invert_yaxis()
+    ax_names.set_xticks([])
+    ax_names.set_yticks([])
+    for sp in ax_names.spines.values():
+        sp.set_visible(False)
+    for i, gene in enumerate(genes):
+        ax_names.text(1.0, i, gene, fontsize=8, ha='right', va='center')
+
+    # Expression colorbar
+    cb = fig.colorbar(im, cax=cbar_ax, orientation='vertical')
+    cb.set_label('Relative expression  (x / max per gene)\n'
+                 'τ  =  mean(1 − this)  across tissues',
+                 fontsize=12, fontweight='bold', rotation=270, labelpad=32)
+
+    # Quadrant legend (top-right of figure)
+    legend_handles = [
+        mpatches.Patch(facecolor=COLOR_MEL,  edgecolor='black', lw=0.6,
+                       label=f'Melanesian-specific  '
+                             f'(n={int((quadrants == "Melanesian").sum())})'),
+        mpatches.Patch(facecolor=COLOR_AFR,  edgecolor='black', lw=0.6,
+                       label=f'African-specific  '
+                             f'(n={int((quadrants == "African").sum())})'),
+        mpatches.Patch(facecolor=COLOR_BOTH, edgecolor='black', lw=0.6,
+                       label=f'Both  (n={int((quadrants == "Both").sum())})'),
+        mpatches.Patch(facecolor=COLOR_NONE, edgecolor='black', lw=0.6,
+                       label=f'Neither  (n={int((quadrants == "Neither").sum())})'),
+        mpatches.Patch(facecolor='#ffffff',  edgecolor='black', lw=0.6,
+                       label=f'No PBS data  '
+                             f'(n={int((quadrants == "No PBS").sum())})'),
+    ]
+    fig.legend(handles=legend_handles, loc='upper right',
+               bbox_to_anchor=(0.99, 0.96), frameon=True, fontsize=10,
+               title='PBS selection quadrant', title_fontsize=11)
+
+    # Fisher result inset (top-left, mirrors the legend on the right)
+    fisher_txt = (f"τ-block × selection (Afr vs. Mel only)\n"
+                  f"OR = {odds:.2f}   ·   Fisher p = {p_fisher:.2e}\n"
+                  f"high-τ:  Afr = {table_2x2.loc['high-τ','African']},  "
+                  f"Mel = {table_2x2.loc['high-τ','Melanesian']}\n"
+                  f"low-τ:   Afr = {table_2x2.loc['low-τ','African']},  "
+                  f"Mel = {table_2x2.loc['low-τ','Melanesian']}")
+    fig.text(0.04, 0.96, fisher_txt, ha='left', va='top',
+             fontsize=10, family='monospace',
+             bbox=dict(boxstyle='round,pad=0.4', facecolor='#f8f8f8',
+                       edgecolor='#888', lw=0.6))
+
+    fig.suptitle(
+        f'τ-split skin-specificity heatmap with selection overlay — '
+        f'{n} network genes × {len(tissue_labels)} GTEx tissues\n'
+        f'tissue-specific (τ ≥ {tau_threshold}) on top, broadly expressed '
+        "below; coloured side-bar = PBS quadrant",
+        fontsize=14, fontweight='bold', y=0.985)
+
+    for ext in ('png', 'pdf'):
+        path = os.path.join(OUT_DIR, f'{fname}.{ext}')
+        fig.savefig(path, dpi=180, bbox_inches='tight', facecolor='white')
+    plt.close(fig)
+    print(f"  Saved {fname}.png/pdf")
+
+
+make_skin_split_with_selection_figure()
 
 print("\nDone!")

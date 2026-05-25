@@ -378,4 +378,106 @@ for ext in ('png', 'pdf'):
 plt.close(fig)
 
 
+# ════════════════════════════════════════════════════════════════════════════
+# Figure 4: Adaptation × tissue specificity contrast (poster-focused)
+# ════════════════════════════════════════════════════════════════════════════
+# Strips Figure 3 down to its punchline: among genes that are population-
+# specifically selected, τ differs between African-specific and Melanesian-
+# specific quadrants while LOEUF does not. Two violin panels (τ on left,
+# LOEUF on right), only the African-only and Melanesian-only quadrants —
+# 'Both' and 'Neither' are dropped to keep the contrast clean. A banner
+# between the panels states the conclusion in plain language.
+print("\nFigure 4: Adaptation × tissue specificity (poster-focused)...")
+
+afr_tau   = df.loc[df['quadrant'] == 'African',    'tau'  ].dropna().values
+mel_tau   = df.loc[df['quadrant'] == 'Melanesian', 'tau'  ].dropna().values
+afr_loeuf = df.loc[df['quadrant'] == 'African',    'LOEUF'].dropna().values
+mel_loeuf = df.loc[df['quadrant'] == 'Melanesian', 'LOEUF'].dropna().values
+
+p_tau   = mw_results.get('tau',   (np.nan, np.nan))[1]
+p_loeuf = mw_results.get('LOEUF', (np.nan, np.nan))[1]
+
+fig = plt.figure(figsize=(11, 6.4))
+gs  = fig.add_gridspec(1, 2, wspace=0.36, left=0.08, right=0.97,
+                       top=0.78, bottom=0.10)
+ax_tau   = fig.add_subplot(gs[0, 0])
+ax_loeuf = fig.add_subplot(gs[0, 1])
+
+def _violin_panel(ax, afr_vals, mel_vals, ylabel, p_value, panel_letter,
+                  y_endpoint_labels=None):
+    parts = ax.violinplot([afr_vals, mel_vals],
+                          positions=[0, 1], widths=0.78,
+                          showmedians=True, showextrema=False)
+    for body, color in zip(parts['bodies'], (COLOR_AFR, COLOR_MEL)):
+        body.set_facecolor(color)
+        body.set_edgecolor('black')
+        body.set_alpha(0.78)
+        body.set_linewidth(0.8)
+    if 'cmedians' in parts:
+        parts['cmedians'].set_color('black')
+        parts['cmedians'].set_linewidth(2.0)
+    # Individual gene points (jittered)
+    rng = np.random.default_rng(0)
+    for pos, vals, color in [(0, afr_vals, COLOR_AFR),
+                              (1, mel_vals, COLOR_MEL)]:
+        jitter = rng.uniform(-0.07, 0.07, size=len(vals))
+        ax.scatter(np.full(len(vals), pos) + jitter, vals,
+                   s=24, c=color, edgecolor='black', linewidth=0.4,
+                   alpha=0.85, zorder=3)
+
+    ax.set_xticks([0, 1])
+    ax.set_xticklabels([f'African-specific\n(n = {len(afr_vals)})',
+                        f'Melanesian-specific\n(n = {len(mel_vals)})'],
+                       fontsize=11)
+    ax.set_ylabel(ylabel, fontsize=12)
+    ax.tick_params(axis='y', labelsize=10)
+    for spine in ('top', 'right'):
+        ax.spines[spine].set_visible(False)
+
+    # Mann–Whitney annotation as a header inside the panel
+    sig = '***' if p_value < 1e-3 else ('**' if p_value < 1e-2
+            else ('*' if p_value < 0.05 else 'ns'))
+    bbox_color = '#d4edda' if p_value < 0.05 else '#f4f4f4'
+    edge_color = '#28a745' if p_value < 0.05 else '#888'
+    ax.text(0.5, 1.04,
+            f'Mann–Whitney  p = {p_value:.3f}   {sig}',
+            transform=ax.transAxes, ha='center', va='bottom',
+            fontsize=12, fontweight='bold',
+            bbox=dict(boxstyle='round,pad=0.35', facecolor=bbox_color,
+                      edgecolor=edge_color, lw=1.0))
+    ax.text(-0.15, 1.10, panel_letter, transform=ax.transAxes,
+            fontsize=18, fontweight='bold', va='top')
+
+    if y_endpoint_labels is not None:
+        bot_lbl, top_lbl = y_endpoint_labels
+        ax.annotate(bot_lbl, xy=(-0.14, 0.0), xycoords='axes fraction',
+                    ha='right', va='center', fontsize=9, style='italic',
+                    color='#555')
+        ax.annotate(top_lbl, xy=(-0.14, 1.0), xycoords='axes fraction',
+                    ha='right', va='center', fontsize=9, style='italic',
+                    color='#555')
+
+_violin_panel(ax_tau, afr_tau, mel_tau,
+              'Tissue specificity (τ)', p_tau, 'A',
+              y_endpoint_labels=('broadly\nexpressed', 'tissue-\nrestricted'))
+_violin_panel(ax_loeuf, afr_loeuf, mel_loeuf,
+              'LOEUF', p_loeuf, 'B',
+              y_endpoint_labels=('constrained', 'tolerated'))
+
+# Headline banner spanning both panels — the "demonstration" of the title.
+fig.text(0.5, 0.965,
+         'Adaptation exploits tissue specificity, not constraint',
+         ha='center', va='top', fontsize=15.5, fontweight='bold')
+fig.text(0.5, 0.925,
+         'τ DIFFERS between African- and Melanesian-specific selection '
+         '(p = %.3f)   ·   LOEUF DOES NOT (p = %.2f)' % (p_tau, p_loeuf),
+         ha='center', va='top', fontsize=12, color='#333')
+
+for ext in ('png', 'pdf'):
+    path = os.path.join(OUT_DIR, f'figure_phase2_adaptation_tau_contrast.{ext}')
+    fig.savefig(path, dpi=300, bbox_inches='tight', facecolor='white')
+    print(f"  Saved → {path}")
+plt.close(fig)
+
+
 print("\nDone!")

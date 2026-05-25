@@ -597,6 +597,36 @@ The rank-based partial Spearman ρ(τ, LOEUF | KEGG) = +0.23 (p = 9 × 10⁻³) 
 contributes after controlling for the other. (Full table:
 [`output/phase2_joint_regression.txt`](../output/phase2_joint_regression.txt).)
 
+#### Visual summary — added-variable plots and forest plot of coefficients
+
+The figure below makes the joint-regression evidence visible at a glance.
+Panels A and B are **added-variable (partial-regression) plots**: each scatter
+shows LOEUF residuals (after regressing out one predictor) against the other
+predictor's residuals (after the same removal). The slope of the black line
+*is* the joint-model coefficient and its p-value *is* the joint-model
+significance — so each panel directly answers, "does this axis still move
+LOEUF once the other axis is controlled for?" Panel C is a forest plot of the
+standardized β ± 95% CI for each predictor across six model specifications
+(breadth or τ, with KEGG and/or betweenness centrality). Confidence intervals
+that clearly exclude zero indicate an independent contribution.
+
+```{python}
+#| echo: false
+#| fig-align: center
+if os.path.exists('../output/figure_phase2_joint_regression.png'):
+    display(Image(filename='../output/figure_phase2_joint_regression.png', width=1200))
+else:
+    print("Figure not yet generated. Run `analysis/phase2_joint_regression_figure.py`.")
+```
+
+Pattern in panel C: both **breadth** (or τ) and **KEGG** retain CIs well clear
+of zero in every bivariate specification, and both survive the trivariate
+model. **Betweenness centrality** is significant on its own but its CI crosses
+zero once KEGG is also in the model — within-pathway centrality and
+cross-system pathway count are partly redundant indicators of network
+position, while expression breadth indexes a genuinely distinct constraint
+axis.
+
 ---
 
 ### Figure D — τ × LOEUF with KEGG connectivity as node color (size = PBS)
