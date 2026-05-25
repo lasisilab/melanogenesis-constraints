@@ -1,0 +1,131 @@
+gene,BetweennessCentrality,LOEUF,pLI,functional_category,disease_class,kegg_functional_category,n_kegg_pathways,in_kegg_melanogenesis
+CFLAR,0.00044648,0.173,0.99967,Apoptosis/cell death,Other Mendelian,Specialized/other,7,False
+MCL1,0.0,0.29,0.96349,Apoptosis/cell death,Not classified,Specialized/other,4,False
+BCL2L1,0.00171391,0.341,0.93667,Apoptosis/cell death,Not classified,Pleiotropic signaling,28,False
+FAS,0.0050409,0.441,0.8117,Apoptosis/cell death,Other Mendelian,Pleiotropic signaling,32,False
+TP53,0.02551789,0.469,0.53235,Apoptosis/cell death,Other Mendelian,Pleiotropic signaling,51,False
+CASP3,0.05886104,0.686,0.10017,Apoptosis/cell death,Other Mendelian,Pleiotropic signaling,46,False
+BCL2,0.00264767,0.712,0.55903,Apoptosis/cell death,Other Mendelian,Pleiotropic signaling,43,False
+FASLG,0.00321178,0.716,0.18345,Apoptosis/cell death,Not classified,Pleiotropic signaling,31,False
+BAX,0.00624674,0.751,0.31746,Apoptosis/cell death,Not classified,Pleiotropic signaling,50,False
+CASP8,0.01934902,0.811,3.7236e-06,Apoptosis/cell death,Other Mendelian,Pleiotropic signaling,37,False
+CASP9,0.01493238,0.974,7.3826e-06,Apoptosis/cell death,Not classified,Pleiotropic signaling,35,False
+DFFB,0.00496889,1.08,1.1349e-05,Apoptosis/cell death,Not classified,Specialized/other,1,False
+DFFA,0.0,1.161,8.6585e-05,Apoptosis/cell death,Not classified,Specialized/other,1,False
+BAK1,0.01353369,1.369,7.4028e-06,Apoptosis/cell death,Not classified,Pleiotropic signaling,33,False
+BAD,0.00759541,1.533,0.0046237,Apoptosis/cell death,Not classified,Pleiotropic signaling,43,False
+BBC3,0.00023764,1.589,0.0039762,Apoptosis/cell death,Not classified,Specialized/other,9,False
+PMAIP1,0.00396715,1.848,0.11182,Apoptosis/cell death,Not classified,Specialized/other,7,False
+BID,0.00317132,1.917,1.5646e-11,Apoptosis/cell death,Not classified,Pleiotropic signaling,24,False
+TNFRSF1A,0.0789998,0.236,0.9949,Cytokines/growth factors,Not classified,Pleiotropic signaling,35,False
+HGF,0.0,0.25,0.99947,Cytokines/growth factors,Syndromic/developmental,Pleiotropic signaling,17,False
+MET,0.0184281,0.305,0.96998,Cytokines/growth factors,Syndromic/developmental,Pleiotropic signaling,24,False
+TNF,0.07717067,0.487,0.8033,Cytokines/growth factors,Not classified,Pleiotropic signaling,67,False
+CSF2,0.01221339,0.505,0.83468,Cytokines/growth factors,Not classified,Pleiotropic signaling,16,False
+IL1R1,0.01130603,0.506,0.15126,Cytokines/growth factors,Not classified,Specialized/other,13,False
+NGF,0.00687867,0.528,0.82026,Cytokines/growth factors,Syndromic/developmental,Specialized/other,9,False
+NTRK1,0.00660502,0.658,1.9568e-06,Cytokines/growth factors,Syndromic/developmental,Specialized/other,11,False
+IL6,0.00602227,0.753,0.31536,Cytokines/growth factors,Not classified,Pleiotropic signaling,51,False
+IL6R,0.0078514,0.813,3.1681e-05,Cytokines/growth factors,Not classified,Specialized/other,12,False
+IL12A,0.00158188,0.815,0.04746,Cytokines/growth factors,Not classified,Pleiotropic signaling,25,False
+IL10,0.00082095,1.039,0.0058874,Cytokines/growth factors,Not classified,Pleiotropic signaling,23,False
+IL1A,0.0094769,1.309,0.0001602,Cytokines/growth factors,Not classified,Pleiotropic signaling,21,False
+IL8,0.00082095,1.861,0.00027377,Cytokines/growth factors,Not classified,Pleiotropic signaling,33,False
+SOX10,0.0,0.209,0.99166,Developmental/NC,Syndromic/developmental,Developmental/NC TF,0,False
+TFAP2A,0.03993222,0.261,0.98964,Developmental/NC,Syndromic/developmental,Developmental/NC TF,0,False
+KIT,0.06758285,0.305,0.98087,Developmental/NC,Syndromic/developmental,Shared melanogenesis signaling,11,True
+MITF,0.08239823,0.308,0.98119,Developmental/NC,Syndromic/developmental,Melanocyte effector,7,True
+KITLG,0.06160578,0.419,0.85024,Developmental/NC,Syndromic/developmental,Shared melanogenesis signaling,8,True
+PAX3,0.0,0.475,0.24063,Developmental/NC,Syndromic/developmental,Developmental/NC TF,1,False
+EDNRB,0.06193821,0.593,0.0092419,Developmental/NC,Syndromic/developmental,Melanocyte effector,6,True
+EDN1,0.04743481,0.635,0.45504,Developmental/NC,Syndromic/developmental,Shared melanogenesis signaling,12,True
+PRKCB,0.0514965,0.081,1.0,Generic signaling,Not classified,Shared melanogenesis signaling,73,True
+STAT3,0.01150965,0.095,1.0,Generic signaling,Syndromic/developmental,Pleiotropic signaling,33,False
+PIK3CA,0.05303048,0.117,1.0,Generic signaling,Syndromic/developmental,Pleiotropic signaling,109,False
+CTNNB1,0.0038887,0.129,0.99999,Generic signaling,Syndromic/developmental,Shared melanogenesis signaling,33,True
+NFKB1,0.21466372,0.138,1.0,Generic signaling,Other Mendelian,Pleiotropic signaling,76,False
+PRKCD,0.06155725,0.171,0.99995,Generic signaling,Not classified,Pleiotropic signaling,17,False
+MAPK1,0.0298414,0.175,0.99698,Generic signaling,Not classified,Shared melanogenesis signaling,119,True
+STAT1,0.00174991,0.187,0.99999,Generic signaling,Not classified,Pleiotropic signaling,29,False
+MAPK8,0.0260185,0.207,0.99823,Generic signaling,Not classified,Pleiotropic signaling,74,False
+JAK1,0.00968052,0.214,0.99998,Generic signaling,Syndromic/developmental,Pleiotropic signaling,28,False
+MAP3K1,0.01588485,0.214,0.99998,Generic signaling,Not classified,Specialized/other,9,False
+MAP2K4,0.00267055,0.22,0.99709,Generic signaling,Not classified,Pleiotropic signaling,20,False
+CREB1,0.0761451,0.223,0.99673,Generic signaling,Not classified,Shared melanogenesis signaling,43,True
+MAP2K7,0.00484534,0.232,0.99552,Generic signaling,Not classified,Pleiotropic signaling,25,False
+PRKG1,0.01022181,0.235,0.99938,Generic signaling,Not classified,Specialized/other,11,False
+SRC,0.00722049,0.244,0.99691,Generic signaling,Not classified,Pleiotropic signaling,45,False
+WNT5A,0.0,0.269,0.98732,Generic signaling,Syndromic/developmental,Shared melanogenesis signaling,16,True
+ATF2,0.0,0.283,0.99131,Generic signaling,Not classified,Pleiotropic signaling,27,False
+PDPK1,0.02607905,0.29,0.98013,Generic signaling,Not classified,Pleiotropic signaling,27,False
+HIF1A,0.00705726,0.309,0.9777,Generic signaling,Not classified,Specialized/other,14,False
+AKT1,0.06352732,0.315,0.9759,Generic signaling,Other Mendelian,Pleiotropic signaling,103,False
+PRKACA,0.03594884,0.318,0.97142,Generic signaling,Other Mendelian,Shared melanogenesis signaling,72,True
+MAP2K2,0.01294072,0.325,0.96673,Generic signaling,Other Mendelian,Shared melanogenesis signaling,79,True
+GSK3B,0.00229721,0.334,0.95571,Generic signaling,Other Mendelian,Shared melanogenesis signaling,48,True
+MAP3K5,0.01087563,0.34,0.51964,Generic signaling,Not classified,Pleiotropic signaling,20,False
+ELK1,0.00518493,0.341,0.93711,Generic signaling,Not classified,Specialized/other,15,False
+EGFR,0.03106565,0.349,0.36837,Generic signaling,Syndromic/developmental,Pleiotropic signaling,50,False
+RAF1,0.02968372,0.354,0.85295,Generic signaling,Other Mendelian,Shared melanogenesis signaling,83,True
+MAP2K6,0.01140463,0.359,0.91334,Generic signaling,Not classified,Pleiotropic signaling,24,False
+MAP2K1,0.01294072,0.377,0.89669,Generic signaling,Other Mendelian,Shared melanogenesis signaling,91,True
+PRKCH,0.01746697,0.388,0.42878,Generic signaling,Not classified,Specialized/other,2,False
+PRKCZ,0.04693966,0.4,0.541,Generic signaling,Not classified,Pleiotropic signaling,16,False
+RAC1,0.04857548,0.467,0.76228,Generic signaling,Not classified,Pleiotropic signaling,55,False
+MAPK14,0.02334748,0.473,0.37466,Generic signaling,Not classified,Pleiotropic signaling,64,False
+CDC42,0.02565266,0.501,0.78728,Generic signaling,Not classified,Pleiotropic signaling,33,False
+RPS6KA1,0.00902526,0.515,0.0019056,Generic signaling,Not classified,Specialized/other,10,False
+RAP1A,0.02407249,0.537,0.62227,Generic signaling,Not classified,Pleiotropic signaling,17,False
+PAK1,0.00465923,0.563,0.0013306,Generic signaling,Not classified,Pleiotropic signaling,20,False
+USF1,0.00639475,0.585,0.023545,Generic signaling,Not classified,Specialized/other,0,False
+MAPK3,0.0298414,0.614,0.036884,Generic signaling,Not classified,Shared melanogenesis signaling,119,True
+FZD3,0.00136825,0.62,0.00043561,Generic signaling,Not classified,Shared melanogenesis signaling,17,True
+FOS,0.03611939,0.645,0.26176,Generic signaling,Not classified,Pleiotropic signaling,45,False
+MAP2K3,0.01140463,0.663,0.022009,Generic signaling,Not classified,Pleiotropic signaling,21,False
+RHOA,0.00164189,0.664,0.60405,Generic signaling,Not classified,Pleiotropic signaling,43,False
+MAP4K2,0.00028431,0.689,1.5422e-11,Generic signaling,Not classified,Specialized/other,1,False
+HRAS,0.03090794,0.926,0.079774,Generic signaling,Other Mendelian,Shared melanogenesis signaling,84,True
+JUN,0.04388001,1.02,0.05962,Generic signaling,Not classified,Pleiotropic signaling,56,False
+MSN,0.00345662,0.13,0.99967,Other,Not classified,Specialized/other,6,False
+PPP3CA,0.00163469,0.158,0.99988,Other,Other Mendelian,Pleiotropic signaling,33,False
+PTGS2,0.03677893,0.263,0.99597,Other,Not classified,Pleiotropic signaling,23,False
+CDH2,0.0,0.29,0.99171,Other,Not classified,Specialized/other,3,False
+PTGER4,0.01350242,0.3,0.9755,Other,Not classified,Specialized/other,7,False
+PIAS3,0.0,0.301,0.98499,Other,Not classified,Specialized/other,2,False
+RDX,0.00086415,0.348,0.85245,Other,Not classified,Specialized/other,5,False
+SPTLC2,0.00978948,0.39,0.78035,Other,Other Mendelian,Specialized/other,4,False
+CCND1,0.00252045,0.41,0.89057,Other,Not classified,Pleiotropic signaling,49,False
+GUCY1A2,0.01210855,0.434,0.31409,Other,Not classified,Specialized/other,11,False
+GAB1,0.03580637,0.439,0.18433,Other,Not classified,Specialized/other,10,False
+EZR,0.00086415,0.44,0.17989,Other,Not classified,Specialized/other,8,False
+RYR1,0.01682077,0.456,1.5944e-29,Other,Syndromic/developmental,Specialized/other,8,False
+CDK2,0.0,0.485,0.61054,Other,Not classified,Pleiotropic signaling,19,False
+PTGER3,0.01513286,0.579,0.37217,Other,Not classified,Specialized/other,6,False
+ICAM1,0.0,0.618,0.035295,Other,Not classified,Pleiotropic signaling,19,False
+CDK4,0.0028085,0.642,0.062909,Other,Not classified,Pleiotropic signaling,28,False
+NOS2,0.01259824,0.755,4.0277e-15,Other,Not classified,Pleiotropic signaling,19,False
+ADCY4,0.04939699,0.892,1.0791e-18,Other,Not classified,Shared melanogenesis signaling,52,True
+F7,0.0,0.902,1.349e-05,Other,Not classified,Specialized/other,1,False
+CYCS,0.04274614,0.914,0.63647,Other,Not classified,Pleiotropic signaling,34,False
+DUSP1,0.05470344,0.917,0.010151,Other,Not classified,Specialized/other,4,False
+F10,0.0,0.97,2.3473e-06,Other,Not classified,Specialized/other,1,False
+SPTLC1,0.00978948,0.978,4.1945e-11,Other,Other Mendelian,Specialized/other,4,False
+PTGER2,0.01350242,0.982,0.0074901,Other,Not classified,Specialized/other,7,False
+NOX1,0.02356826,1.064,8.6564e-08,Other,Not classified,Specialized/other,7,False
+SMPD1,0.0164086,1.085,3.8932e-10,Other,Not classified,Specialized/other,5,False
+CSF2RA,0.01067231,1.119,2.3956e-10,Other,Not classified,Specialized/other,4,False
+GADD45A,6.001e-05,1.131,0.044075,Other,Not classified,Pleiotropic signaling,23,False
+F2RL1,0.02404293,1.327,0.00014843,Other,Not classified,Specialized/other,3,False
+CDKN1A,0.00260687,1.375,0.0018575,Other,Not classified,Pleiotropic signaling,41,False
+MMP1,0.00012242,1.525,7.7197e-18,Other,Not classified,Specialized/other,8,False
+cAMP,0.04817277,1.553,0.0043897,Other,Not classified,N/A,,
+SMPD2,0.01132438,1.583,3.5507e-18,Other,Not classified,Specialized/other,3,False
+PTGER1,0.01513286,1.584,0.00097345,Other,Not classified,Specialized/other,4,False
+TPSAB1,0.0,1.95,1.2733e-13,Other,Not classified,Specialized/other,1,False
+OCA2,0.00129623,0.856,2.9064e-13,Pigment-specific,Isolated pigment,Melanocyte effector,0,False
+DCT,0.00161457,1.174,7.3889e-14,Pigment-specific,Isolated pigment,Melanocyte effector,3,True
+PMEL,0.0,1.287,3.0571e-18,Pigment-specific,Isolated pigment,Melanocyte effector,0,False
+TYRP1,0.00039607,1.889,6.557e-25,Pigment-specific,Isolated pigment,Melanocyte effector,3,True
+MLANA,0.00129623,1.952,1.2584e-09,Pigment-specific,Isolated pigment,Melanocyte effector,0,False
+TYR,0.02650647,1.964,4.9861e-32,Pigment-specific,Isolated pigment,Melanocyte effector,3,True
+MC1R,0.01653176,1.967,8.1075e-11,Pigment-specific,Isolated pigment,Melanocyte effector,3,True

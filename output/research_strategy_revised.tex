@@ -1,0 +1,185 @@
+\documentclass[11pt]{article}
+\usepackage[margin=0.5in]{geometry}
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{natbib}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{microtype}
+
+% Formatting
+\setlength{\parindent}{0em}
+\setlength{\parskip}{0.5em}
+\titleformat{\section}{\normalfont\Large\bfseries}{}{0em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries}{}{0em}{}
+\titleformat{\subsubsection}{\normalfont\normalsize\bfseries}{}{0em}{}
+\titlespacing*{\section}{0pt}{1em}{0.3em}
+\titlespacing*{\subsection}{0pt}{0.8em}{0.2em}
+\titlespacing*{\subsubsection}{0pt}{0.5em}{0.1em}
+
+% Margin notes for editorial comments
+\newcommand{\ednote}[1]{\textcolor{blue}{\textsf{[#1]}}}
+
+\begin{document}
+
+\begin{center}
+{\Large \textbf{RESEARCH STRATEGY}}
+\end{center}
+
+%% ====================================================================
+\section{A. Significance}
+%% ====================================================================
+
+\subsubsection{An interpretive gap in complex trait genetics.}
+Despite thousands of GWAS and ever-larger biobank cohorts, we still lack a principled way to predict, within specific polygenic pathways, which genes are under strong constraint versus those that tolerate extensive variation (Visscher et al., 2017). The omnigenic model posits that a small set of ``core'' genes have direct, large effects on a trait while peripheral genes modulate the trait through regulatory and network connections (Boyle et al., 2017; Pritchard et al., 2019). However, this remains a conceptual framework: we have almost no empirical tests, in specific human pathways, of whether a gene's position within a pathway actually predicts its tolerance to variation and likelihood of experiencing selection. Most current polygenic approaches treat GWAS loci as exchangeable given their marginal effect sizes, without explicit regard for pathway topology or pleiotropic burden (Vilhj\'{a}lmsson et al., 2015; Torkamani et al., 2018). Gene-level constraint metrics such as LOEUF quantify long-term purifying selection (Karczewski et al., 2020), but summarize this selection primarily in cohorts of European ancestry and do not reveal \emph{why} a gene is constrained or which functions underlie that constraint.
+
+This creates a fundamental pleiotropy interpretation problem. Many ``pigmentation genes'' are deeply involved in other systems: \emph{MC1R} is interpreted as being under strong purifying selection for pigmentation in African populations, yet also plays roles in immune and inflammatory pathways (B\"{o}hm et al., 2006). Selection signals at pigmentation loci in Bronze Age Britain have been argued to reflect vitamin D/calcium metabolism rather than skin color (Mathieson \& Terhorst, 2022). At present, there is no quantitative framework in human population genetics to partition selection at pleiotropic loci between competing functions based on pathway position, or to predict which parts of a pathway are evolutionarily ``tunable'' versus constrained by roles in other systems.
+
+\subsubsection{Existing constraint measures miss population-specific patterns.}
+LOEUF and related metrics summarize loss-of-function depletion primarily in European-ancestry individuals, providing limited insight into how allele-frequency spectra and selection signatures at the same gene differ across populations with distinct demographic and environmental histories. We lack a model that uses pathway architecture and network position to explain these cross-population differences. The proposed work targets this gap by asking: does a gene's position within a biologically grounded network predict its constraint and the distribution of selection signatures across human populations, and can this network context help explain why additive prediction models fail for some individuals?
+
+\subsubsection{Melanogenesis as an ideal model system.}
+Human melanogenesis is uniquely suited to address these questions. The Raghunath et al.\ (2015) melanocyte signaling network provides a literature-curated directed graph of 134 genes connected by 429 typed interactions (activation, inhibition, expression regulation), spanning upstream signaling (UV response, receptor tyrosine kinases, MAPK/cAMP cascades) through transcriptional regulation (\emph{MITF}, \emph{SOX10}) to melanin biosynthetic enzymes (\emph{TYR}, \emph{TYRP1}, \emph{DCT}) and melanosome transport. Recent CRISPR screens have validated 169 melanin-promoting genes including many novel regulators in organellar trafficking and endosomal recycling machinery (Bajpai et al., 2023). Comparative genomics across vertebrates has annotated hundreds of additional pigmentation genes (Baxter et al., 2018). Key melanogenesis genes function in multiple systems: \emph{MC1R} in immune signaling (B\"{o}hm et al., 2006); \emph{SOX10}, \emph{PAX3}, \emph{MITF}, and \emph{EDNRB} in neural crest development, where mutations cause Waardenburg syndrome and Hirschsprung disease (Read \& Newton, 1997; Amiel et al., 2008); and other genes in vitamin D biology and thermoregulation (Jablonski \& Chaplin, 2010). Selection signals at ``pigmentation genes'' cannot be interpreted unambiguously as selection on pigmentation alone, making melanogenesis a concrete testbed for disentangling direct versus pleiotropic selection.
+
+Ancient DNA and present-day analyses show that a handful of loci (\emph{SLC24A5}, \emph{SLC45A2}, \emph{HERC2}/\emph{OCA2}) underwent strong frequency changes in West Eurasians over 5--40 thousand years (Mathieson et al., 2015; Ju \& Mathieson, 2020), while dark pigmentation in African and Melanesian populations reflects partially distinct genetic architectures (Crawford et al., 2017; Deng et al., 2022). These contrasting histories provide semi-independent natural experiments for testing how selection distributes across the network---but we do not yet understand why those loci were chosen from the perspective of pathway architecture and pleiotropic constraint.
+
+%% ────────────────────────────────────────────────────────────────
+\subsubsection{Rigor of prior research and the outstanding gap.}
+The proposed study builds on three robust but largely un-integrated pillars. First, mutation--selection--drift frameworks and constraint metrics have quantified purifying selection at individual genes (Simons et al., 2018; Karczewski et al., 2020), and theoretical work on pleiotropic stabilizing selection illuminates how polygenic architectures emerge under multivariate constraint (Koch \& Guillaume, 2020; Berg \& Sella, 2020). However, in these models pleiotropy is encoded as high-dimensional trait-space correlations, not as explicit network connectivity of particular genes. Second, sophisticated methods detect polygenic selection using GWAS effect sizes and allele frequencies (Berg \& Coop, 2014), whole-genome genealogies (Stern et al., 2021), and improved demographic modeling (Mathieson \& Terhorst, 2022). These treat loci as exchangeable and do not incorporate pathway topology. Third, integrative frameworks stack multiple evolutionary metrics across GWAS traits and highlight pigmentation as enriched for both deep constraint and recent positive selection (Abraham et al., 2022). These establish feasibility of cross-timescale integration but operate at the level of enrichments, not pathway-aware mechanistic predictions from network structure. While network centrality correlates with constraint at the genome-wide level, it is unknown whether, within a single fitness-relevant pathway, selection systematically targets less-constrained peripheral pathway genes while sparing highly connected core nodes---or whether cross-system pleiotropy, independent of within-pathway position, drives these patterns. To our knowledge, no existing study has combined pathway topology, variant-to-node mapping, and population-stratified selection inference in a single framework for human melanogenesis or other pigmentation pathways. The proposed work fills this gap.
+
+%% ────────────────────────────────────────────────────────────────
+\subsubsection{Preliminary data supporting the approach.}
+We performed a pilot analysis using the Raghunath et al.\ (2015) 134-gene melanocyte signaling network (Figure~1). For each gene, we computed betweenness centrality---a measure of how often a gene lies on shortest paths between other genes in the network, capturing its role as a signaling integration point---and extracted LOEUF scores from gnomAD v2.1.1.
+
+Genes in different functional classes showed distinct constraint levels: signaling hub genes (median LOEUF $\approx 0.33$) were substantially more constrained than pigment-specific genes (median LOEUF $\approx 1.89$), with highly significant separation ($p = 3.0 \times 10^{-5}$, Mann--Whitney $U$ test; Figure~1B). Importantly, the mechanistic interpretation of this pattern differs from the original omnigenic ``core vs.\ peripheral'' framing. High-centrality genes in this network---\emph{NFKB1}, \emph{MITF}, \emph{AKT1}, \emph{PIK3CA}---are not ``core melanogenesis genes'' but rather \textbf{pleiotropic signaling hubs} that integrate melanocyte signaling with broader cellular processes. Low-centrality genes---\emph{TYR}, \emph{TYRP1}, \emph{DCT}, \emph{OCA2}, \emph{MC1R}---are the \textbf{melanocyte-specific effectors} whose loss primarily affects pigmentation alone. The constraint gradient therefore reflects a pleiotropy gradient: genes embedded in many processes cannot tolerate loss-of-function (low LOEUF), while genes specific to pigmentation can (high LOEUF). This is precisely the pattern that creates evolutionary room for human pigmentation diversity at the network periphery (Figure~1A,D).
+
+To validate this pattern outside the Raghunath network, we identified 31 genes present in both the Baxter et al.\ (2018) cross-species pigmentation gene compendium (635 genes) and the Bajpai et al.\ (2023) CRISPR screen (169 melanin-promoting hits at 10\% FDR), but absent from the Raghunath network. These 31 independently validated genes show the same constraint pattern: the 21 melanocyte-specific genes (HPS1--6, BLOC1S3/5/6, RAB27A, SLC45A2, SLC24A5, and others involved in melanosome biogenesis and transport) have a mean LOEUF of 0.89, while the 10 pleiotropic genes (RB1, AMBRA1, USF2, RAB7A, and other broadly expressed regulators) have a mean LOEUF of 0.60 ($p = 0.06$, Mann--Whitney $U$ test; Figure~1C). Despite the modest sample size, the direction is consistent and the individual genes are biologically coherent: BLOC1S3 (LOEUF = 1.91) and RAB27A (1.65) are among the least constrained, while RB1 (0.13) and AMBRA1 (0.14) are among the most constrained.
+
+These patterns, based on a curated 134-gene network and univariate analyses, should be interpreted as preliminary. Aim~1 will test these relationships systematically using formal covariate control and permutation-based null models.
+
+\ednote{Insert Figure 1 here: figure\_preliminary\_results.pdf}
+
+%% ────────────────────────────────────────────────────────────────
+\subsubsection{Anticipated impact.}
+By linking pathway architecture to genetic constraint, selection, and prediction performance, this research will advance the field from gene-by-gene constraint assessment toward network-aware, pathway-conditioned predictions about which loci can harbor large-effect variation. It will complement current European-reference constraint metrics by treating variation across populations as informative signal rather than noise. The work will offer a formal framework to partition selection among competing functions at pleiotropic loci based on network position and cross-system connectivity, and enable principled prioritization of GWAS loci by pathway position rather than treating all SNPs as equivalent. Demonstrating these principles in melanogenesis, where we have unusually rich functional and evolutionary data, will provide a concrete template for extending network-aware analyses to other polygenic systems such as lipid metabolism, immune regulation, and glucose homeostasis.
+
+%% ====================================================================
+\section{B. Innovation}
+%% ====================================================================
+
+\subsubsection{Conceptual Innovation: Network Position as a Predictor of Constraint and Selection.}
+Polygenic and omnigenic frameworks posit that core genes experience stronger constraint than peripheral genes (Boyle et al., 2017), yet existing approaches assess constraint gene-by-gene using genome-wide metrics like LOEUF (Karczewski et al., 2020), treating GWAS loci as exchangeable units. No study in melanogenesis or pigmentation has tested whether a gene's position within a biologically grounded network predicts its tolerance to variation or propensity for selection. We introduce a paradigm shift: constraint and evolvability become emergent properties of network position, specifically \textbf{within-pathway centrality} and \textbf{cross-system connectivity}, rather than intrinsic gene-level features.
+
+\subsubsection{Mechanistic Pleiotropy Replacing Abstract Correlations.}
+Theoretical work treats pleiotropy as correlations in high-dimensional trait space (Koch \& Guillaume, 2020; Berg \& Sella, 2020), but many pigmentation genes clearly operate across systems. We operationalize pleiotropy along two orthogonal dimensions:
+
+\begin{enumerate}[itemsep=2pt, topsep=2pt]
+    \item \textbf{Within-pathway integration} (Aim~1): Betweenness centrality in the melanocyte signaling network, measuring how much a gene serves as a signaling bridge connecting multiple sub-pathways (e.g., UV response $\to$ MAPK $\to$ MITF $\to$ melanin synthesis). High-centrality genes are ``pleiotropic within melanogenesis''---they connect many processes and thus face stronger constraint.
+    \item \textbf{Cross-system connectivity} (Aim~2): Participation in biological systems beyond melanogenesis---immune signaling, neural crest development, vitamin D metabolism---quantified via pathway membership (KEGG/Reactome), tissue expression breadth (GTEx $\tau$ scores), and melanocyte-specific eQTL effects. This captures ``pleiotropy beyond melanogenesis.''
+\end{enumerate}
+
+This two-dimensional decomposition enables the first quantitative partitioning of selection signals at pigmentation loci between melanogenesis-internal network architecture and melanogenesis-external functional roles.
+
+\subsubsection{Methodological Innovation: Three-Dimensional Integration.}
+The required components exist in isolation: curated melanogenesis networks (Raghunath et al., 2015), CRISPR-validated melanin-promoting genes (Bajpai et al., 2023), constraint metrics (Karczewski et al., 2020), and polygenic selection methods (Berg \& Coop, 2014; Stern et al., 2021). No prior work has integrated these into a unified pathway-aware analysis. We construct a three-dimensional framework characterizing each gene by: (1) within-pathway centrality, (2) cross-system connectivity, and (3) contribution to phenotype prediction failures.
+
+\subsubsection{Population-Centered Innovation: Variation Across Ancestries as Signal.}
+Standard constraint metrics derive primarily from European-ancestry cohorts, obscuring population-specific patterns critical for pigmentation (Crawford et al., 2017; Deng et al., 2021). We place multi-ancestry variation at the center of analysis, using African, Papuan/Melanesian, and European populations as replicate natural experiments on the same pathway.
+
+%% ====================================================================
+\section{C. Approach}
+%% ====================================================================
+
+\subsection{Overall Strategy}
+
+\textbf{Framework}: Test three complementary hypotheses about how network position predicts constraint and selection, each corresponding to a distinct dimension of pleiotropy.
+
+\textbf{Populations}: African, Papuan, and Australasian samples provide: (1)~maximum diversity for constraint inference; (2)~independent tests across continental populations; (3)~escape from European-reference bias.
+
+\textbf{Gene network}: The Raghunath et al.\ (2015) melanocyte signaling network, a literature-curated directed graph of 134 genes connected by 429 typed interactions spanning upstream signaling through melanin synthesis. We retain this curated network as our primary topology because its directed, typed edges (activation, inhibition, expression regulation) support biologically meaningful centrality computation. The Baxter et al.\ (2018) cross-species pigmentation gene compendium and Bajpai et al.\ (2023) CRISPR screen provide independent validation layers (see Preliminary Data).
+
+\textbf{Addressing Prior Research Weaknesses:}
+\begin{itemize}[itemsep=2pt, topsep=2pt]
+    \item \textbf{European bias}: Use diversity computed directly from population samples, not gnomAD
+    \item \textbf{Pathway-level gap}: Explicit network-based predictions tested against population data
+    \item \textbf{Validation}: Multiple populations provide independent replication; CRISPR-validated gene sets provide functional ground truth
+\end{itemize}
+
+%% ────────────────────────────────────────────────────────────────
+\subsection{AIM 1: Test whether within-pathway network position predicts genetic constraint and selection}
+%% ────────────────────────────────────────────────────────────────
+
+\subsubsection{Rationale.}
+Recent work on pigmentation evolution shows a striking asymmetry: GWAS have identified $> 170$ pigmentation-associated variants across dozens of loci, yet strong signals of positive selection are concentrated on fewer than $\sim 10$ genes (Quillen et al., 2019; Crawford et al., 2017; Ju \& Mathieson, 2021). This suggests that most pigmentation-associated loci are limited by pleiotropic constraint rather than free to respond to selection---only some positions in the pathway can tolerate the allele-frequency shifts accompanying positive selection. We hypothesize that a gene's structural position within the melanogenesis network helps determine this tolerance: \textbf{melanocyte-specific effector genes} at the network periphery, with limited connections to other signaling processes, should more often harbor population-specific adaptive variants, whereas \textbf{pleiotropic signaling hubs} at the network center should be under strong purifying constraint regardless of their pigmentation role.
+
+Our preliminary data support this hypothesis: within the Raghunath network, signaling hubs (\emph{NFKB1}, \emph{AKT1}, \emph{PIK3CA}, \emph{MITF}) show median LOEUF $\approx 0.33$, while melanocyte-specific effectors (\emph{TYR}, \emph{TYRP1}, \emph{DCT}, \emph{OCA2}) show median LOEUF $\approx 1.89$ ($p = 3.0 \times 10^{-5}$). This pattern is independently confirmed in 31 genes validated by both the Baxter compendium and Bajpai CRISPR screen but absent from the Raghunath network (Figure~1C). Aim~1 will formalize and extend these preliminary observations with appropriate statistical controls.
+
+\subsubsection{Methodology.}
+We will compute structural metrics for each gene in the Raghunath melanocyte signaling network, quantify evolutionary constraint and population-specific selection, and test whether network position predicts these measures using a formal statistical framework.
+
+\subsubsection{Network centrality computation.}
+For each of the 134 genes in the Raghunath directed network, we will compute: degree centrality (in-degree and out-degree, leveraging the directed edge structure), betweenness centrality (fraction of shortest directed paths passing through a node), eigenvector centrality (connectivity to other highly connected nodes), and module membership via Louvain community detection to delineate functional modules (e.g., melanocyte specification, melanin biosynthesis, melanosome trafficking, keratinocyte transfer). The directed edge types (activation vs.\ inhibition) will be used to construct separate ``activating'' and ``inhibiting'' sub-networks to test whether centrality in positive vs.\ negative regulatory layers shows different constraint relationships.
+
+To assess robustness, we will perform sensitivity analyses: (a)~testing results across multiple centrality metrics, (b)~comparing results with and without non-gene nodes from the original Raghunath network (signaling molecules, environmental stimuli), and (c)~constructing a ``validated core'' sub-network restricted to the 30 Raghunath genes independently confirmed in the Baxter compendium.
+
+\subsubsection{Quantifying evolutionary constraint and diversity.}
+For each network gene, we will quantify constraint across two evolutionary timescales. For \emph{cross-species (deep-time) constraint}, we will use PhyloP conservation scores (100-way vertebrate alignment) averaged across coding sequence and GERP rejected-substitution scores, capturing long-term purifying selection on coding regions. For \emph{human variation (recent-time) constraint}, we will obtain LOEUF scores, missense observed/expected ratios, and pLI scores from gnomAD v4.x ($> 750{,}000$ exomes).
+
+\emph{Within-population diversity}---nucleotide diversity ($\pi$), Tajima's D, and segregating-site density---will be computed in fixed windows (e.g., 50 kb) centered on each gene from three complementary datasets: 1000 Genomes Phase 3, HGDP (929 individuals in 54 populations), and SGDP ($\sim 300$ individuals in 142 populations).
+
+\subsubsection{Statistical framework for centrality--constraint relationships.}
+We will test whether network position predicts constraint using four complementary approaches. (a)~\emph{Correlation analyses}: Spearman correlations between each centrality metric (degree, betweenness, eigenvector) and each constraint measure (LOEUF, missense o/e, pLI, PhyloP, GERP). (b)~\emph{Multivariable regression}: Linear or generalized linear models predicting each constraint metric from centrality measures, controlling for known confounders: gene length, GC content, local recombination rate, local mutation rate (estimated from trinucleotide context), and expression breadth (number of GTEx tissues with robust expression). (c)~\emph{Permutation tests}: To assess significance beyond generic properties of the network, we will compare observed correlations to a null distribution generated by randomizing gene labels over the network while preserving the degree distribution (1{,}000 permutations). (d)~\emph{Neighborhood constraint}: For each gene, we will compute neighborhood features (e.g., mean LOEUF and fraction of neighbors with LOEUF $< 0.35$) and test whether local network context predicts constraint independently of a gene's own centrality. Where multiple centrality--constraint relationships are tested, we will control false discovery using Benjamini--Hochberg procedures.
+
+\subsubsection{Quantifying population-specific selection.}
+We will map SNP-level selection signals to genes and test whether selection preferentially targets peripheral network positions.
+
+\textbf{SNP-to-gene mapping.} For each gene, we will define a genomic window (gene body $\pm 10$ kb) and aggregate SNP-wise selection scores within that window using the maximum or top-percentile (e.g., 95th percentile) of SNP z-scores. We will examine robustness to window size and aggregation choice.
+
+\textbf{Selection statistics.} (a)~\emph{Population branch statistic (PBS)}: PBS will be calculated for populations representing distinct pigmentation histories, including CEU (European), CHB (East Asian), YRI (West African), GIH (South Asian), and an Oceanian group (e.g., Papuan/Melanesian). (b)~\emph{Haplotype-based scans}: We will compute iHS within each population and XP-EHH comparing each non-African population to YRI. (c)~\emph{Composite selection scores}: For each gene and population, we will construct a composite selection score by averaging standardized PBS, iHS, and XP-EHH values. (d)~\emph{Ancient-DNA validation}: For loci with well-characterized ancient trajectories (\emph{SLC24A5}, \emph{SLC45A2}, \emph{OCA2}, \emph{HERC2}, \emph{TYR}), we will compare published time-averaged selection coefficients with contemporary composite scores as a qualitative check.
+
+\textbf{Key hypothesis tests.} We will test three primary hypotheses linking network position to selection:
+
+\emph{Network position vs.\ selection intensity.} We will test whether genes with lower betweenness (peripheral, melanocyte-specific) show higher composite selection scores. Analyses will include Spearman correlations and regression with centrality as a predictor.
+
+\emph{Module-level enrichment.} For each Louvain-defined functional module, we will aggregate selection scores and test whether melanocyte-specific modules (e.g., melanin biosynthesis, melanosome trafficking) show stronger selection signals than signaling-hub modules. Module-level significance will be assessed using permutation tests with FDR control.
+
+\emph{Population-specific patterns.} We will test whether the relationship between centrality and selection differs across populations using interaction terms in regression models (selection $\sim$ centrality $\times$ population), focusing on contrasts between African vs.\ non-African populations, Europeans vs.\ East Asians, and Europeans vs.\ Oceanians.
+
+\subsubsection{Power considerations.}
+With 134 genes, we will be able to detect centrality--LOEUF correlations of $|r| \approx 0.25$ at $\alpha = 0.05$ with $> 80\%$ power. Our preliminary data show a categorical separation between signaling hubs and melanocyte-specific genes of $p = 3.0 \times 10^{-5}$, suggesting adequate power for the primary hypothesis even with a modest network. For selection statistics, which are noisier, we will rely on module-level aggregation (5--8 modules expected from Louvain community detection) to boost signal.
+
+\subsubsection{Timeline.}
+Aim 1 activities will concentrate in Year 1, months 1--6. Months 1--3 will focus on centrality computation, validation, and constraint analyses. Months 4--6 will focus on selection statistics and module-level comparisons. A mid-aim checkpoint at month 4 will evaluate whether centrality--constraint correlations are of interpretable magnitude (e.g., $|r| > 0.2$) and consistent across centrality metrics before propagating centrality-based weights to downstream aims.
+
+\subsubsection{Potential problems and alternative strategies.}
+
+\emph{Network completeness.} The Raghunath network, while carefully curated, may omit relevant genes or interactions. We will assess this by testing whether the 30 Raghunath genes independently confirmed in the Baxter compendium and the 4 confirmed in the Bajpai CRISPR screen show stronger centrality--constraint relationships than unvalidated genes. If the validated subset drives the signal, this supports the curated network's reliability; if not, we will explore principled network expansion using STRING interactions restricted to genes present in $\geq 2$ of our three sources (Raghunath, Baxter, Bajpai).
+
+\emph{Confounding between centrality and gene properties.} Highly central genes may be systematically longer, older, or more broadly expressed. Multivariable regression will control for measurable covariates. In addition, propensity-score style matching (e.g., nearest-neighbor matching on log gene length, GC content, and expression breadth) will compare genes with similar basic properties but differing centrality.
+
+%% ────────────────────────────────────────────────────────────────
+\subsection{AIM 2: Test whether cross-system connectivity predicts constraint independently of within-pathway position}
+%% ────────────────────────────────────────────────────────────────
+
+\subsubsection{Rationale.}
+Aim~1 captures structural relationships \emph{within} the melanocyte signaling network: how much a gene integrates different sub-pathways of melanogenesis (UV response, MAPK cascades, transcriptional regulation, melanin synthesis). But genes also function \emph{beyond} pigmentation. \emph{MC1R} modulates immune responses and metabolism; \emph{IRF4} regulates lymphocyte development; \emph{EDNRB} and \emph{KIT} are essential for neural crest specification (Quillen et al., 2018; Sturm \& Duffy, 2012). This cross-system embedding creates pleiotropic constraints invisible to within-pathway analysis. Selection signals at ``pigmentation genes'' may reflect constraint on non-pigmentation functions---a confound that single-pathway analyses cannot resolve.
+
+We therefore distinguish two dimensions of pleiotropy:
+\begin{enumerate}[itemsep=2pt, topsep=2pt]
+    \item \textbf{Within-pathway integration} (measured in Aim~1): Centrality within the melanocyte signaling network. A gene can be a hub within melanogenesis while having no other biological roles.
+    \item \textbf{Cross-system connectivity} (measured here): Participation in biological systems entirely outside melanogenesis---immune signaling, neural crest development, vitamin D metabolism, cell cycle regulation.
+\end{enumerate}
+
+These two dimensions are partially correlated (some within-melanogenesis hubs, like \emph{MITF}, are also pleiotropic across systems) but conceptually and empirically separable. \emph{TYR}, for example, is melanocyte-specific on both dimensions: peripheral in the network (low Aim~1 centrality) and not involved in other organ systems (low Aim~2 cross-system connectivity). \emph{EDNRB}, conversely, has modest within-pathway centrality but high cross-system connectivity via its essential role in neural crest development. The key question is whether cross-system connectivity explains additional constraint variance beyond what within-pathway centrality already captures.
+
+\ednote{Aim 2 methodology continues as in original draft, with the revised terminology distinguishing ``within-pathway integration'' (Aim 1) from ``cross-system connectivity'' (Aim 2). The three dimensions of cross-system measurement remain: (1) pathway membership via KEGG/Reactome, (2) tissue expression breadth via GTEx $\tau$ scores, and (3) melanocyte-specific eQTL regulatory architecture. The key statistical test becomes a hierarchical regression: does cross-system connectivity predict constraint after controlling for Aim 1 centrality?}
+
+%% ────────────────────────────────────────────────────────────────
+\subsection{AIM 3: Test whether network context improves phenotype prediction}
+%% ────────────────────────────────────────────────────────────────
+
+\ednote{Aim 3 structure remains largely as in original draft. The key revision is framing Aim 3 as the translational consequence of the Aim 1 (within-pathway integration) and Aim 2 (cross-system connectivity) findings: if network position and cross-system pleiotropy predict where adaptive variation accumulates, then incorporating these features should improve phenotype prediction, especially for cases where standard models fail (intermediate eye colors, non-European populations).}
+
+\end{document}

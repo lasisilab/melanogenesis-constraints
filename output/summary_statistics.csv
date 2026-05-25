@@ -1,0 +1,6 @@
+Category,Type,n,median_LOEUF,IQR_low,IQR_high
+pigment_restricted,Clinical_phenotype,15,1.163,0.7735,1.7325
+pleiotropic,Clinical_phenotype,29,0.733,0.419,1.291
+coding,GWAS_variant,7,1.163,0.933,1.6925
+regulatory,GWAS_variant,10,0.534,0.39125,1.3315
+none,GWAS_variant,27,0.963,0.5035000000000001,1.3235000000000001
