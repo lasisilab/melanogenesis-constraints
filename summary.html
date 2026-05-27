@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Melanogenesis Constraints — Project Status & Ideation Brief</title>
+<style>
+  :root {
+    --ink:#1a1a1a; --muted:#5a5a5a; --line:#e3e3e3; --bg:#fafafa;
+    --accent:#c0282c; --accent2:#1f6feb; --good:#28a745; --warn:#b8860b;
+    --chip:#f0f0f0;
+  }
+  * { box-sizing:border-box; }
+  body {
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink); line-height:1.55; max-width:920px; margin:0 auto;
+    padding:2.5rem 1.5rem 5rem; background:#fff;
+  }
+  h1 { font-size:1.7rem; margin:0 0 .25rem; }
+  h2 { font-size:1.25rem; margin:2.2rem 0 .6rem; padding-bottom:.3rem;
+       border-bottom:2px solid var(--line); }
+  h3 { font-size:1.02rem; margin:1.3rem 0 .4rem; color:#222; }
+  .sub { color:var(--muted); font-size:.95rem; margin:0 0 1.5rem; }
+  p, li { font-size:.95rem; }
+  code { background:var(--chip); padding:.1em .35em; border-radius:4px;
+         font-size:.86em; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
+  .card { background:var(--bg); border:1px solid var(--line); border-radius:10px;
+          padding:1rem 1.2rem; margin:1rem 0; }
+  .finding { border-left:4px solid var(--accent); }
+  .caveat  { border-left:4px solid var(--warn); }
+  .good    { border-left:4px solid var(--good); }
+  .next    { border-left:4px solid var(--accent2); }
+  table { border-collapse:collapse; width:100%; margin:.8rem 0; font-size:.88rem; }
+  th, td { border:1px solid var(--line); padding:.45rem .6rem; text-align:left; }
+  th { background:var(--chip); }
+  .chip { display:inline-block; background:var(--chip); border-radius:20px;
+          padding:.12rem .65rem; font-size:.78rem; color:var(--muted);
+          margin:0 .3rem .3rem 0; }
+  .q { font-weight:600; color:var(--accent2); }
+  .stat { font-variant-numeric:tabular-nums; }
+  .small { font-size:.82rem; color:var(--muted); }
+  ul.tight { margin:.3rem 0; }
+  hr { border:none; border-top:1px solid var(--line); margin:2rem 0; }
+</style>
+</head>
+<body>
+
+<h1>Melanogenesis Constraints — Status &amp; Ideation Brief</h1>
+<p class="sub">PEQG 2026 poster · constraint (LOEUF) &times; expression breadth (&tau;/GTEx) &times; network connectivity (KEGG) &times; population-specific selection (PBS) · snapshot 2026-05-27</p>
+
+<div class="card">
+<strong>What this document is:</strong> a portable summary of the current analytical state for continued ideation. It captures the project's core claims, what was built/learned in the latest working session, the key statistical findings (including a negative result worth knowing), and the open questions/decisions on the table. Pair it with the repo's <code>CHANGELOG.md</code> (technical build log) and the Quarto site under <code>pages/</code>.
+</div>
+
+<h2>1 · Core thesis &amp; data</h2>
+<p>The poster argues that <strong>constraint and adaptation operate on partly orthogonal evolutionary axes</strong> in the melanogenesis network. Two strands:</p>
+<ul class="tight">
+  <li><strong>Constraint strand:</strong> tissue-expression breadth and network connectivity each independently predict loss-of-function intolerance (LOEUF).</li>
+  <li><strong>Adaptation strand:</strong> population-specific selection (PBS) targets different tissue-specificity regimes in African vs. Melanesian lineages.</li>
+</ul>
+<table>
+<tr><th>Layer</th><th>Metric</th><th>Source</th></tr>
+<tr><td>Gene set</td><td>129-gene melanocyte signaling network</td><td>Raghunath et al. 2015, <em>BMC Res Notes</em> (DOI 10.1186/s13104-015-1128-6)</td></tr>
+<tr><td>Constraint</td><td>LOEUF</td><td>gnomAD</td></tr>
+<tr><td>Expression breadth</td><td>&tau; (Yanai) + GTEx tissue-breadth count</td><td>GTEx v8, 54 tissues</td></tr>
+<tr><td>Connectivity</td><td>KEGG pathway count; betweenness centrality</td><td>KEGG; Raghunath network</td></tr>
+<tr><td>Selection</td><td>PBS (Hudson F<sub>ST</sub> &rarr; Cavalli-Sforza T)</td><td>HGDP+1KGP (gnomAD v3.1.2); SGDP</td></tr>
+</table>
+
+<h2>2 · Session work — what changed</h2>
+
+<h3>Multiple regression (reviewer-driven)</h3>
+<p>A collaborator challenged the claim that connectivity and breadth <em>independently</em> affect constraint. Built a joint OLS in <code>analysis/phase2_tau_variants.py</code> and a figure in <code>analysis/phase2_joint_regression_figure.py</code>.</p>
+<div class="card finding">
+<strong>Result — claim holds.</strong> <code>LOEUF ~ &tau; + log1p(KEGG)</code> (z-scored, n=127): &beta;<sub>&tau;</sub>=+0.126 (p=3.6&times;10<sup>-3</sup>), &beta;<sub>KEGG</sub>=&minus;0.126 (p=3.5&times;10<sup>-3</sup>), VIF&approx;1.22. Using the literal GTEx breadth count instead of &tau; is slightly stronger (&beta;=&minus;0.135, p=1.3&times;10<sup>-3</sup>). Betweenness drops out once KEGG is included &mdash; so the figure now shows only the four <em>bivariate</em> specifications (breadth/&tau; &times; KEGG/betweenness), each with both predictors significant.
+</div>
+<p class="small">Figure panels: (A,B) added-variable plots = the joint coefficient made visual; (C) forest plot of standardized &beta; &plusmn; 95% CI across specifications. &rarr; <code>output/figure_phase2_joint_regression.{png,pdf}</code></p>
+
+<h3>GTEx expression heatmaps</h3>
+<p>Reworked the heatmap from raw log2(TPM+1) to <strong>row-normalized "&tau;-style" expression</strong> (each cell = x / row-max; &tau; = mean(1&minus;this)). Removed the LOEUF side-bar. Explored several gene orderings and built a family of figures:</p>
+<ul class="tight">
+  <li><code>figure_phase1_gtex_heatmap_limited</code> — 43 curated tissues, rows hierarchically clustered by expression profile, tissues grouped by biological system.</li>
+  <li><code>figure_phase1_gtex_heatmap_skin_sorted</code> — 3 panels: Welch's t (skin vs non-skin), &tau;-split, and composite (t&times;&tau;).</li>
+  <li><code>figure_phase1_gtex_heatmap_skin_split</code> — standalone &tau;-split: tissue-specific (&tau;&ge;0.7) block on top, broadly-expressed below, rows sorted by skin Welch's t within each block.</li>
+  <li><code>figure_phase1_gtex_heatmap_skin_split_selection</code> — the &tau;-split <em>with a PBS-quadrant side-bar</em> overlaying the selection axis onto the expression heatmap (see below).</li>
+</ul>
+
+<h3>Adaptation &times; tissue specificity (poster section fix)</h3>
+<p>A reviewer couldn't see how the PBS quadrant scatter demonstrated "Adaptation exploits tissue specificity, not constraint." Built a focused 2-panel companion (<code>figure_phase2_adaptation_tau_contrast</code>) showing &tau; and LOEUF violins for African-specific vs Melanesian-specific quadrants only.</p>
+<div class="card finding">
+<strong>The demonstration.</strong> Among population-specifically-selected network genes: &tau; differs between African- and Melanesian-targeted genes (Mann-Whitney <span class="stat">p=0.032</span>) while LOEUF does not (<span class="stat">p=0.97</span>). African selection &rarr; broadly expressed genes; Melanesian selection &rarr; tissue-restricted genes.
+</div>
+
+<h3>τ-split &times; selection overlay</h3>
+<div class="card finding">
+<strong>The two axes connect.</strong> Overlaying PBS quadrant onto the &tau;-split heatmap and testing the contingency: of the population-specifically-selected genes in the <em>tissue-specific</em> block, 7/8 are Melanesian-targeted; the <em>broadly-expressed</em> block splits 21 African vs 15 Melanesian. <strong>Fisher's exact OR=0.10, p=0.046.</strong> The selection axis aligns with the tissue-specificity axis as predicted.
+</div>
+
+<h2>3 · New: SGDP genome-wide PBS pipeline</h2>
+<p>To replace the within-network 75th-percentile "significance" threshold (a relative ranking, not a test) with a genome-wide-calibrated one, built a full SGDP-only genome-wide PBS pipeline. Scripts in <code>analysis/cluster/</code>:</p>
+<table>
+<tr><th>Script</th><th>Role</th></tr>
+<tr><td><code>13_make_sgdp_only_sample_lists.py</code></td><td>Assigns SGDP samples to 5 populations from sample-ID naming</td></tr>
+<tr><td><code>14_filter_sgdp_genomewide.sh</code></td><td>Per-chrom filter + hg19&rarr;hg38 liftover + per-pop split</td></tr>
+<tr><td><code>15_compute_pbs_sgdp_genomewide.{py,sh}</code></td><td>Per-gene PBS (same Hudson estimator as HGDP pipeline)</td></tr>
+<tr><td><code>16_compare_pbs_hgdp_vs_sgdp.py</code></td><td>Gene-level concordance (auto/network/genomewide modes)</td></tr>
+<tr><td><code>17_network_enrichment_genomewide.py</code></td><td>Network-vs-genome enrichment: MWU + SNP-matched permutation + per-gene genome-wide percentiles</td></tr>
+</table>
+<p class="small">SGDP genome-wide run is complete (22 chrs, 19,022 genes). HGDP genome-wide is building on the cluster now. Sample-size caveat: only 17 SGDP Melanesians (vs ~25-30 HGDP) &rarr; inflated F<sub>ST</sub> variance.</p>
+
+<h2>4 · Key new finding — network enrichment (a careful negative)</h2>
+<div class="card caveat">
+<strong>The melanogenesis network is NOT significantly enriched for elevated PBS vs. the genome-wide background (SGDP).</strong>
+<ul class="tight">
+  <li>PBS-1 African: network median 0.302 vs background 0.293; MWU p=0.15; SNP-matched perm p=0.24.</li>
+  <li>PBS-3 Melanesian: network median 0.330 vs background 0.311; MWU p=0.18; perm p=0.25.</li>
+  <li>Network genes in genome-wide top 1%: <strong>0 of 123</strong> (expected ~1.2). Top 5%: 5-6 (expected ~6.2) &mdash; at chance.</li>
+</ul>
+</div>
+<p>Two things make this <em>interpretable rather than disappointing</em>:</p>
+<ul class="tight">
+  <li><strong>The high genome-wide baseline (~0.31) is real, not an artifact.</strong> It holds for genes with 100+ SNPs and n_snps barely correlates with PBS (&rho;=0.07). It reflects deep divergence of the SGDP populations &mdash; PBS is a relative/outlier statistic, so the median is demographic baseline; the tail is what matters.</li>
+  <li><strong>The poster claim was never network-level enrichment.</strong> It's the within-network <em>distribution</em> of selection (African&rarr;broad, Melanesian&rarr;specific), which holds independently (Fisher p=0.046).</li>
+</ul>
+<div class="card good">
+<strong>Individual genes still rank high genome-wide</strong> (PBS-3 percentiles): KITLG 98.6, ATF2 98.6, HIF1A 97.7, PRKACA 96.9, BAK1 95.9, CREB1 95.8; MITF 85.8, TYRP1 86.6. KITLG is a known pigmentation selection target &mdash; a nice positive control. Per-gene percentiles saved to <code>output/network_gene_genomewide_percentiles_SGDP.csv</code>.
+</div>
+<p class="small">Suggested honest framing: <em>"Individual pigmentation effectors (KITLG, ATF2, HIF1A) rank in the genome-wide top 2-3% for population-specific PBS, though the network as a whole is not enriched above genomic background (MWU p=0.18) &mdash; consistent with selection acting on specific effectors rather than the entire pathway."</em></p>
+
+<h2>5 · Open questions for ideation</h2>
+<div class="card next">
+<p class="q">A. Does the HGDP genome-wide run change the enrichment picture?</p>
+<p>HGDP has ~25-30 Melanesians vs SGDP's 17, so a less-inflated background and better power. Run <code>17_network_enrichment_genomewide.py --prefix pbs_genomewide_chr --label HGDP</code> once the cluster job finishes. If the network is enriched in HGDP but not SGDP, that's a sample-size story; if neither, the "specific effectors not whole pathway" framing is robust.</p>
+</div>
+<div class="card next">
+<p class="q">B. Should the quadrant/&tau; thresholds switch from within-network quartiles to genome-wide percentiles?</p>
+<p>The within-network 75th-percentile cut sits on top of the inflated baseline. Re-deriving the African-/Melanesian-specific calls using genome-wide percentile cuts (e.g. top 5% genome-wide) would make the quadrant labels mean "extreme relative to the whole genome." Does the &tau;-association (Fisher p=0.046) survive that stricter definition?</p>
+</div>
+<div class="card next">
+<p class="q">C. Is the "orthogonal axes" story better told gene-by-gene than set-level?</p>
+<p>Given the null set-level enrichment, the strongest version of the poster may lead with: (1) constraint axes are independent (regression, solid); (2) within the network, selection signal partitions by tissue-specificity (Fisher p=0.046); (3) the specific high-PBS genes are known pigmentation effectors. This sidesteps over-claiming pathway-wide selection.</p>
+</div>
+<div class="card next">
+<p class="q">D. Two-dataset robustness as a figure?</p>
+<p>Once HGDP-GW exists, a side-by-side enrichment ECDF (SGDP | HGDP) + a per-gene percentile concordance scatter would show whether the top genes (KITLG etc.) replicate across independently-genotyped datasets.</p>
+</div>
+
+<h2>6 · Artifact index</h2>
+<p class="small"><strong>Figures (output/):</strong> figure_phase2_joint_regression · figure_phase1_gtex_heatmap_limited · figure_phase1_gtex_heatmap_skin_sorted · figure_phase1_gtex_heatmap_skin_split · figure_phase1_gtex_heatmap_skin_split_selection · figure_phase2_adaptation_tau_contrast · figure_phase2_pbs_quadrants · figure_network_enrichment_SGDP</p>
+<p class="small"><strong>Tables (output/):</strong> phase2_joint_regression.txt · network_gene_genomewide_percentiles_SGDP.csv · network_enrichment_SGDP_summary.txt · pbs_sgdp_genomewide_chr{1..22}.csv · pbs_hgdp_vs_sgdp_per_gene_network.csv</p>
+<p class="small"><strong>Pipeline (analysis/cluster/):</strong> scripts 13-17 + SGDP_PBS_CHECKLIST.md (runbook)</p>
+
+<hr>
+<p class="small">Generated for sharing with the Claude desktop app to continue ideation. Statistics current as of the SGDP genome-wide run; HGDP genome-wide pending. Numbers should be re-verified against the latest CSVs before going on the poster.</p>
+
+</body>
+</html>

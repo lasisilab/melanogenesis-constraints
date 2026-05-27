@@ -1,0 +1,22 @@
+HGDP vs. SGDP genome-wide PBS — comparison summary
+============================================================
+Genes in both: 124
+Network genes in both: 0
+
+Spearman ρ (HGDP vs SGDP) per PBS scan:
+  scan                         all genes      network
+  PBS-1  African (target) /  ρ = +0.226 (p=1.2e-02)   ρ_net = +nan (p=nan)
+  PBS-2  African (target) /  ρ = +0.204 (p=2.4e-02)   ρ_net = +nan (p=nan)
+  PBS-3  Melanesian (target  ρ = +0.516 (p=1.0e-09)   ρ_net = +nan (p=nan)
+  PBS-4  Melanesian (target  ρ = +0.508 (p=2.0e-09)   ρ_net = +nan (p=nan)
+
+Top-percentile Jaccard concordance (all genes):
+  PBS-1 African  top  0.5%  (n=1)   Jaccard = 0.000
+  PBS-1 African  top  1.0%  (n=1)   Jaccard = 0.000
+  PBS-1 African  top  5.0%  (n=6)   Jaccard = 0.091
+  PBS-1 African  top 10.0%  (n=12)   Jaccard = 0.143
+  PBS-3 Melanesian  top  0.5%  (n=1)   Jaccard = 0.000
+  PBS-3 Melanesian  top  1.0%  (n=1)   Jaccard = 0.000
+  PBS-3 Melanesian  top  5.0%  (n=6)   Jaccard = 0.200
+  PBS-3 Melanesian  top 10.0%  (n=12)   Jaccard = 0.412
+

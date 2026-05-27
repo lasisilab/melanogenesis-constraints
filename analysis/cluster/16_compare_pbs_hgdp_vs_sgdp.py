@@ -1,12 +1,15 @@
 """
 16_compare_pbs_hgdp_vs_sgdp.py
 
-Compares the HGDP-only and SGDP-only genome-wide PBS results gene-by-gene.
+Compares the HGDP-only and SGDP-only PBS results gene-by-gene.
 
-Inputs (in BASE/output/):
-  pbs_genomewide_chr{1..22}.csv         — HGDP-only (from 11_compute_pbs_genomewide.py)
+HGDP input (auto-detected, or forced with --mode):
+  genomewide  pbs_genomewide_chr{1..22}.csv    from 11_compute_pbs_hgdp_genomewide.py
+  network     output/pbs_per_gene.csv          from 08_compute_pbs.py (128 network genes)
+
+Other inputs (in BASE/output/):
   pbs_sgdp_genomewide_chr{1..22}.csv    — SGDP-only (from 15_compute_pbs_sgdp_genomewide.py)
-  network_constraint_categorized.csv    — 129 network genes for highlighting
+  network_constraint_categorized.csv    — melanogenesis network genes for highlighting
 
 Outputs (in BASE/output/):
   pbs_hgdp_vs_sgdp_per_gene.csv         — merged gene-level PBS table
@@ -17,20 +20,18 @@ Outputs (in BASE/output/):
                                           top-percentile concordance, top-10
                                           network genes in each dataset)
 
-Headline questions answered:
-  1. Genome-wide Spearman ρ between HGDP and SGDP PBS at the gene level
-     → "Do the two datasets generally agree about which genes are selected?"
-  2. Network-only Spearman ρ
-     → "Do the two datasets agree on the melanogenesis network?"
-  3. Top-1% concordance (Jaccard overlap of top-1% gene sets)
-     → "Do the strongest signals replicate across datasets?"
-
-Run locally after both pipelines have completed and the per-chrom CSVs have
-been pulled back from the cluster.
+  In network mode the output filenames gain a _network suffix so genome-wide
+  and network-only runs do not overwrite each other.
 
 Usage:
-    python analysis/cluster/16_compare_pbs_hgdp_vs_sgdp.py \\
-        --base /path/to/repo
+    # auto: uses genomewide if pbs_genomewide_chr*.csv exist, else network fallback
+    python analysis/cluster/16_compare_pbs_hgdp_vs_sgdp.py --base /path/to/repo
+
+    # force network-only mode (128 genes from pbs_per_gene.csv)
+    python analysis/cluster/16_compare_pbs_hgdp_vs_sgdp.py --base . --mode network
+
+    # force genome-wide mode (requires pbs_genomewide_chr*.csv)
+    python analysis/cluster/16_compare_pbs_hgdp_vs_sgdp.py --base . --mode genomewide
 """
 
 import argparse
@@ -48,6 +49,13 @@ def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--base", default=os.getcwd(),
                    help="Repo root (contains output/ and data/).")
+    p.add_argument("--mode", choices=["auto", "network", "genomewide"],
+                   default="auto",
+                   help="HGDP data source. 'auto' uses genomewide if "
+                        "pbs_genomewide_chr*.csv exist, else falls back to "
+                        "pbs_per_gene.csv (128 network genes). 'network' "
+                        "forces pbs_per_gene.csv. 'genomewide' requires the "
+                        "per-chrom CSVs from 11_compute_pbs_hgdp_genomewide.sh.")
     return p.parse_args()
 
 
@@ -67,6 +75,33 @@ def load_concat(prefix, out_dir):
     return pd.concat(pieces, ignore_index=True)
 
 
+def load_hgdp(out_dir, mode):
+    """Return (DataFrame, mode_used) where mode_used is 'genomewide' or 'network'."""
+    gw_available = any(
+        os.path.exists(os.path.join(out_dir, f"pbs_genomewide_chr{c}.csv"))
+        for c in range(1, 23)
+    )
+    use_network = (mode == "network") or (mode == "auto" and not gw_available)
+
+    if not use_network:
+        df = load_concat("pbs_genomewide_chr", out_dir)
+        return df, "genomewide"
+
+    path = os.path.join(out_dir, "pbs_per_gene.csv")
+    if not os.path.exists(path):
+        raise FileNotFoundError(
+            f"No HGDP PBS data found in {out_dir}.\n"
+            f"  For network-only comparison: run 08_compute_pbs.sh first.\n"
+            f"  For genome-wide comparison:  run 11_compute_pbs_hgdp_genomewide.sh first."
+        )
+    df = pd.read_csv(path)
+    df = df.rename(columns={"gene": "gene_name", "n_sites_shared": "n_snps"})
+    if "gene_id" not in df.columns:
+        df["gene_id"] = pd.NA
+    print(f"  Loaded {len(df):,} genes from pbs_per_gene.csv (network-only mode)")
+    return df, "network"
+
+
 def top_pct_jaccard(a_rank, b_rank, pct):
     """Jaccard overlap of the top-`pct` of two ranked sets (indexed identically)."""
     n = len(a_rank)
@@ -83,8 +118,8 @@ def main():
     data_dir = os.path.join(args.base, "data")
 
     print("Loading HGDP-only PBS results...")
-    hgdp = load_concat("pbs_genomewide_chr",       out_dir)
-    print(f"  {len(hgdp):,} HGDP gene rows")
+    hgdp, hgdp_mode = load_hgdp(out_dir, args.mode)
+    print(f"  {len(hgdp):,} HGDP gene rows  [mode: {hgdp_mode}]")
 
     print("Loading SGDP-only PBS results...")
     sgdp = load_concat("pbs_sgdp_genomewide_chr",  out_dir)
@@ -92,14 +127,22 @@ def main():
 
     pbs_cols = ["pbs1_african", "pbs2_african",
                 "pbs3_melanesian", "pbs4_melanesian"]
-    merged = hgdp[["gene_name", "gene_id", "chrom", "start", "end",
-                   "n_snps"] + pbs_cols].rename(
+
+    # In network mode gene_id is unreliable; merge on gene_name only.
+    merge_keys = ["gene_name"] if hgdp_mode == "network" else ["gene_name", "gene_id"]
+
+    hgdp_cols = ["gene_name", "gene_id", "chrom", "start", "end", "n_snps"] + pbs_cols
+    hgdp_cols = [c for c in hgdp_cols if c in hgdp.columns]
+    sgdp_cols  = ["gene_name", "gene_id"] + pbs_cols + ["n_snps"]
+    sgdp_cols  = [c for c in sgdp_cols if c in sgdp.columns]
+
+    merged = hgdp[hgdp_cols].rename(
         columns={c: c + "_hgdp" for c in pbs_cols + ["n_snps"]}
     ).merge(
-        sgdp[["gene_name", "gene_id"] + pbs_cols + ["n_snps"]].rename(
+        sgdp[sgdp_cols].rename(
             columns={c: c + "_sgdp" for c in pbs_cols + ["n_snps"]}
         ),
-        on=["gene_name", "gene_id"], how="inner",
+        on=merge_keys, how="inner",
     )
     print(f"  {len(merged):,} genes present in both pipelines")
 
@@ -112,7 +155,10 @@ def main():
         merged["is_network"] = False
         print(f"  WARNING: {network_csv} not found; network highlight disabled.")
 
-    out_csv = os.path.join(out_dir, "pbs_hgdp_vs_sgdp_per_gene.csv")
+    # Output file suffix so network and genomewide runs don't overwrite each other
+    sfx = "_network" if hgdp_mode == "network" else ""
+
+    out_csv = os.path.join(out_dir, f"pbs_hgdp_vs_sgdp_per_gene{sfx}.csv")
     merged.to_csv(out_csv, index=False)
     print(f"Saved → {out_csv}")
 
@@ -179,7 +225,7 @@ def main():
             summary.append(top_sgdp.to_string(index=False))
             summary.append("")
 
-    summary_path = os.path.join(out_dir, "pbs_hgdp_vs_sgdp_summary.txt")
+    summary_path = os.path.join(out_dir, f"pbs_hgdp_vs_sgdp_summary{sfx}.txt")
     with open(summary_path, "w") as f:
         f.write("\n".join(summary) + "\n")
     print(f"Saved → {summary_path}")
@@ -221,11 +267,11 @@ def main():
         for sp in ("top", "right"):
             ax.spines[sp].set_visible(False)
 
-    fig.suptitle("Genome-wide PBS — HGDP-only vs. SGDP-only "
-                 "(per-gene concordance)",
+    scope = "network genes only" if hgdp_mode == "network" else "genome-wide"
+    fig.suptitle(f"PBS — HGDP-only vs. SGDP-only ({scope}, per-gene concordance)",
                  fontsize=14, fontweight="bold", y=0.995)
     fig.tight_layout()
-    fig_path = os.path.join(out_dir, "figure_pbs_hgdp_vs_sgdp_scatter.png")
+    fig_path = os.path.join(out_dir, f"figure_pbs_hgdp_vs_sgdp_scatter{sfx}.png")
     fig.savefig(fig_path, dpi=200, bbox_inches="tight", facecolor="white")
     fig.savefig(fig_path.replace(".png", ".pdf"), bbox_inches="tight",
                 facecolor="white")

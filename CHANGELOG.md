@@ -6,6 +6,39 @@ All notable changes to the melanogenesis-constraints project are documented here
 
 ## [Unreleased] — Phase 2 Population Genomics Pipeline
 
+### Added (2026-05-27 — SGDP-only genome-wide PBS pipeline)
+- `analysis/cluster/13_make_sgdp_only_sample_lists.py` — assigns SGDP samples to 5 super-populations (African/Melanesian/East Asian/South Asian/European) by parsing the SGDP `{PANEL}_{POPULATION}-{IDX}` sample-ID convention; writes per-pop lists + an audit TSV to `data/sgdp_only/`; excludes North African/Siberian/Native American/admixed pops from the panel
+- `analysis/cluster/14_filter_sgdp_genomewide.sh` — SLURM array (1–22%2, 2 cpu/16G); per-chrom quality filter (biallelic SNPs, GQ<20→missing, drop >10% missing), hg19→hg38 liftover (reuses chain from step 04), per-population split → `vcf/sgdp_genomewide/`; auto-detects per-chrom vs single multi-chrom SGDP VCF layout
+- `analysis/cluster/15_compute_pbs_sgdp_genomewide.{py,sh}` — per-gene PBS for all protein-coding genes using the same Hudson FST estimator as step 11; SLURM array (1–22%3, 1 cpu/8G); outputs `output/pbs_sgdp_genomewide_chr{1..22}.csv`
+- `analysis/cluster/16_compare_pbs_hgdp_vs_sgdp.py` — gene-level concordance (Spearman ρ, top-percentile Jaccard); auto/network/genomewide modes so it works whether HGDP data is genome-wide or network-only
+- `analysis/cluster/17_network_enrichment_genomewide.py` — tests whether the network carries elevated PBS vs. genome-wide background using a single scan; per-gene genome-wide percentiles, one-sided Mann-Whitney U, and a SNP-count-matched permutation null (controls for the gene-length/PBS confound); dataset-agnostic via `--prefix`/`--label`
+- `analysis/cluster/SGDP_PBS_CHECKLIST.md` — runbook: pre-flight checks, chr22 smoke test, full submission, troubleshooting table
+- SGDP genome-wide run complete (22 chrs, 19,022 genes); HGDP genome-wide pending on cluster
+
+### Added (2026-05-27 — Network selection enrichment finding)
+- `output/network_enrichment_SGDP_summary.txt`, `output/network_gene_genomewide_percentiles_SGDP.csv`, `output/figure_network_enrichment_SGDP.{png,pdf}`
+- Finding (SGDP): melanogenesis network NOT significantly enriched for elevated PBS vs. genomic background — PBS-1 African MWU p=0.15 / perm p=0.24; PBS-3 Melanesian MWU p=0.18 / perm p=0.25; 0/123 network genes in genome-wide top 1% (expected ~1.2)
+- Background median PBS (~0.31) confirmed real, not a low-SNP artifact (holds for genes with 100+ SNPs; Spearman(n_snps, PBS)=0.07) — reflects deep SGDP population divergence; PBS is an outlier statistic, so the median is demographic baseline
+- Individual genes still rank high genome-wide (PBS-3 percentile): KITLG 98.6, ATF2 98.6, HIF1A 97.7, PRKACA 96.9, MITF 85.8, TYRP1 86.6 — supports "selection on specific effectors, not the whole pathway"; per-gene CSV carries both African and Melanesian percentiles, enabling genome-wide-percentile quadrant reframe
+
+### Added (2026-05-27 — Multiple regression of LOEUF on breadth + connectivity)
+- `analysis/phase2_tau_variants.py` — joint OLS block: `LOEUF ~ τ/breadth + log1p(KEGG) [+ betweenness]`, z-scored predictors, with VIF and rank-based partial Spearman; writes `output/phase2_joint_regression.txt`
+- `analysis/phase2_joint_regression_figure.py` — added-variable plots (A,B) + forest plot of standardized β ± 95% CI (C); shows the four bivariate specifications (breadth/τ × KEGG/betweenness); `output/figure_phase2_joint_regression.{png,pdf}`
+- Result: breadth and KEGG each independently predict LOEUF — β_breadth=−0.135 (p=1.3e-3), β_KEGG=−0.131 (p=1.8e-3), VIF≈1.16; betweenness drops to non-significant once KEGG is included
+- `pages/popgen_selection.qmd` — Figure B/C text updated with the joint-regression statistics; betweenness independence claim softened
+
+### Added (2026-05-27 — GTEx expression heatmaps reworked)
+- `analysis/phase1_gtex_extras.py` — heatmap cells switched from raw log2(TPM+1) to row-normalized "τ-style" expression (x / row-max; τ = mean(1−this)); LOEUF side-bar removed; gene rows ordered by hierarchical clustering of expression profiles (limited heatmap)
+- New ordering figures: `figure_phase1_gtex_heatmap_skin_sorted` (3 panels: Welch's t / τ-split / composite t×τ), `figure_phase1_gtex_heatmap_skin_split` (standalone τ-split: tissue-specific τ≥0.7 on top, broadly-expressed below, sorted by skin Welch's t), `figure_phase1_gtex_heatmap_skin_split_selection` (τ-split with PBS-quadrant side-bar overlay)
+- Skin-specificity scoring discussed: option 2 (mean(skin)−mean(non-skin)) vs Welch's t; tissue group labels rotated 90° below the heatmap, only skin tissues bolded
+
+### Added (2026-05-27 — Adaptation × tissue specificity poster fix)
+- `analysis/phase2_pop_difference.py` — `figure_phase2_adaptation_tau_contrast.{png,pdf}`: 2-panel τ vs LOEUF violins (African-specific vs Melanesian-specific quadrants only) demonstrating the "Adaptation exploits tissue specificity, not constraint" claim — τ differs (Mann-Whitney p=0.032), LOEUF does not (p=0.97)
+- τ-split × selection overlay contingency: of population-specifically-selected genes in the tissue-specific block, 7/8 are Melanesian-targeted (Fisher's exact OR=0.10, p=0.046)
+
+### Added (2026-05-27 — Project status brief)
+- `summary.html` — self-contained ideation brief (core thesis, session work, key findings incl. the enrichment negative, open questions, artifact index) for sharing with the Claude desktop app
+
 ### Fixed
 - `analysis/cluster/03_make_sample_lists.py` — `all_keep` was built before `sgdp_melanesian` was defined, causing `--force-samples` in 05 to silently drop all 17 SGDP Papuan/Bougainville samples from `melanesian.vcf.gz`; fixed by moving `sgdp_melanesian` definition above `all_keep` and including it in the union; verified: `melanesian.vcf.gz` now has exactly 47 samples (30 HGDP + 17 SGDP)
 - Phase 2 VCF prep complete: all 5 population VCFs verified in `vcf/final/` (african 184,859 vars/747 samples; southasian 167,302/790; eastasian 137,663/718; european 135,432/788; melanesian 47 samples confirmed)

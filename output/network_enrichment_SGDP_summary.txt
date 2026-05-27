@@ -1,0 +1,76 @@
+Melanogenesis network PBS enrichment vs. genome-wide background [SGDP]
+======================================================================
+Genome-wide genes: 19,022
+Network genes matched: 124
+Permutations: 10,000   (SNP-matched, 10 bins)
+
+PBS-1  African (S.Asian out, Melanesian dist)
+  network median PBS   = 0.3020
+  background median    = 0.2931
+  matched-null median  = 0.2947
+  Mann-Whitney U       p = 1.476e-01  (one-sided, network>bg)
+  SNP-matched perm     p = 0.2448  (network median vs 10,000 matched draws)
+  network genes in genome-wide top 1%: 0 / 123 (expected ~1.2)
+  network genes in genome-wide top 5%: 5 / 123 (expected ~6.2)
+
+PBS-2  African (European out, Melanesian dist)
+  network median PBS   = 0.3116
+  background median    = 0.2968
+  matched-null median  = 0.2990
+  Mann-Whitney U       p = 1.052e-01  (one-sided, network>bg)
+  SNP-matched perm     p = 0.1475  (network median vs 10,000 matched draws)
+  network genes in genome-wide top 1%: 0 / 123 (expected ~1.2)
+  network genes in genome-wide top 5%: 4 / 123 (expected ~6.2)
+
+PBS-3  Melanesian (S.Asian out, African dist)
+  network median PBS   = 0.3303
+  background median    = 0.3110
+  matched-null median  = 0.3147
+  Mann-Whitney U       p = 1.773e-01  (one-sided, network>bg)
+  SNP-matched perm     p = 0.2486  (network median vs 10,000 matched draws)
+  network genes in genome-wide top 1%: 0 / 123 (expected ~1.2)
+  network genes in genome-wide top 5%: 6 / 123 (expected ~6.2)
+
+PBS-4  Melanesian (European out, African dist)
+  network median PBS   = 0.3050
+  background median    = 0.3062
+  matched-null median  = 0.3095
+  Mann-Whitney U       p = 2.528e-01  (one-sided, network>bg)
+  SNP-matched perm     p = 0.5918  (network median vs 10,000 matched draws)
+  network genes in genome-wide top 1%: 0 / 123 (expected ~1.2)
+  network genes in genome-wide top 5%: 6 / 123 (expected ~6.2)
+
+Top 15 network genes by genome-wide pbs1_african percentile:
+  MMP1          97.54 pctile
+  KITLG         97.23 pctile
+  CDC42         96.79 pctile
+  CREB1         96.52 pctile
+  FZD3          95.96 pctile
+  RHOA          94.70 pctile
+  HGF           93.88 pctile
+  HIF1A         93.76 pctile
+  SOX10         93.37 pctile
+  MAP4K2        92.00 pctile
+  PTGER2        91.33 pctile
+  F7            89.65 pctile
+  PRKCD         89.59 pctile
+  ATF2          89.57 pctile
+  FASLG         89.57 pctile
+
+Top 15 network genes by genome-wide pbs3_melanesian percentile:
+  KITLG         98.62 pctile
+  ATF2          98.55 pctile
+  HIF1A         97.74 pctile
+  PRKACA        96.91 pctile
+  BAK1          95.91 pctile
+  CREB1         95.76 pctile
+  FZD3          93.26 pctile
+  ADCY4         93.16 pctile
+  FASLG         92.64 pctile
+  CDKN1A        92.48 pctile
+  MAP4K2        91.28 pctile
+  MAPK3         90.50 pctile
+  TYRP1         86.63 pctile
+  MITF          85.79 pctile
+  BAD           85.71 pctile
+
