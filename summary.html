@@ -96,6 +96,19 @@
 <strong>The two axes connect.</strong> Overlaying PBS quadrant onto the &tau;-split heatmap and testing the contingency: of the population-specifically-selected genes in the <em>tissue-specific</em> block, 7/8 are Melanesian-targeted; the <em>broadly-expressed</em> block splits 21 African vs 15 Melanesian. <strong>Fisher's exact OR=0.10, p=0.046.</strong> The selection axis aligns with the tissue-specificity axis as predicted.
 </div>
 
+<h3>PBS regression — selection predicted by breadth &amp; connectivity</h3>
+<p>Selection-side mirror of the LOEUF regression: predict population-specific PBS from the same predictors. <code>analysis/phase2_pbs_regression.py</code>; outputs <code>figure_phase2_pbs_regression{,_eur_sas}</code> and <code>phase2_pbs_regression.txt</code>.</p>
+<div class="card finding">
+<strong>Tissue specificity predicts African selection &mdash; and it's lineage-specific.</strong>
+<ul class="tight">
+  <li><strong>African</strong> PBS: &tau; &beta;=&minus;0.026 (p=0.014), breadth &beta;=+0.024 (p=0.019) &mdash; broadly-expressed genes carry higher African PBS. <strong>Survives LOEUF control</strong> (&tau; p=0.022, LOEUF ns) &rarr; direct orthogonal-axes test.</li>
+  <li><strong>Melanesian:</strong> directionally consistent (breadth &beta;&minus;, &tau; &beta;+) but ns (p=0.08&ndash;0.23) &mdash; likely the n=17 sample.</li>
+  <li><strong>European &amp; South Asian:</strong> null for &tau;/breadth/KEGG/betweenness &mdash; a clean negative control. The African coupling isn't a generic metric artifact.</li>
+  <li>Network centrality (KEGG, betweenness) predicts PBS in <em>no</em> population. Effect sizes small (R²&approx;0.05). log1p(PBS) sensitivity: all directionally consistent.</li>
+</ul>
+</div>
+<p class="small">Caveat: Eur/SAS PBS use the Afr&ndash;Mel reference pair (no Eur&ndash;SAS F<sub>ST</sub> exists), so they are valid lineage-specific drift estimates but not perfectly parallel to the S.Asian-outgroup PBS-1/3 scans.</p>
+
 <h2>3 · New: SGDP genome-wide PBS pipeline</h2>
 <p>To replace the within-network 75th-percentile "significance" threshold (a relative ranking, not a test) with a genome-wide-calibrated one, built a full SGDP-only genome-wide PBS pipeline. Scripts in <code>analysis/cluster/</code>:</p>
 <table>
@@ -138,7 +151,7 @@
 </div>
 <div class="card next">
 <p class="q">C. Is the "orthogonal axes" story better told gene-by-gene than set-level?</p>
-<p>Given the null set-level enrichment, the strongest version of the poster may lead with: (1) constraint axes are independent (regression, solid); (2) within the network, selection signal partitions by tissue-specificity (Fisher p=0.046); (3) the specific high-PBS genes are known pigmentation effectors. This sidesteps over-claiming pathway-wide selection.</p>
+<p>Given the null set-level enrichment, the strongest version of the poster may lead with: (1) constraint axes are independent (LOEUF regression, solid); (2) selection on the African lineage tracks tissue specificity and survives LOEUF control (PBS regression &tau; p=0.022 controlling for LOEUF) &mdash; the direct orthogonal-axes test &mdash; reinforced by the within-network &tau;-quadrant partition (Fisher p=0.046); (3) the specific high-PBS genes are known pigmentation effectors (KITLG etc.). This sidesteps over-claiming pathway-wide selection. Note the African signal is lineage-specific (null in Eur/SAS), which doubles as a negative control.</p>
 </div>
 <div class="card next">
 <p class="q">D. Two-dataset robustness as a figure?</p>
@@ -146,8 +159,8 @@
 </div>
 
 <h2>6 · Artifact index</h2>
-<p class="small"><strong>Figures (output/):</strong> figure_phase2_joint_regression · figure_phase1_gtex_heatmap_limited · figure_phase1_gtex_heatmap_skin_sorted · figure_phase1_gtex_heatmap_skin_split · figure_phase1_gtex_heatmap_skin_split_selection · figure_phase2_adaptation_tau_contrast · figure_phase2_pbs_quadrants · figure_network_enrichment_SGDP</p>
-<p class="small"><strong>Tables (output/):</strong> phase2_joint_regression.txt · network_gene_genomewide_percentiles_SGDP.csv · network_enrichment_SGDP_summary.txt · pbs_sgdp_genomewide_chr{1..22}.csv · pbs_hgdp_vs_sgdp_per_gene_network.csv</p>
+<p class="small"><strong>Figures (output/):</strong> figure_phase2_joint_regression · figure_phase2_pbs_regression · figure_phase2_pbs_regression_eur_sas · figure_phase1_gtex_heatmap_limited · figure_phase1_gtex_heatmap_skin_sorted · figure_phase1_gtex_heatmap_skin_split · figure_phase1_gtex_heatmap_skin_split_selection · figure_phase2_adaptation_tau_contrast · figure_phase2_pbs_quadrants · figure_network_enrichment_SGDP</p>
+<p class="small"><strong>Tables (output/):</strong> phase2_joint_regression.txt · phase2_pbs_regression.txt · network_gene_genomewide_percentiles_SGDP.csv · network_enrichment_SGDP_summary.txt · pbs_sgdp_genomewide_chr{1..22}.csv · pbs_hgdp_vs_sgdp_per_gene_network.csv</p>
 <p class="small"><strong>Pipeline (analysis/cluster/):</strong> scripts 13-17 + SGDP_PBS_CHECKLIST.md (runbook)</p>
 
 <hr>

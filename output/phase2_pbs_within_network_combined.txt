@@ -1,0 +1,85 @@
+Within-network PBS association — COMBINED dataset (HGDP+1KGP+SGDP)
+==============================================================================
+Outcome: WITHIN-network PBS percentile (rank among network genes, 0–100).
+Source: pbs_per_gene.csv (network-scale; no genome-wide background).
+Adjusted models: pctile ~ z(predictor) + z(log1p n_sites) + z(log10 body_len).
+Permutation: 10,000 shuffles of the percentile among network genes.
+NOTE: ρ identical to ρ on raw combined PBS (rank-invariant). This reports
+the better-powered dataset; it does NOT resolve the SGDP-vs-combined
+robustness gap — the SGDP genome-wide version of this analysis is null.
+
+
+##############################################################################
+# BRANCH: AFR — African (PBS-1, S.Asian outgroup)
+##############################################################################
+  network genes with AFR percentile: 124
+  τ (tissue specificity)       ρ=-0.234 (p=9.25e-03) | adjβ=-6.89 [-12.02,-1.76] p=8.84e-03 | perm p=0.0112 * | VIF=1.04 | broadly-expressed genes higher
+  Betweenness centrality       ρ=+0.137 (p=1.30e-01) | adjβ=+2.14 [-3.00,+7.28] p=4.12e-01 | perm p=0.4301 ns | VIF=1.00 | central genes higher
+  KEGG  log1p(pathway count)   ρ=+0.096 (p=2.86e-01) | adjβ=+2.07 [-3.08,+7.22] p=4.29e-01 | perm p=0.4268 ns | VIF=1.01 | more-pathway genes higher
+  LOEUF (constraint)           ρ=-0.068 (p=4.56e-01) | adjβ=-0.55 [-6.54,+5.43] p=8.55e-01 | perm p=0.8572 ns | VIF=1.35 | more-constrained genes higher
+  Tissue breadth               ρ=+0.273 (p=2.22e-03) | adjβ=+7.88 [+2.79,+12.98] p=2.69e-03 | perm p=0.0029 ** | VIF=1.04 | broadly-expressed genes higher
+
+##############################################################################
+# BRANCH: MEL — Melanesian (PBS-3, S.Asian outgroup)
+##############################################################################
+  network genes with MEL percentile: 124
+  τ (tissue specificity)       ρ=+0.143 (p=1.14e-01) | adjβ=+5.28 [+0.06,+10.50] p=4.73e-02 | perm p=0.0475 * | VIF=1.04 | tissue-specific genes higher
+  Betweenness centrality       ρ=-0.038 (p=6.74e-01) | adjβ=-1.13 [-6.30,+4.05] p=6.68e-01 | perm p=0.6797 ns | VIF=1.00 | peripheral genes higher
+  KEGG  log1p(pathway count)   ρ=-0.059 (p=5.13e-01) | adjβ=-1.71 [-6.89,+3.47] p=5.15e-01 | perm p=0.5266 ns | VIF=1.01 | fewer-pathway genes higher
+  LOEUF (constraint)           ρ=+0.038 (p=6.74e-01) | adjβ=+1.85 [-4.16,+7.85] p=5.43e-01 | perm p=0.5522 ns | VIF=1.35 | less-constrained genes higher
+  Tissue breadth               ρ=-0.175 (p=5.35e-02) | adjβ=-6.18 [-11.38,-0.98] p=2.03e-02 | perm p=0.0207 * | VIF=1.04 | tissue-restricted genes higher
+
+##############################################################################
+# BRANCH: EUR — European (Afr–Mel reference)
+##############################################################################
+  network genes with EUR percentile: 124
+  τ (tissue specificity)       ρ=-0.015 (p=8.65e-01) | adjβ=-0.98 [-6.26,+4.31] p=7.15e-01 | perm p=0.7133 ns | VIF=1.04 | broadly-expressed genes higher
+  Betweenness centrality       ρ=-0.040 (p=6.59e-01) | adjβ=-3.47 [-8.63,+1.69] p=1.86e-01 | perm p=0.1932 ns | VIF=1.00 | peripheral genes higher
+  KEGG  log1p(pathway count)   ρ=-0.054 (p=5.48e-01) | adjβ=-1.68 [-6.88,+3.52] p=5.23e-01 | perm p=0.5280 ns | VIF=1.01 | fewer-pathway genes higher
+  LOEUF (constraint)           ρ=+0.107 (p=2.35e-01) | adjβ=+4.47 [-1.51,+10.45] p=1.42e-01 | perm p=0.1451 ns | VIF=1.35 | less-constrained genes higher
+  Tissue breadth               ρ=+0.021 (p=8.15e-01) | adjβ=+0.61 [-4.69,+5.91] p=8.20e-01 | perm p=0.8144 ns | VIF=1.04 | broadly-expressed genes higher
+
+##############################################################################
+# BRANCH: SAS — South Asian (Afr–Mel reference)
+##############################################################################
+  network genes with SAS percentile: 124
+  τ (tissue specificity)       ρ=+0.012 (p=8.92e-01) | adjβ=-0.16 [-5.38,+5.07] p=9.52e-01 | perm p=0.9556 ns | VIF=1.04 | broadly-expressed genes higher
+  Betweenness centrality       ρ=-0.128 (p=1.56e-01) | adjβ=-4.92 [-9.97,+0.12] p=5.57e-02 | perm p=0.0526 ns | VIF=1.00 | peripheral genes higher
+  KEGG  log1p(pathway count)   ρ=-0.012 (p=8.97e-01) | adjβ=-0.12 [-5.25,+5.02] p=9.64e-01 | perm p=0.9618 ns | VIF=1.01 | fewer-pathway genes higher
+  LOEUF (constraint)           ρ=+0.059 (p=5.16e-01) | adjβ=+4.11 [-1.79,+10.02] p=1.70e-01 | perm p=0.1692 ns | VIF=1.35 | less-constrained genes higher
+  Tissue breadth               ρ=-0.014 (p=8.78e-01) | adjβ=-0.42 [-5.66,+4.82] p=8.73e-01 | perm p=0.8741 ns | VIF=1.04 | tissue-restricted genes higher
+
+
+==============================================================================
+SUMMARY TABLE  (β on 0–100 within-network percentile scale)
+==============================================================================
+branch predictor                     rho    adjβ       adjp    permp  direction
+AFR    τ (tissue specificity)     -0.234   -6.89   8.84e-03   0.0112  broadly-expressed genes higher
+AFR    Betweenness centrality     +0.137   +2.14   4.12e-01   0.4301  central genes higher
+AFR    KEGG  log1p(pathway count  +0.096   +2.07   4.29e-01   0.4268  more-pathway genes higher
+AFR    LOEUF (constraint)         -0.068   -0.55   8.55e-01   0.8572  more-constrained genes higher
+AFR    Tissue breadth             +0.273   +7.88   2.69e-03   0.0029  broadly-expressed genes higher
+MEL    τ (tissue specificity)     +0.143   +5.28   4.73e-02   0.0475  tissue-specific genes higher
+MEL    Betweenness centrality     -0.038   -1.13   6.68e-01   0.6797  peripheral genes higher
+MEL    KEGG  log1p(pathway count  -0.059   -1.71   5.15e-01   0.5266  fewer-pathway genes higher
+MEL    LOEUF (constraint)         +0.038   +1.85   5.43e-01   0.5522  less-constrained genes higher
+MEL    Tissue breadth             -0.175   -6.18   2.03e-02   0.0207  tissue-restricted genes higher
+EUR    τ (tissue specificity)     -0.015   -0.98   7.15e-01   0.7133  broadly-expressed genes higher
+EUR    Betweenness centrality     -0.040   -3.47   1.86e-01   0.1932  peripheral genes higher
+EUR    KEGG  log1p(pathway count  -0.054   -1.68   5.23e-01   0.5280  fewer-pathway genes higher
+EUR    LOEUF (constraint)         +0.107   +4.47   1.42e-01   0.1451  less-constrained genes higher
+EUR    Tissue breadth             +0.021   +0.61   8.20e-01   0.8144  broadly-expressed genes higher
+SAS    τ (tissue specificity)     +0.012   -0.16   9.52e-01   0.9556  broadly-expressed genes higher
+SAS    Betweenness centrality     -0.128   -4.92   5.57e-02   0.0526  peripheral genes higher
+SAS    KEGG  log1p(pathway count  -0.012   -0.12   9.64e-01   0.9618  fewer-pathway genes higher
+SAS    LOEUF (constraint)         +0.059   +4.11   1.70e-01   0.1692  less-constrained genes higher
+SAS    Tissue breadth             -0.014   -0.42   8.73e-01   0.8741  tissue-restricted genes higher
+
+------------------------------------------------------------------------------
+CAVEATS:
+  • Combined dataset: gnomAD HGDP+1KGP (AFR/SAS/EUR) + HGDP+SGDP (MEL, n=47).
+  • Network-scale only → outcome is WITHIN-network percentile, not genome-wide.
+  • The SGDP-only genome-wide version of this analysis is NULL; this signal
+    does not replicate at SGDP sample sizes. Report as dataset-dependent.
+  • EUR/SAS use Afr–Mel reference (no eur–sas FST). EUR = depigmentation contrast.
+  • PBS is a frequency-differentiation statistic, NOT proof of selection.

@@ -1,0 +1,192 @@
+phase2_pbs_regression.py — PBS predicted by network & tissue metrics
+==========================================================================
+Predictors z-scored; OLS; β are standardized. VIF<5 = acceptable collinearity.
+
+
+##########################################################################
+# OUTCOME: PBS-1  African (S. Asian outgroup)
+##########################################################################
+  n (non-null) = 124;  skewness = +3.50 (right-skewed — log1p sensitivity run below)
+
+  ── Breadth + KEGG  (n=123) ──
+     R²=0.047  adjR²=0.031  F p=5.457e-02
+     predictor                          β      SE       t          p              95% CI    VIF
+     Tissue breadth                 0.024   0.010    2.38   1.89e-02   [+0.004, +0.045]   1.16
+     KEGG  log1p(pathway count)    -0.004   0.010   -0.37   7.13e-01   [-0.024, +0.016]   1.16
+
+  ── Breadth + betw.  (n=123) ──
+     R²=0.047  adjR²=0.031  F p=5.494e-02
+     predictor                          β      SE       t          p              95% CI    VIF
+     Tissue breadth                 0.022   0.010    2.31   2.25e-02   [+0.003, +0.041]   1.03
+     Betweenness  (sqrt)            0.003   0.010    0.35   7.27e-01   [-0.016, +0.022]   1.03
+
+  ── τ + KEGG  (n=123) ──
+     R²=0.051  adjR²=0.035  F p=4.299e-02
+     predictor                          β      SE       t          p              95% CI    VIF
+     τ (tissue specificity)        -0.026   0.010   -2.48   1.44e-02   [-0.047, -0.005]   1.22
+     KEGG  log1p(pathway count)    -0.006   0.010   -0.57   5.71e-01   [-0.027, +0.015]   1.22
+
+  ── τ + betw.  (n=123) ──
+     R²=0.050  adjR²=0.034  F p=4.740e-02
+     predictor                          β      SE       t          p              95% CI    VIF
+     τ (tissue specificity)        -0.023   0.010   -2.38   1.90e-02   [-0.042, -0.004]   1.03
+     Betweenness  (sqrt)            0.003   0.010    0.36   7.23e-01   [-0.016, +0.022]   1.03
+
+  ── τ + KEGG + LOEUF  (n=123) ──
+     R²=0.052  adjR²=0.028  F p=9.388e-02
+     predictor                          β      SE       t          p              95% CI    VIF
+     τ (tissue specificity)        -0.025   0.011   -2.32   2.19e-02   [-0.047, -0.004]   1.29
+     KEGG  log1p(pathway count)    -0.007   0.011   -0.64   5.23e-01   [-0.029, +0.015]   1.32
+     LOEUF  (constraint covariate)  -0.004   0.011   -0.36   7.22e-01   [-0.025, +0.017]   1.24
+
+  ── log1p(PBS) sensitivity (directional check) ──
+     spec                predictor                    β(raw)     p(raw)   β(log)     p(log)  flag
+     Breadth + KEGG      Tissue breadth                0.024   1.89e-02    0.021   1.03e-02  consistent
+     Breadth + KEGG      KEGG  log1p(pathway count)   -0.004   7.13e-01   -0.003   7.22e-01  consistent
+     Breadth + betw.     Tissue breadth                0.022   2.25e-02    0.019   1.26e-02  consistent
+     Breadth + betw.     Betweenness  (sqrt)           0.003   7.27e-01    0.004   6.30e-01  consistent
+     τ + KEGG            τ (tissue specificity)       -0.026   1.44e-02   -0.022   9.71e-03  consistent
+     τ + KEGG            KEGG  log1p(pathway count)   -0.006   5.71e-01   -0.004   5.91e-01  consistent
+     τ + betw.           τ (tissue specificity)       -0.023   1.90e-02   -0.019   1.28e-02  consistent
+     τ + betw.           Betweenness  (sqrt)           0.003   7.23e-01    0.004   6.16e-01  consistent
+
+##########################################################################
+# OUTCOME: PBS-3  Melanesian (S. Asian outgroup)
+##########################################################################
+  n (non-null) = 124;  skewness = +1.22 (right-skewed — log1p sensitivity run below)
+
+  ── Breadth + KEGG  (n=123) ──
+     R²=0.027  adjR²=0.011  F p=1.892e-01
+     predictor                          β      SE       t          p              95% CI    VIF
+     Tissue breadth                -0.017   0.010   -1.78   7.82e-02   [-0.036, +0.002]   1.16
+     KEGG  log1p(pathway count)     0.010   0.010    1.09   2.77e-01   [-0.008, +0.029]   1.16
+
+  ── Breadth + betw.  (n=123) ──
+     R²=0.020  adjR²=0.003  F p=3.032e-01
+     predictor                          β      SE       t          p              95% CI    VIF
+     Tissue breadth                -0.014   0.009   -1.54   1.27e-01   [-0.032, +0.004]   1.03
+     Betweenness  (sqrt)            0.004   0.009    0.49   6.24e-01   [-0.013, +0.022]   1.03
+
+  ── τ + KEGG  (n=123) ──
+     R²=0.014  adjR²=-0.003  F p=4.415e-01
+     predictor                          β      SE       t          p              95% CI    VIF
+     τ (tissue specificity)         0.012   0.010    1.20   2.34e-01   [-0.008, +0.031]   1.22
+     KEGG  log1p(pathway count)     0.009   0.010    0.93   3.53e-01   [-0.010, +0.029]   1.22
+
+  ── τ + betw.  (n=123) ──
+     R²=0.008  adjR²=-0.009  F p=6.349e-01
+     predictor                          β      SE       t          p              95% CI    VIF
+     τ (tissue specificity)         0.008   0.009    0.93   3.54e-01   [-0.010, +0.026]   1.03
+     Betweenness  (sqrt)            0.003   0.009    0.38   7.08e-01   [-0.015, +0.021]   1.03
+
+  ── τ + KEGG + LOEUF  (n=123) ──
+     R²=0.014  adjR²=-0.011  F p=6.529e-01
+     predictor                          β      SE       t          p              95% CI    VIF
+     τ (tissue specificity)         0.012   0.010    1.15   2.51e-01   [-0.008, +0.032]   1.29
+     KEGG  log1p(pathway count)     0.009   0.010    0.90   3.71e-01   [-0.011, +0.030]   1.32
+     LOEUF  (constraint covariate)   0.000   0.010    0.01   9.88e-01   [-0.020, +0.020]   1.24
+
+  ── log1p(PBS) sensitivity (directional check) ──
+     spec                predictor                    β(raw)     p(raw)   β(log)     p(log)  flag
+     Breadth + KEGG      Tissue breadth               -0.017   7.82e-02   -0.015   6.64e-02  consistent
+     Breadth + KEGG      KEGG  log1p(pathway count)    0.010   2.77e-01    0.008   3.19e-01  consistent
+     Breadth + betw.     Tissue breadth               -0.014   1.27e-01   -0.013   1.03e-01  consistent
+     Breadth + betw.     Betweenness  (sqrt)           0.004   6.24e-01    0.003   6.71e-01  consistent
+     τ + KEGG            τ (tissue specificity)        0.012   2.34e-01    0.011   2.10e-01  consistent
+     τ + KEGG            KEGG  log1p(pathway count)    0.009   3.53e-01    0.007   3.99e-01  consistent
+     τ + betw.           τ (tissue specificity)        0.008   3.54e-01    0.008   3.06e-01  consistent
+     τ + betw.           Betweenness  (sqrt)           0.003   7.08e-01    0.002   7.59e-01  consistent
+
+##########################################################################
+# OUTCOME: PBS  European (Afr–Mel reference)
+##########################################################################
+  n (non-null) = 128;  skewness = +1.47 (right-skewed — log1p sensitivity run below)
+
+  ── Breadth + KEGG  (n=127) ──
+     R²=0.022  adjR²=0.006  F p=2.483e-01
+     predictor                          β      SE       t          p              95% CI    VIF
+     Tissue breadth                -0.003   0.007   -0.38   7.02e-01   [-0.016, +0.011]   1.16
+     KEGG  log1p(pathway count)    -0.009   0.007   -1.38   1.70e-01   [-0.022, +0.004]   1.16
+
+  ── Breadth + betw.  (n=127) ──
+     R²=0.017  adjR²=0.001  F p=3.509e-01
+     predictor                          β      SE       t          p              95% CI    VIF
+     Tissue breadth                -0.005   0.006   -0.77   4.46e-01   [-0.017, +0.008]   1.03
+     Betweenness  (sqrt)           -0.007   0.006   -1.10   2.74e-01   [-0.019, +0.006]   1.03
+
+  ── τ + KEGG  (n=127) ──
+     R²=0.021  adjR²=0.005  F p=2.671e-01
+     predictor                          β      SE       t          p              95% CI    VIF
+     τ (tissue specificity)         0.000   0.007    0.02   9.86e-01   [-0.013, +0.014]   1.22
+     KEGG  log1p(pathway count)    -0.010   0.007   -1.47   1.44e-01   [-0.024, +0.004]   1.22
+
+  ── τ + betw.  (n=127) ──
+     R²=0.014  adjR²=-0.002  F p=4.088e-01
+     predictor                          β      SE       t          p              95% CI    VIF
+     τ (tissue specificity)         0.003   0.006    0.53   5.98e-01   [-0.009, +0.016]   1.02
+     Betweenness  (sqrt)           -0.007   0.006   -1.14   2.57e-01   [-0.020, +0.005]   1.02
+
+  ── τ + KEGG + LOEUF  (n=127) ──
+     R²=0.056  adjR²=0.033  F p=6.856e-02
+     predictor                          β      SE       t          p              95% CI    VIF
+     τ (tissue specificity)        -0.004   0.007   -0.53   5.96e-01   [-0.018, +0.010]   1.31
+     KEGG  log1p(pathway count)    -0.006   0.007   -0.89   3.76e-01   [-0.020, +0.008]   1.31
+     LOEUF  (constraint covariate)   0.015   0.007    2.13   3.51e-02   [+0.001, +0.028]   1.25
+
+  ── log1p(PBS) sensitivity (directional check) ──
+     spec                predictor                    β(raw)     p(raw)   β(log)     p(log)  flag
+     Breadth + KEGG      Tissue breadth               -0.003   7.02e-01   -0.002   8.01e-01  consistent
+     Breadth + KEGG      KEGG  log1p(pathway count)   -0.009   1.70e-01   -0.008   1.87e-01  consistent
+     Breadth + betw.     Tissue breadth               -0.005   4.46e-01   -0.003   5.44e-01  consistent
+     Breadth + betw.     Betweenness  (sqrt)          -0.007   2.74e-01   -0.006   2.77e-01  consistent
+     τ + KEGG            τ (tissue specificity)        0.000   9.86e-01   -0.001   9.29e-01  SIGN-FLIP
+     τ + KEGG            KEGG  log1p(pathway count)   -0.010   1.44e-01   -0.009   1.59e-01  consistent
+     τ + betw.           τ (tissue specificity)        0.003   5.98e-01    0.002   6.97e-01  consistent
+     τ + betw.           Betweenness  (sqrt)          -0.007   2.57e-01   -0.006   2.62e-01  consistent
+
+##########################################################################
+# OUTCOME: PBS  South Asian (Afr–Mel reference)
+##########################################################################
+  n (non-null) = 128;  skewness = +1.38 (right-skewed — log1p sensitivity run below)
+
+  ── Breadth + KEGG  (n=127) ──
+     R²=0.000  adjR²=-0.016  F p=9.781e-01
+     predictor                          β      SE       t          p              95% CI    VIF
+     Tissue breadth                -0.001   0.005   -0.17   8.65e-01   [-0.011, +0.009]   1.16
+     KEGG  log1p(pathway count)     0.001   0.005    0.18   8.59e-01   [-0.009, +0.011]   1.16
+
+  ── Breadth + betw.  (n=127) ──
+     R²=0.019  adjR²=0.003  F p=3.046e-01
+     predictor                          β      SE       t          p              95% CI    VIF
+     Tissue breadth                 0.001   0.005    0.13   8.94e-01   [-0.009, +0.010]   1.03
+     Betweenness  (sqrt)           -0.007   0.005   -1.55   1.25e-01   [-0.016, +0.002]   1.03
+
+  ── τ + KEGG  (n=127) ──
+     R²=0.001  adjR²=-0.015  F p=9.600e-01
+     predictor                          β      SE       t          p              95% CI    VIF
+     τ (tissue specificity)        -0.001   0.005   -0.26   7.97e-01   [-0.012, +0.009]   1.22
+     KEGG  log1p(pathway count)     0.000   0.005    0.00   9.99e-01   [-0.010, +0.010]   1.22
+
+  ── τ + betw.  (n=127) ──
+     R²=0.021  adjR²=0.005  F p=2.666e-01
+     predictor                          β      SE       t          p              95% CI    VIF
+     τ (tissue specificity)        -0.002   0.005   -0.53   5.95e-01   [-0.012, +0.007]   1.02
+     Betweenness  (sqrt)           -0.007   0.005   -1.61   1.10e-01   [-0.017, +0.002]   1.02
+
+  ── τ + KEGG + LOEUF  (n=127) ──
+     R²=0.020  adjR²=-0.004  F p=4.696e-01
+     predictor                          β      SE       t          p              95% CI    VIF
+     τ (tissue specificity)        -0.003   0.005   -0.65   5.14e-01   [-0.014, +0.007]   1.31
+     KEGG  log1p(pathway count)     0.002   0.005    0.41   6.85e-01   [-0.008, +0.013]   1.31
+     LOEUF  (constraint covariate)   0.008   0.005    1.57   1.19e-01   [-0.002, +0.018]   1.25
+
+  ── log1p(PBS) sensitivity (directional check) ──
+     spec                predictor                    β(raw)     p(raw)   β(log)     p(log)  flag
+     Breadth + KEGG      Tissue breadth               -0.001   8.65e-01   -0.001   8.67e-01  consistent
+     Breadth + KEGG      KEGG  log1p(pathway count)    0.001   8.59e-01    0.001   8.65e-01  consistent
+     Breadth + betw.     Tissue breadth                0.001   8.94e-01    0.001   8.91e-01  consistent
+     Breadth + betw.     Betweenness  (sqrt)          -0.007   1.25e-01   -0.007   1.19e-01  consistent
+     τ + KEGG            τ (tissue specificity)       -0.001   7.97e-01   -0.001   8.06e-01  consistent
+     τ + KEGG            KEGG  log1p(pathway count)    0.000   9.99e-01   -0.000   1.00e+00  SIGN-FLIP
+     τ + betw.           τ (tissue specificity)       -0.002   5.95e-01   -0.002   6.01e-01  consistent
+     τ + betw.           Betweenness  (sqrt)          -0.007   1.10e-01   -0.007   1.05e-01  consistent

@@ -94,55 +94,69 @@ def added_variable(df_sub, target, focal, other):
     return focal_resid, y_resid, slope, intercept, se, p, r
 
 # Use ORIGINAL-SCALE predictors here (not z-scored) so axes have real units.
-sub = df.dropna(subset=['LOEUF', 'tissue_breadth', 'kegg_log1p']).copy()
+# AV plots for breadth + KEGG model
+sub_bk = df.dropna(subset=['LOEUF', 'tissue_breadth', 'kegg_log1p']).copy()
+fr_b,  yr_b,  slope_b,  int_b,  se_b,  p_b,  r_b  = added_variable(
+    sub_bk, target='LOEUF', focal='tissue_breadth', other=['kegg_log1p'])
+fr_k,  yr_k,  slope_k,  int_k,  se_k,  p_k,  r_k  = added_variable(
+    sub_bk, target='LOEUF', focal='kegg_log1p',     other=['tissue_breadth'])
 
-fr_b, yr_b, slope_b, int_b, se_b, p_b, r_b = added_variable(
-    sub, target='LOEUF', focal='tissue_breadth', other=['kegg_log1p'])
-fr_k, yr_k, slope_k, int_k, se_k, p_k, r_k = added_variable(
-    sub, target='LOEUF', focal='kegg_log1p',   other=['tissue_breadth'])
+# AV plots for τ + KEGG model
+sub_tk = df.dropna(subset=['LOEUF', 'tau', 'kegg_log1p']).copy()
+fr_t,  yr_t,  slope_t,  int_t,  se_t,  p_t,  r_t  = added_variable(
+    sub_tk, target='LOEUF', focal='tau',         other=['kegg_log1p'])
+fr_k2, yr_k2, slope_k2, int_k2, se_k2, p_k2, r_k2 = added_variable(
+    sub_tk, target='LOEUF', focal='kegg_log1p',  other=['tau'])
 
 POINT_COLOR = '#E89A3C'   # uniform orange — category coloring removed
-colors = np.array([POINT_COLOR] * len(sub))
+colors_bk = np.array([POINT_COLOR] * len(sub_bk))
+colors_tk = np.array([POINT_COLOR] * len(sub_tk))
 
-# ── Figure ────────────────────────────────────────────────────────────────
-fig = plt.figure(figsize=(17, 6.2))
-gs  = fig.add_gridspec(1, 3, width_ratios=[1.0, 1.0, 1.15], wspace=0.62)
+# ── Figure (wide & short poster size, 5 panels) ────────────────────────────
+fig = plt.figure(figsize=(15.5, 2.2))
+gs  = fig.add_gridspec(1, 5, width_ratios=[1.0, 1.0, 1.0, 1.0, 1.2], wspace=0.52)
 ax1 = fig.add_subplot(gs[0, 0])
 ax2 = fig.add_subplot(gs[0, 1])
 ax3 = fig.add_subplot(gs[0, 2])
+ax4 = fig.add_subplot(gs[0, 3])
+ax5 = fig.add_subplot(gs[0, 4])
 
-def _av_panel(ax, fx, fy, slope, intercept, se, p, n, focal_label, other_label):
+def _av_panel(ax, fx, fy, colors, slope, intercept, se, p, n, focal_label, other_label):
     ax.axhline(0, color='#999', lw=0.6, zorder=0)
     ax.axvline(0, color='#999', lw=0.6, zorder=0)
-    ax.scatter(fx, fy, c=colors, s=42, edgecolor='black', linewidth=0.4,
+    ax.scatter(fx, fy, c=colors, s=14, edgecolor='black', linewidth=0.3,
                alpha=0.85, zorder=2)
     xs = np.linspace(fx.min(), fx.max(), 100)
     ys = intercept + slope * xs
-    ax.plot(xs, ys, color='black', lw=2.0, zorder=3)
+    ax.plot(xs, ys, color='black', lw=1.3, zorder=3)
     # 95% CI band on the line
     t_crit = stats.t.ppf(0.975, df=n - 2)
     band = t_crit * se * np.sqrt(1 / n + (xs - fx.mean()) ** 2 / np.sum((fx - fx.mean()) ** 2))
     ax.fill_between(xs, ys - band, ys + band, color='black', alpha=0.12, zorder=1)
-    ax.set_xlabel(f'{focal_label}  residuals\n(after removing {other_label})', fontsize=11)
-    ax.set_ylabel(f'LOEUF  residuals\n(after removing {other_label})', fontsize=11)
+    ax.set_xlabel(f'{focal_label} resid.\n(remove {other_label})', fontsize=8)
+    ax.set_ylabel(f'LOEUF resid.\n(remove {other_label})', fontsize=8)
     stars = '***' if p < 1e-3 else ('**' if p < 1e-2 else ('*' if p < 0.05 else 'ns'))
     ax.text(0.04, 0.96,
-            f'slope = {slope:.3f}\np = {p:.2e}  {stars}\nn = {n}',
-            transform=ax.transAxes, fontsize=10.5, va='top', ha='left',
-            bbox=dict(boxstyle='round,pad=0.35', fc='white', ec='#666', lw=0.6))
-    ax.tick_params(labelsize=9.5)
+            f'slope={slope:.3f}\np={p:.1e} {stars}\nn={n}',
+            transform=ax.transAxes, fontsize=7, va='top', ha='left',
+            bbox=dict(boxstyle='round,pad=0.3', fc='white', ec='#666', lw=0.5))
+    ax.tick_params(labelsize=7, pad=1)
     for spine in ('top', 'right'):
         ax.spines[spine].set_visible(False)
 
-_av_panel(ax1, fr_b, yr_b, slope_b, int_b, se_b, p_b, len(sub),
+_av_panel(ax1, fr_b, yr_b, colors_bk, slope_b, int_b, se_b, p_b, len(sub_bk),
           focal_label='Tissue breadth', other_label='KEGG')
-_av_panel(ax2, fr_k, yr_k, slope_k, int_k, se_k, p_k, len(sub),
-          focal_label='KEGG  log1p(pathway count)', other_label='breadth')
+_av_panel(ax2, fr_k, yr_k, colors_bk, slope_k, int_k, se_k, p_k, len(sub_bk),
+          focal_label='KEGG log1p', other_label='breadth')
+_av_panel(ax3, fr_t, yr_t, colors_tk, slope_t, int_t, se_t, p_t, len(sub_tk),
+          focal_label='τ (tissue spec.)', other_label='KEGG')
+_av_panel(ax4, fr_k2, yr_k2, colors_tk, slope_k2, int_k2, se_k2, p_k2, len(sub_tk),
+          focal_label='KEGG log1p', other_label='τ')
 
-ax1.set_title('A.  Breadth | KEGG controlled',
-              fontsize=11.5, loc='left', pad=8, weight='bold')
-ax2.set_title('B.  KEGG | breadth controlled',
-              fontsize=11.5, loc='left', pad=8, weight='bold')
+ax1.set_title('A.  Breadth | KEGG', fontsize=9.5, loc='left', pad=4, weight='bold')
+ax2.set_title('B.  KEGG | breadth', fontsize=9.5, loc='left', pad=4, weight='bold')
+ax3.set_title('C.  τ | KEGG',       fontsize=9.5, loc='left', pad=4, weight='bold')
+ax4.set_title('D.  KEGG | τ',       fontsize=9.5, loc='left', pad=4, weight='bold')
 
 # ── Forest plot of standardized β ± 95% CI ───────────────────────────────
 PRED_DISPLAY = {
@@ -192,47 +206,31 @@ for label, preds in MODELS:
     yticklabels.append(label)
     y = base + n_preds * 0.7 + 0.9   # gap between models
 
-ax3.axvline(0, color='#444', lw=0.8, ls='--', zorder=0)
+ax5.axvline(0, color='#444', lw=0.7, ls='--', zorder=0)
 for _, r in forest.iterrows():
     yp = y_positions[(r['model'], r['pred'])]
     c  = PRED_COLORS[r['pred']]
-    ax3.errorbar(r['beta'], yp,
+    ax5.errorbar(r['beta'], yp,
                  xerr=[[r['beta'] - r['lo']], [r['hi'] - r['beta']]],
-                 fmt='o', color=c, ecolor=c, elinewidth=1.6, capsize=4,
-                 markersize=7, markeredgecolor='black', markeredgewidth=0.5)
+                 fmt='o', color=c, ecolor=c, elinewidth=1.2, capsize=3,
+                 markersize=6, markeredgecolor='black', markeredgewidth=0.4)
     stars = '***' if r['p'] < 1e-3 else ('**' if r['p'] < 1e-2 else ('*' if r['p'] < 0.05 else 'ns'))
-    ax3.text(r['hi'] + 0.015, yp, stars, fontsize=10.5, va='center')
+    ax5.text(r['hi'] + 0.01, yp, stars, fontsize=8, va='center')
 
-# Predictor legend (build manually so it includes all unique predictors used)
-import matplotlib.lines as mlines
-handles = []
-seen = set()
-for _, preds in MODELS:
-    for nm in preds:
-        if nm in seen:
-            continue
-        seen.add(nm)
-        handles.append(mlines.Line2D([], [], color=PRED_COLORS[nm], marker='o',
-                                     linestyle='', markersize=7,
-                                     markeredgecolor='black', markeredgewidth=0.5,
-                                     label=PRED_DISPLAY[nm]))
-ax3.legend(handles=handles, fontsize=9, loc='upper left',
-           bbox_to_anchor=(1.02, 1.0), frameon=True, borderaxespad=0)
-
-ax3.set_yticks(yticks)
-ax3.set_yticklabels(yticklabels, fontsize=10)
-ax3.invert_yaxis()
-ax3.set_xlabel('Standardized β (95% CI)', fontsize=11)
-ax3.set_title('C.  Joint-model β across specifications',
-              fontsize=11.5, loc='left', pad=8, weight='bold')
-ax3.tick_params(labelsize=9.5)
+ax5.set_yticks(yticks)
+ax5.set_yticklabels(yticklabels, fontsize=8)
+ax5.invert_yaxis()
+ax5.set_xlabel('Standardized β (95% CI)', fontsize=8)
+ax5.set_title('E.  Joint-model β', fontsize=9.5, loc='left', pad=4, weight='bold')
+ax5.tick_params(labelsize=7, pad=1)
 for spine in ('top', 'right'):
-    ax3.spines[spine].set_visible(False)
+    ax5.spines[spine].set_visible(False)
 
-fig.suptitle('Tissue expression breadth and network connectivity independently predict LOEUF',
-             fontsize=13.5, weight='bold', y=1.02)
+fig.suptitle('Breadth & network connectivity independently predict LOEUF',
+             fontsize=10.5, weight='bold', y=1.03)
+fig.tight_layout(rect=[0, 0, 1, 0.95])
 
 for ext in ('png', 'pdf'):
     path = os.path.join(OUT_DIR, f'figure_phase2_joint_regression.{ext}')
-    fig.savefig(path, dpi=220, bbox_inches='tight')
+    fig.savefig(path, dpi=300, bbox_inches='tight')
     print(f'  Saved → {path}')
