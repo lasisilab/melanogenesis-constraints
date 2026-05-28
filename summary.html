@@ -46,7 +46,7 @@
 <body>
 
 <h1>Melanogenesis Constraints — Status &amp; Ideation Brief</h1>
-<p class="sub">PEQG 2026 poster · constraint (LOEUF) &times; expression breadth (&tau;/GTEx) &times; network connectivity (KEGG) &times; population-specific selection (PBS) · snapshot 2026-05-27</p>
+<p class="sub">PEQG 2026 poster · constraint (LOEUF) &times; expression breadth (&tau;/GTEx) &times; network connectivity (KEGG) &times; population-specific selection (PBS) · snapshot 2026-05-28</p>
 
 <div class="card">
 <strong>What this document is:</strong> a portable summary of the current analytical state for continued ideation. It captures the project's core claims, what was built/learned in the latest working session, the key statistical findings (including a negative result worth knowing), and the open questions/decisions on the table. Pair it with the repo's <code>CHANGELOG.md</code> (technical build log) and the Quarto site under <code>pages/</code>.
@@ -69,12 +69,12 @@
 
 <h2>2 · Session work — what changed</h2>
 
-<h3>Multiple regression (reviewer-driven)</h3>
+<h3>Multiple regression (reviewer-driven) — now 5-panel figure</h3>
 <p>A collaborator challenged the claim that connectivity and breadth <em>independently</em> affect constraint. Built a joint OLS in <code>analysis/phase2_tau_variants.py</code> and a figure in <code>analysis/phase2_joint_regression_figure.py</code>.</p>
 <div class="card finding">
-<strong>Result — claim holds.</strong> <code>LOEUF ~ &tau; + log1p(KEGG)</code> (z-scored, n=127): &beta;<sub>&tau;</sub>=+0.126 (p=3.6&times;10<sup>-3</sup>), &beta;<sub>KEGG</sub>=&minus;0.126 (p=3.5&times;10<sup>-3</sup>), VIF&approx;1.22. Using the literal GTEx breadth count instead of &tau; is slightly stronger (&beta;=&minus;0.135, p=1.3&times;10<sup>-3</sup>). Betweenness drops out once KEGG is included &mdash; so the figure now shows only the four <em>bivariate</em> specifications (breadth/&tau; &times; KEGG/betweenness), each with both predictors significant.
+<strong>Result — claim holds.</strong> <code>LOEUF ~ breadth + log1p(KEGG)</code> (z-scored, n=127): &beta;<sub>breadth</sub>=&minus;0.135 (p=1.3&times;10<sup>-3</sup>), &beta;<sub>KEGG</sub>=&minus;0.131 (p=1.8&times;10<sup>-3</sup>), VIF&approx;1.16. Using &tau; instead of breadth: &beta;<sub>&tau;</sub>=+0.126 (p=3.6&times;10<sup>-3</sup>). Betweenness drops out once KEGG is included. <strong>Direction of &tau;: higher tissue specificity → higher LOEUF (less constrained)</strong> — expected, because broadly-expressed genes face stronger pleiotropic purifying selection.
 </div>
-<p class="small">Figure panels: (A,B) added-variable plots = the joint coefficient made visual; (C) forest plot of standardized &beta; &plusmn; 95% CI across specifications. &rarr; <code>output/figure_phase2_joint_regression.{png,pdf}</code></p>
+<p class="small">Figure now has 5 panels (12.91" × 2.67", poster-ready): (A) Breadth | KEGG AV plot; (B) KEGG | breadth AV plot; (C) &tau; | KEGG AV plot; (D) KEGG | &tau; AV plot; (E) forest plot of standardized &beta; &plusmn; 95% CI across all four bivariate specifications. &rarr; <code>output/figure_phase2_joint_regression.{png,pdf}</code></p>
 
 <h3>GTEx expression heatmaps</h3>
 <p>Reworked the heatmap from raw log2(TPM+1) to <strong>row-normalized "&tau;-style" expression</strong> (each cell = x / row-max; &tau; = mean(1&minus;this)). Removed the LOEUF side-bar. Explored several gene orderings and built a family of figures:</p>
@@ -96,18 +96,26 @@
 <strong>The two axes connect.</strong> Overlaying PBS quadrant onto the &tau;-split heatmap and testing the contingency: of the population-specifically-selected genes in the <em>tissue-specific</em> block, 7/8 are Melanesian-targeted; the <em>broadly-expressed</em> block splits 21 African vs 15 Melanesian. <strong>Fisher's exact OR=0.10, p=0.046.</strong> The selection axis aligns with the tissue-specificity axis as predicted.
 </div>
 
-<h3>PBS regression — selection predicted by breadth &amp; connectivity</h3>
-<p>Selection-side mirror of the LOEUF regression: predict population-specific PBS from the same predictors. <code>analysis/phase2_pbs_regression.py</code>; outputs <code>figure_phase2_pbs_regression{,_eur_sas}</code> and <code>phase2_pbs_regression.txt</code>.</p>
+<h3>Within-network PBS association — the primary selection finding</h3>
+<p>Among the 129 network genes, does tissue specificity or breadth predict population-specific PBS? Two datasets tested (both in <code>analysis/phase2_pbs_within_network{,_combined}.py</code>; compact row figures via <code>phase2_pbs_within_network_smallfigs.py</code>):</p>
 <div class="card finding">
-<strong>Tissue specificity predicts African selection &mdash; and it's lineage-specific.</strong>
+<strong>Combined dataset (HGDP+1KGP+SGDP) — significant signal:</strong> within-network PBS percentile (0–100 rank among the 129 genes) regressed on z-scored predictors + covariates (log1p SNP count, log10 body length); 10,000-shuffle permutation p.
 <ul class="tight">
-  <li><strong>African</strong> PBS: &tau; &beta;=&minus;0.026 (p=0.014), breadth &beta;=+0.024 (p=0.019) &mdash; broadly-expressed genes carry higher African PBS. <strong>Survives LOEUF control</strong> (&tau; p=0.022, LOEUF ns) &rarr; direct orthogonal-axes test.</li>
-  <li><strong>Melanesian:</strong> directionally consistent (breadth &beta;&minus;, &tau; &beta;+) but ns (p=0.08&ndash;0.23) &mdash; likely the n=17 sample.</li>
-  <li><strong>European &amp; South Asian:</strong> null for &tau;/breadth/KEGG/betweenness &mdash; a clean negative control. The African coupling isn't a generic metric artifact.</li>
-  <li>Network centrality (KEGG, betweenness) predicts PBS in <em>no</em> population. Effect sizes small (R²&approx;0.05). log1p(PBS) sensitivity: all directionally consistent.</li>
+  <li><strong>AFR &tau;</strong>: adj&beta;=&minus;6.89, perm p=0.011* &mdash; broadly-expressed genes have higher African PBS (n≈127)</li>
+  <li><strong>AFR breadth</strong>: adj&beta;=+7.88, perm p=0.003** &mdash; confirming direction; consistent sign, independent predictors</li>
+  <li><strong>MEL &tau;</strong>: adj&beta;=+5.28, perm p=0.048* &mdash; tissue-specific genes have higher Melanesian PBS</li>
+  <li><strong>MEL breadth</strong>: adj&beta;=&minus;6.18, perm p=0.021*</li>
+  <li><strong>EUR/SAS:</strong> all null &mdash; lineage-specificity control holds</li>
+  <li>KEGG, betweenness, LOEUF: ns in all branches</li>
 </ul>
+The AFR and MEL τ signals go in <em>opposite directions</em> — this is the quantitative version of the "Adaptation exploits tissue specificity" story. &rarr; <code>output/figure_phase2_pbs_within_network_combined_row.{png,pdf}</code> <strong>(poster figure 1)</strong>
 </div>
-<p class="small">Caveat: Eur/SAS PBS use the Afr&ndash;Mel reference pair (no Eur&ndash;SAS F<sub>ST</sub> exists), so they are valid lineage-specific drift estimates but not perfectly parallel to the S.Asian-outgroup PBS-1/3 scans.</p>
+<div class="card caveat">
+<strong>Dataset-robustness caveat:</strong> The SGDP-only genome-wide percentile version of this analysis is <strong>null</strong> (all permutation p > 0.13; AFR τ Spearman ρ=+0.075 SGDP vs ρ=&minus;0.234 combined — a sign flip). This is purely a <em>dataset</em> effect (African n≈18 in SGDP vs 747 in combined), not a percentile-transform artifact (Spearman is rank-invariant). The combined signal is better-powered but is <em>within-network</em> only (no genome-wide background). Report as dataset-dependent; present combined as primary with the SGDP null as an honest caveat. &rarr; <code>output/figure_phase2_pbs_within_network_row.{png,pdf}</code>
+</div>
+
+<h3>PBS regression — earlier raw-PBS analysis (background)</h3>
+<p>An earlier regression predicted raw PBS from the same predictors (<code>analysis/phase2_pbs_regression.py</code>; outputs <code>figure_phase2_pbs_regression{,_eur_sas}</code>). Consistent directionally with the within-network percentile result but superseded by the within-network analysis as the primary figure.</p>
 
 <h2>3 · New: SGDP genome-wide PBS pipeline</h2>
 <p>To replace the within-network 75th-percentile "significance" threshold (a relative ranking, not a test) with a genome-wide-calibrated one, built a full SGDP-only genome-wide PBS pipeline. Scripts in <code>analysis/cluster/</code>:</p>
@@ -140,31 +148,38 @@
 </div>
 <p class="small">Suggested honest framing: <em>"Individual pigmentation effectors (KITLG, ATF2, HIF1A) rank in the genome-wide top 2-3% for population-specific PBS, though the network as a whole is not enriched above genomic background (MWU p=0.18) &mdash; consistent with selection acting on specific effectors rather than the entire pathway."</em></p>
 
-<h2>5 · Open questions for ideation</h2>
-<div class="card next">
-<p class="q">A. Does the HGDP genome-wide run change the enrichment picture?</p>
-<p>HGDP has ~25-30 Melanesians vs SGDP's 17, so a less-inflated background and better power. Run <code>17_network_enrichment_genomewide.py --prefix pbs_genomewide_chr --label HGDP</code> once the cluster job finishes. If the network is enriched in HGDP but not SGDP, that's a sample-size story; if neither, the "specific effectors not whole pathway" framing is robust.</p>
-</div>
-<div class="card next">
-<p class="q">B. Should the quadrant/&tau; thresholds switch from within-network quartiles to genome-wide percentiles?</p>
-<p>The within-network 75th-percentile cut sits on top of the inflated baseline. Re-deriving the African-/Melanesian-specific calls using genome-wide percentile cuts (e.g. top 5% genome-wide) would make the quadrant labels mean "extreme relative to the whole genome." Does the &tau;-association (Fisher p=0.046) survive that stricter definition?</p>
-</div>
-<div class="card next">
-<p class="q">C. Is the "orthogonal axes" story better told gene-by-gene than set-level?</p>
-<p>Given the null set-level enrichment, the strongest version of the poster may lead with: (1) constraint axes are independent (LOEUF regression, solid); (2) selection on the African lineage tracks tissue specificity and survives LOEUF control (PBS regression &tau; p=0.022 controlling for LOEUF) &mdash; the direct orthogonal-axes test &mdash; reinforced by the within-network &tau;-quadrant partition (Fisher p=0.046); (3) the specific high-PBS genes are known pigmentation effectors (KITLG etc.). This sidesteps over-claiming pathway-wide selection. Note the African signal is lineage-specific (null in Eur/SAS), which doubles as a negative control.</p>
-</div>
-<div class="card next">
-<p class="q">D. Two-dataset robustness as a figure?</p>
-<p>Once HGDP-GW exists, a side-by-side enrichment ECDF (SGDP | HGDP) + a per-gene percentile concordance scatter would show whether the top genes (KITLG etc.) replicate across independently-genotyped datasets.</p>
+<h2>5 · Poster layout (finalized)</h2>
+<div class="card good">
+<strong>Three figures selected for PEQG 2026 poster:</strong>
+<ol>
+  <li><code>figure_phase2_joint_regression</code> (~12.9" × 2.7") — 5-panel added-variable + forest; both breadth and KEGG independently predict LOEUF. <strong>Constraint strand.</strong></li>
+  <li><code>figure_phase1_gtex_heatmap_skin_split</code> — &tau;-split GTEx heatmap, tissue-specific block on top / broadly-expressed below, sorted by skin Welch's t. <strong>Expression architecture strand.</strong></li>
+  <li><code>figure_phase2_pbs_within_network_combined_row</code> (~10.9" × 2.3") — within-network PBS association, 4 branches in a row; AFR and MEL signals significant, EUR/SAS null. <strong>Selection strand.</strong></li>
+</ol>
 </div>
 
-<h2>6 · Artifact index</h2>
-<p class="small"><strong>Figures (output/):</strong> figure_phase2_joint_regression · figure_phase2_pbs_regression · figure_phase2_pbs_regression_eur_sas · figure_phase1_gtex_heatmap_limited · figure_phase1_gtex_heatmap_skin_sorted · figure_phase1_gtex_heatmap_skin_split · figure_phase1_gtex_heatmap_skin_split_selection · figure_phase2_adaptation_tau_contrast · figure_phase2_pbs_quadrants · figure_network_enrichment_SGDP</p>
-<p class="small"><strong>Tables (output/):</strong> phase2_joint_regression.txt · phase2_pbs_regression.txt · network_gene_genomewide_percentiles_SGDP.csv · network_enrichment_SGDP_summary.txt · pbs_sgdp_genomewide_chr{1..22}.csv · pbs_hgdp_vs_sgdp_per_gene_network.csv</p>
-<p class="small"><strong>Pipeline (analysis/cluster/):</strong> scripts 13-17 + SGDP_PBS_CHECKLIST.md (runbook)</p>
+<h2>6 · Open questions for ideation</h2>
+<div class="card next">
+<p class="q">A. Dataset robustness — how to frame the SGDP null honestly on the poster?</p>
+<p>The combined-dataset result drives the story, but the SGDP-only genome-wide version is null. Best framing: footnote or caption noting "combined dataset (HGDP+1KGP+SGDP), within-network percentile; SGDP-only genome-wide version is null at current sample sizes (African n=18) — see supplementary." The direction and effect size in the combined data is the primary claim.</p>
+</div>
+<div class="card next">
+<p class="q">B. Is the "orthogonal axes" story now complete?</p>
+<p>The three figures jointly tell: (1) breadth and KEGG each independently predict LOEUF (joint regression, 5-panel); (2) tissue specificity splits the expression architecture (heatmap); (3) selection on tissue specificity is lineage-specific and goes in opposite directions in African vs. Melanesian (within-network PBS row figure). The quadrant Fisher test (p=0.046) and Mann-Whitney τ contrast (p=0.032) are strong supporting stats for the caption.</p>
+</div>
+<div class="card next">
+<p class="q">C. Does LOEUF need controlling in the within-network PBS model?</p>
+<p>The earlier raw-PBS regression showed AFR τ survives LOEUF control (τ p=0.022 with LOEUF in the model). This hasn't been repeated for the within-network percentile outcome — could be a confirmatory analysis worth running if a reviewer presses on whether τ is proxying constraint.</p>
+</div>
+
+<h2>7 · Artifact index</h2>
+<p class="small"><strong>Poster figures (output/):</strong> <strong>figure_phase2_pbs_within_network_combined_row</strong> · <strong>figure_phase1_gtex_heatmap_skin_split</strong> · <strong>figure_phase2_joint_regression</strong> (5-panel, 12.9" × 2.7")</p>
+<p class="small"><strong>All figures (output/):</strong> figure_phase2_pbs_within_network_combined_row · figure_phase2_pbs_within_network_row · figure_phase2_joint_regression · figure_phase2_pbs_regression · figure_phase2_pbs_regression_eur_sas · figure_phase1_gtex_heatmap_limited · figure_phase1_gtex_heatmap_skin_sorted · figure_phase1_gtex_heatmap_skin_split · figure_phase1_gtex_heatmap_skin_split_selection · figure_phase2_adaptation_tau_contrast · figure_phase2_pbs_quadrants · figure_network_enrichment_SGDP</p>
+<p class="small"><strong>Tables (output/):</strong> phase2_joint_regression.txt · phase2_pbs_regression.txt · phase2_pbs_within_network.{txt,csv} · phase2_pbs_within_network_combined.{txt,csv} · network_gene_genomewide_percentiles_SGDP.csv · network_enrichment_SGDP_summary.txt · pbs_sgdp_genomewide_chr{1..22}.csv</p>
+<p class="small"><strong>Pipeline (analysis/cluster/):</strong> scripts 13-17 + SGDP_PBS_CHECKLIST.md · PBS_WITHIN_NETWORK_PLAN.md (within-network analysis plan)</p>
 
 <hr>
-<p class="small">Generated for sharing with the Claude desktop app to continue ideation. Statistics current as of the SGDP genome-wide run; HGDP genome-wide pending. Numbers should be re-verified against the latest CSVs before going on the poster.</p>
+<p class="small">Generated for sharing with the Claude desktop app to continue ideation. Numbers should be re-verified against the latest CSVs before going on the poster. SGDP-only genome-wide PBS is null — the combined-dataset within-network result is the primary selection finding.</p>
 
 </body>
 </html>

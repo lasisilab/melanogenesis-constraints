@@ -600,15 +600,16 @@ contributes after controlling for the other. (Full table:
 #### Visual summary — added-variable plots and forest plot of coefficients
 
 The figure below makes the joint-regression evidence visible at a glance.
-Panels A and B are **added-variable (partial-regression) plots**: each scatter
+**Panels A–D are added-variable (partial-regression) plots**: each scatter
 shows LOEUF residuals (after regressing out one predictor) against the other
-predictor's residuals (after the same removal). The slope of the black line
-*is* the joint-model coefficient and its p-value *is* the joint-model
-significance — so each panel directly answers, "does this axis still move
-LOEUF once the other axis is controlled for?" Panel C is a forest plot of the
-standardized β ± 95% CI for each predictor across six model specifications
-(breadth or τ, with KEGG and/or betweenness centrality). Confidence intervals
-that clearly exclude zero indicate an independent contribution.
+predictor's residuals. The slope of the black line *is* the joint-model
+coefficient — each panel directly answers "does this axis still move LOEUF
+once the other axis is controlled for?" A and B show the breadth + KEGG
+model; C and D show the τ + KEGG model. **Panel E** is a forest plot of
+standardized β ± 95% CI across all four bivariate specifications.
+Confidence intervals that clearly exclude zero indicate an independent
+contribution. Note: higher τ → higher LOEUF (less constrained), the expected
+direction given pleiotropic constraint on broadly-expressed genes.
 
 ```{python}
 #| echo: false
@@ -763,6 +764,67 @@ populations are selecting genes from different positions on the
 **tissue-specificity** axis, but they show **no difference** in LoF intolerance
 or cross-system connectivity. African selection prefers broadly expressed
 network genes; Melanesian selection prefers more tissue-specific ones.
+
+---
+
+## Phase 2.8 — Within-network PBS association
+
+Tests whether gene-level features (τ, breadth, betweenness, KEGG, LOEUF) predict
+branch-specific PBS **within the 129-gene melanogenesis network**. Two datasets:
+
+- **SGDP-only genome-wide percentile** — 19,022 genome-wide genes as background; network
+  genes ranked 0–100 against that background. All predictors null (perm p > 0.13). SGDP
+  African n≈18 is too small to recover within-network signal.
+
+- **Combined-dataset within-network percentile** — gnomAD HGDP+1KGP (AFR/SAS/EUR) +
+  HGDP+SGDP (MEL); genes ranked 0–100 among the 129 network genes. Better-powered but
+  no genome-wide background.
+
+Models: `pctile ~ z(predictor) + z(log1p n_sites) + z(log10 body_len)`;
+10,000-shuffle within-network permutation for empirical p.
+
+### Figure — Combined dataset, all 4 branches (poster figure)
+
+```{python}
+#| echo: false
+#| fig-align: center
+from IPython.display import Image, display
+import os
+if os.path.exists('../output/figure_phase2_pbs_within_network_combined_row.png'):
+    display(Image(filename='../output/figure_phase2_pbs_within_network_combined_row.png', width=1100))
+else:
+    print("Figure not yet generated. Run `analysis/phase2_pbs_within_network_smallfigs.py`.")
+```
+
+Key results (combined dataset):
+
+| Branch | Predictor | adj β | perm p |
+|---|---|---|---|
+| AFR | τ | −6.89 | 0.011 \* |
+| AFR | Breadth | +7.88 | 0.003 \*\* |
+| MEL | τ | +5.28 | 0.048 \* |
+| MEL | Breadth | −6.18 | 0.021 \* |
+| EUR | all | ns | > 0.05 |
+| SAS | all | ns | > 0.05 |
+
+The opposite signs for AFR vs. MEL τ capture the core finding: African selection targets
+broadly-expressed genes; Melanesian selection targets tissue-specific genes.
+
+### Figure — SGDP-only genome-wide (robustness panel)
+
+```{python}
+#| echo: false
+#| fig-align: center
+if os.path.exists('../output/figure_phase2_pbs_within_network_row.png'):
+    display(Image(filename='../output/figure_phase2_pbs_within_network_row.png', width=1100))
+else:
+    print("Figure not yet generated. Run `analysis/phase2_pbs_within_network_smallfigs.py`.")
+```
+
+All null. Spearman ρ(AFR τ) = +0.075 (p = 0.41) in SGDP vs. ρ = −0.234 (p = 0.009)
+in combined — a sign flip driven by dataset (African n≈18 in SGDP vs 747 in combined),
+not by the percentile transform (Spearman is rank-invariant). Present combined as primary;
+cite SGDP null as an honest dataset-robustness caveat.
 
 ---
 

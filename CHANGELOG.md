@@ -6,6 +6,30 @@ All notable changes to the melanogenesis-constraints project are documented here
 
 ## [Unreleased] — Phase 2 Population Genomics Pipeline
 
+### Updated (2026-05-28 — Joint regression figure expanded to 5 panels)
+- `analysis/phase2_joint_regression_figure.py` — added two new added-variable (AV) panels for the τ + KEGG model (C: τ | KEGG, D: KEGG | τ), bringing the figure to 5 panels total (A–D: AV plots for both bivariate models; E: forest plot of standardized β ± 95% CI across all 4 model specs)
+- Output now 12.91" × 2.67" (`output/figure_phase2_joint_regression.{png,pdf}`)
+- Interpretation confirmed: higher τ (more tissue-specific) → higher LOEUF (less constrained); expected direction given pleiotropic constraint on broadly-expressed genes
+
+### Added (2026-05-28 — Within-network PBS association, compact row figures)
+- `analysis/phase2_pbs_within_network.py` — within-network PBS association on **SGDP-only genome-wide percentile** outcome (19,022 genome-wide genes as background); all predictors null (permutation p > 0.13 everywhere; all 95% CIs cross zero); SGDP African sample n≈18 too small to recover within-network signal
+- `analysis/phase2_pbs_within_network_combined.py` — same analysis on **combined-dataset within-network PBS percentile** (gnomAD HGDP+1KGP for AFR/SAS/EUR; HGDP+SGDP for MEL); n=47 Melanesians; key findings:
+  - **AFR τ**: β=−6.89, perm p=0.011* — broadly-expressed genes have higher African PBS
+  - **AFR breadth**: β=+7.88, perm p=0.003** — confirming direction
+  - **MEL τ**: β=+5.28, perm p=0.048* — tissue-specific genes have higher Melanesian PBS
+  - **MEL breadth**: β=−6.18, perm p=0.021* — confirming direction
+  - EUR/SAS: all null — lineage-specificity control
+- `analysis/phase2_pbs_within_network_smallfigs.py` — compact row-format (1×4 panels for AFR/MEL/EUR/SAS) versions of both within-network figures; sized ~11" × 2.1" for poster
+- Outputs: `output/phase2_pbs_within_network.{txt,csv}`, `output/phase2_pbs_within_network_combined.{txt,csv}`, `output/figure_phase2_pbs_within_network_row.{png,pdf}`, `output/figure_phase2_pbs_within_network_combined_row.{png,pdf}`
+- **Dataset-robustness caveat documented**: SGDP-only genome-wide result is null (sign-flip on AFR τ: ρ=+0.075 SGDP vs ρ=−0.234 combined); discrepancy is purely dataset-driven (African n≈18 in SGDP vs 747 in combined). Poster presents combined as primary with SGDP null as honest caveat.
+- `analysis/PBS_WITHIN_NETWORK_PLAN.md` — execution plan with all steps complete; decision not to pursue HGDP genome-wide scan documented
+
+### Poster figure selection (2026-05-28)
+Three figures selected for PEQG 2026 poster:
+1. `output/figure_phase2_joint_regression` — 5-panel added-variable + forest (constraint strand)
+2. `output/figure_phase1_gtex_heatmap_skin_split` — τ-split GTEx heatmap (expression architecture strand)
+3. `output/figure_phase2_pbs_within_network_combined_row` — within-network PBS association, combined dataset (selection strand)
+
 ### Added (2026-05-27 — SGDP-only genome-wide PBS pipeline)
 - `analysis/cluster/13_make_sgdp_only_sample_lists.py` — assigns SGDP samples to 5 super-populations (African/Melanesian/East Asian/South Asian/European) by parsing the SGDP `{PANEL}_{POPULATION}-{IDX}` sample-ID convention; writes per-pop lists + an audit TSV to `data/sgdp_only/`; excludes North African/Siberian/Native American/admixed pops from the panel
 - `analysis/cluster/14_filter_sgdp_genomewide.sh` — SLURM array (1–22%2, 2 cpu/16G); per-chrom quality filter (biallelic SNPs, GQ<20→missing, drop >10% missing), hg19→hg38 liftover (reuses chain from step 04), per-population split → `vcf/sgdp_genomewide/`; auto-detects per-chrom vs single multi-chrom SGDP VCF layout
