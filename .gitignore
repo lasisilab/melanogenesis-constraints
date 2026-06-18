@@ -33,3 +33,4 @@ __pycache__/
 memory/
 
 /.quarto/
+script_scaffold.md
