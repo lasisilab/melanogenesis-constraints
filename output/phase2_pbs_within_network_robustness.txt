@@ -1,0 +1,146 @@
+Within-network PBS — ROBUSTNESS CHECKS (combined dataset, HGDP+1KGP+SGDP)
+==============================================================================
+Companion to phase2_pbs_within_network_combined.py. Same inputs, same model:
+outcome = WITHIN-network PBS percentile (rank among network genes with
+n_sites_shared > 0, 0–100); predictors z-scored; covariates z(log1p n_sites)
+and z(log10 body_length), body_length = (end - start - 20000) clipped at 1.
+
+Three checks, corresponding to sections 3–5 of
+docs/provenance_within_network_pbs.md:
+  1. seed sensitivity of the permutation p-values
+  2. τ / tissue_breadth collinearity (one finding or two?)
+  3. covariate collinearity (the VIF the headline script never computes)
+
+Network genes with combined-dataset PBS: 128
+Permutation settings: 40 seeds × 10,000 shuffles; MEL τ also at 200,000 (seed 20261014).
+
+
+##############################################################################
+# 1. SEED SENSITIVITY OF THE PERMUTATION p-VALUES
+##############################################################################
+The headline script shares one np.random.default_rng(0) stream across all 20
+branch×predictor loops, so the permutation draw each test receives depends on
+loop order. Below, each test gets its own independent seed, repeated N times.
+
+  AFR τ (tissue specificity)   n=123  β=-6.89  parametric p=0.0088
+      perm p over 40 seeds: min=0.0080  max=0.0117  mean=0.0100  sd=0.0009
+      seeds with perm p < 0.05: 40/40 (100%)
+
+  AFR Tissue breadth           n=123  β=+7.88  parametric p=0.0027
+      perm p over 40 seeds: min=0.0018  max=0.0047  mean=0.0032  sd=0.0006
+      seeds with perm p < 0.05: 40/40 (100%)
+
+  MEL τ (tissue specificity)   n=123  β=+5.28  parametric p=0.0473
+      perm p over 40 seeds: min=0.0460  max=0.0526  mean=0.0490  sd=0.0017
+      seeds with perm p < 0.05: 25/40 (62%)
+
+  MEL Tissue breadth           n=123  β=-6.18  parametric p=0.0203
+      perm p over 40 seeds: min=0.0188  max=0.0248  mean=0.0213  sd=0.0013
+      seeds with perm p < 0.05: 40/40 (100%)
+
+  --------------------------------------------------------------------------
+  HIGH-RESOLUTION RE-RUN — MEL τ at 200,000 permutations (seed 20261014)
+  --------------------------------------------------------------------------
+  MEL τ  β=+5.28  n=123
+  permutation p = 0.04888   (BELOW the 0.05 threshold)
+  → asterisk survives at this resolution.
+
+  The four headline tests at a glance:
+  test                         β   mean perm p    <0.05
+  AFR tau                  -6.89        0.0100     100%
+  AFR tissue_breadth       +7.88        0.0032     100%
+  MEL tau                  +5.28        0.0490      62%
+  MEL tissue_breadth       -6.18        0.0213     100%
+
+
+##############################################################################
+# 2. τ AND TISSUE BREADTH — COLLINEARITY
+##############################################################################
+  Pearson  r = -0.890 (p=1.68e-44), n=127
+  Spearman ρ = -0.888 (p=5.19e-44), n=127
+  These are two parameterisations of the same tissue-specificity axis.
+
+  ── AFR ─────────────────────────────────────────────────────────────
+    τ alone          n=123  R²=0.095  adj R²=0.072
+      τ (tissue specificity)     β=   -6.89  p=0.0088  VIF=  1.04
+      z(log1p n_sites_shared)    β=  -15.08  p=0.1102  VIF= 13.57
+      z(log10 body_length)       β=  +16.61  p=0.0798  VIF= 13.66
+
+    breadth alone    n=123  R²=0.111  adj R²=0.089
+      Tissue breadth             β=   +7.88  p=0.0027  VIF=  1.04
+      z(log1p n_sites_shared)    β=  -16.61  p=0.0736  VIF= 13.32
+      z(log10 body_length)       β=  +17.30  p=0.0638  VIF= 13.46
+
+    both             n=123  R²=0.112  adj R²=0.081
+      τ (tissue specificity)     β=   +0.59  p=0.9170  VIF=  5.06
+      Tissue breadth             β=   +8.42  p=0.1429  VIF=  5.08
+      z(log1p n_sites_shared)    β=  -16.79  p=0.0766  VIF= 13.78
+      z(log10 body_length)       β=  +17.43  p=0.0653  VIF= 13.71
+
+  ── MEL ─────────────────────────────────────────────────────────────
+    τ alone          n=123  R²=0.065  adj R²=0.041
+      τ (tissue specificity)     β=   +5.28  p=0.0473  VIF=  1.04
+      z(log1p n_sites_shared)    β=  -21.45  p=0.0264  VIF= 13.57
+      z(log10 body_length)       β=  +19.47  p=0.0441  VIF= 13.66
+
+    breadth alone    n=123  R²=0.076  adj R²=0.053
+      Tissue breadth             β=   -6.18  p=0.0203  VIF=  1.04
+      z(log1p n_sites_shared)    β=  -20.32  p=0.0326  VIF= 13.32
+      z(log10 body_length)       β=  +19.01  p=0.0464  VIF= 13.46
+
+    both             n=123  R²=0.076  adj R²=0.045
+      τ (tissue specificity)     β=   -1.04  p=0.8584  VIF=  5.06
+      Tissue breadth             β=   -7.11  p=0.2249  VIF=  5.08
+      z(log1p n_sites_shared)    β=  -20.00  p=0.0392  VIF= 13.78
+      z(log10 body_length)       β=  +18.78  p=0.0521  VIF= 13.71
+
+  Neither predictor survives when both are present — the expected behaviour for
+  two near-collinear measures of one axis. It does not mean either is false; it
+  means they cannot be separated at this n, and so they cannot corroborate each
+  other. Report the pair as one finding measured twice, not as two findings.
+
+
+##############################################################################
+# 3. COVARIATE COLLINEARITY — THE VIF THAT IS NEVER REPORTED
+##############################################################################
+phase2_pbs_within_network_combined.py calls variance_inflation_factor(Xv, 1):
+position 1, the predictor, only. The two covariates are never checked.
+
+  Analysis subset: n=123 (network genes with n_sites_shared > 0)
+  Pearson  r(log1p n_sites, log10 body_length) = +0.961 (p=1.12e-69)
+  Spearman ρ = +0.980
+    z(log1p n_sites_shared)    VIF =  13.22  (covariates only)
+    z(log10 body_length)       VIF =  13.22  (covariates only)
+
+  Within the fitted headline model (predictor + both covariates):
+    τ (tissue specificity)     VIF =   1.04
+    z(log1p n_sites_shared)    VIF =  13.57
+    z(log10 body_length)       VIF =  13.66
+
+  The predictor's own VIF is low, so the τ estimate is not directly
+  destabilised. The covariate adjustment itself is not stable: the two
+  covariates are near-duplicates and come out large and offsetting.
+  POSTER_METHODS_GUIDE.md's claim that 'all VIFs < 1.5' describes only the
+  predictor position and is not supportable as written.
+
+
+==============================================================================
+SUMMARY
+==============================================================================
+  1. Of the four headline tests, three are stable across all 40 seeds.
+     MEL τ (β=+5.28) is not: mean perm p = 0.0490, 62% of seeds below 0.05.
+     At 200,000 permutations it lands at p = 0.04888.
+  2. τ and tissue_breadth correlate at r = -0.890; in the joint model both
+     null out at VIF ≈ 5. They are one finding, not two.
+  3. The two covariates correlate at r = +0.961, VIF ≈ 13.2 each.
+     The headline script never computes these.
+
+------------------------------------------------------------------------------
+CAVEATS:
+  • This script changes nothing about the headline result; it characterises it.
+  • The AFR result is unaffected by all three checks.
+  • Permutation betas use the closed-form pinv solution rather than refitting
+    OLS; this is algebraically identical, not an approximation.
+  • A permutation p near the threshold is a statement about the test, not about
+    the biology. MEL rests on n=47 samples (30 HGDP + 17 SGDP).
+  • PBS is a frequency-differentiation statistic, NOT proof of selection.
