@@ -34,3 +34,17 @@ memory/
 
 /.quarto/
 script_scaffold.md
+
+# Poster presentation materials — speaker notes, cheat cards, methods guide.
+# Kept locally, not published. NOTE: these remain in the repo history prior to
+# the commit that untracked them.
+PEQG_cheat_card.md
+PEQG_cheat_card.pdf
+PEQG_poster_script.md
+PEQG_stats_deepdive.md
+PEQG_stats_deepdive.pdf
+PEQG_presentation_flow.md
+PEQG_audio_overview_script.md
+POSTER_METHODS_GUIDE.md
+PEQG_concepts_from_scratch.md
+PEQG_concepts_from_scratch.pdf
